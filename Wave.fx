@@ -225,8 +225,8 @@ DS_OUTPUT DS(HS_CONSTANT_OUTPUT input, float3 uv : SV_DomainLocation,
 	float fHeight2 = gtxtNormal2.SampleLevel(gssNormal1, output.waveDispTex1, mipLevel).a;
 
 	// 원래 상수 버퍼로 전달한다.
-	float fHeightScale1 = 2.4;  //0.4
-	float fHeightScale2 = 3.2; //1.2
+	float fHeightScale1 = 8.4;  //0.4
+	float fHeightScale2 = 7.2; //1.2
 
 	output.positionW.y += fHeightScale1 * fHeight1;
 	output.positionW.y += fHeightScale2 * fHeight1;
@@ -267,11 +267,11 @@ float4 PS(DS_OUTPUT input) : SV_Target
 		float3 bumpedNormalW = normalize(normalW1 + normalW2);
 
 		float4 cIllumination = Lighting(input.positionW, bumpedNormalW);
-		float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord) * cIllumination;
-		 //cColor = float4(0.0f, 0.0f, 0.8f, 1.0f);
+		//float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord) * cIllumination;
+		float4 cColor = float4(0.3f, 0.7f, 0.8f, 1.0f) *  cIllumination;
 
 	//cColor = cColor * cIllumination;
-	cColor.a = 0.3;
+	cColor.a = 0.2;
 	return(cColor);
 
 

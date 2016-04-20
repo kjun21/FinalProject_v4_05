@@ -4,7 +4,7 @@
 
 ServerPlayer::ServerPlayer()
 {
-	position = D3DXVECTOR3(-20.0, 0.0, -20.0);
+	position = D3DXVECTOR3(20.0, 700.0, 20.0);
 	direction = D3DXVECTOR3(0, 0, 1);
 	velocity = 0.5;
 	character_type = -1;

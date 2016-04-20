@@ -28,6 +28,7 @@ class ClientServer
 	int count;
 	int myId;
 public:
+	double time;
 	Sector sector[SECTOR_WIDETH][SECTOR_LENGTH];
 	ServerPlayer Player[ROOM_MAX_PLAYER];
 	Object objectList[100];

@@ -126,6 +126,8 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	//m_ppShaders[6] = pHuman;
 
 
+	// 같은 그리기는 모아서 한꺼번에 처리해야하는데...
+
 
 	CTessellationShader* pTessllationShader = new CTessellationShader();
 	pTessllationShader->CreateShader(pd3dDevice);
@@ -169,16 +171,17 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	//pTestTessellationShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
 	//m_ppShaders[6] = pTestTessellationShader;
 
+
+
+	CTreeObjectShader* pTreeObjectShader = new CTreeObjectShader();
+	pTreeObjectShader->CreateShader(pd3dDevice);
+	pTreeObjectShader->BuildObjects(pd3dDevice);
+	m_ppShaders[5] = pTreeObjectShader;
+
 	CWaveShader* pWaveShader = new CWaveShader();
 	pWaveShader->CreateShader(pd3dDevice);
 	pWaveShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
-	m_ppShaders[5] = pWaveShader;
-
-	CFixedObjectShader* pFixedShader = new CFixedObjectShader();
-	pFixedShader->CreateShader(pd3dDevice);
-	pFixedShader->BuildObjects(pd3dDevice);
-	m_ppShaders[6] = pFixedShader;
-
+	m_ppShaders[6] = pWaveShader;
 	CreateShaderVariables(pd3dDevice);
 }
 

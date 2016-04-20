@@ -406,18 +406,35 @@ public:
 
 class CWizardObject : public CGameObject
 {
+protected:
+	AnimationClip* m_AnimationClip;
+	UINT m_nAnimationState;
+	ID3D11Buffer	 *m_pd3dcbAnimation;
+	D3DXMATRIX **m_ppResultMatrix;
+	VS_CB_RESULT_MATRIX *m_cbMapData;
 public:
 	CWizardObject(ID3D11Device *pd3dDevice, string strFileName);
 	virtual ~CWizardObject();
 	
+	AnimationClip* CreateAnimation(AnimationClip* animationClip);
+	void LoadAnimation(AnimationClip* animationClip, UINT i);
+	void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
 	virtual void Animate(float fTimeElapsed);
+
 };
 
-class CTreeObject : public CGameObject
+class CWoodObject : public CGameObject
 {
 public:
-	CTreeObject(ID3D11Device *pd3dDevice);
-	virtual ~CTreeObject();
+	CWoodObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~CWoodObject();
+
+};
+class CLeavesObject : public CGameObject
+{
+public:
+	CLeavesObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~CLeavesObject();
 
 };

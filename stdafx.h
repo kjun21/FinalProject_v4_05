@@ -84,6 +84,11 @@ struct AnimationClip
 	long long llNowTime;
 
 };
+// 애니메이션 정보를 정점 셰이더에 전달해줄 구조체
+struct VS_CB_RESULT_MATRIX
+{
+	D3DXMATRIX m_d3dxmtxResult[200];
+};
 
 
 struct BoneIndexData

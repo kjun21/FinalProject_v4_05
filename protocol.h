@@ -14,6 +14,7 @@ struct ScPacketMove
 	int id;
 	D3DXVECTOR3 direction;
 	D3DXVECTOR3 position;
+	double time;
 };
 struct ScPacketSector
 {

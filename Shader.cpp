@@ -405,12 +405,9 @@ void CPlayerShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pTexture->SetTexture(0, pd3dsrvTexture);
 	m_pTexture->SetSampler(0, pd3dSamplerState);
 	pd3dsrvTexture->Release();
-
 	pd3dSamplerState->Release();
 
 
-
-	//CCubeMeshIlluminated *pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, 4.0f, 12.0f, 4.0f);
 
 	string strFileName = "Data/warrior_Vertex.txt";
 	CCharacterMesh* pPlayerMesh = new CCharacterMesh(pd3dDevice, strFileName);
@@ -482,8 +479,6 @@ void CPlayerShader::LoadAnimation(AnimationClip* animationClip, UINT k)
 
 	for (long long i = 0; i <animationClip[k].m_llAniTime / 10; ++i)
 	{
-
-
 		for (unsigned int j = 0; j < animationClip[k].m_uiBoneIndexCount; ++j)
 		{
 			//cout << i << "  " << j << endl;
@@ -497,6 +492,7 @@ void CPlayerShader::LoadAnimation(AnimationClip* animationClip, UINT k)
 				&animationClip[k].m_ppResultMatrix[i][j]._41, &animationClip[k].m_ppResultMatrix[i][j]._42, &animationClip[k].m_ppResultMatrix[i][j]._43, &animationClip[k].m_ppResultMatrix[i][j]._44);
 		}
 	}
+
 	::fclose(pFile);
 }
 
@@ -548,7 +544,6 @@ CInstancingShader::~CInstancingShader()
 	if (m_pMaterial) m_pMaterial->Release();
 	if (m_pTexture) m_pTexture->Release();
 }
-
 
 void CInstancingShader::CreateShader(ID3D11Device *pd3dDevice)
 {
@@ -747,24 +742,37 @@ void CTerrainShader::BuildObjects(ID3D11Device *pd3dDevice)
 	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dDetailSamplerState);
 	///
-	CTexture *pTerrainTexture = new CTexture(2, 2, 0, 0);
-	ID3D11ShaderResourceView *pd3dsrvBaseTexture = NULL;
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/grass-diffuse.png"), NULL, NULL, &pd3dsrvBaseTexture, NULL);
-	pTerrainTexture->SetTexture(0, pd3dsrvBaseTexture);
-	pTerrainTexture->SetSampler(0, pd3dBaseSamplerState);
-	pd3dsrvBaseTexture->Release();
-	pd3dBaseSamplerState->Release();
+	CTexture *pTerrainTexture = new CTexture(1, 1, 0, 0);
+	//ID3D11ShaderResourceView *pd3dsrvBaseTexture = NULL;
+	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Terrain/grass-diffuse.png"), NULL, NULL, &pd3dsrvBaseTexture, NULL);
+	//pTerrainTexture->SetTexture(0, pd3dsrvBaseTexture);
+	//pTerrainTexture->SetSampler(0, pd3dBaseSamplerState);
+	//pd3dsrvBaseTexture->Release();
+	//pd3dBaseSamplerState->Release();
 
-	ID3D11ShaderResourceView *pd3dsrvDetailTexture = NULL;
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Detail_Texture_7.jpg"), NULL, NULL, &pd3dsrvDetailTexture, NULL);
-	pTerrainTexture->SetTexture(1, pd3dsrvDetailTexture);
-	pTerrainTexture->SetSampler(1, pd3dDetailSamplerState);
-	pd3dsrvDetailTexture->Release();
+	//ID3D11ShaderResourceView *pd3dsrvDetailTexture = NULL;
+	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Terrain/Detail_Texture_7.jpg"), NULL, NULL, &pd3dsrvDetailTexture, NULL);
+	//pTerrainTexture->SetTexture(1, pd3dsrvDetailTexture);
+	//pTerrainTexture->SetSampler(1, pd3dDetailSamplerState);
+	//pd3dsrvDetailTexture->Release();
+
+	ID3D11ShaderResourceView *pd3dsrvBlendMap = NULL;
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Terrain/blend3.dds"), NULL, NULL, &pd3dsrvBlendMap, NULL);
+	pTerrainTexture->SetTexture(0, pd3dsrvBlendMap);
+	pTerrainTexture->SetSampler(0, pd3dDetailSamplerState);
+	pd3dsrvBlendMap->Release();
+
 	pd3dDetailSamplerState->Release();
 
+
 	D3DXVECTOR3 d3dxvScale(8.0f, 2.0f, 8.0f); //"Image/black.raw" 257  // T("Image/9.raw"), 513, 513, 513, 513
-	m_ppObjects[0] = new CHeightMapTerrain(pd3dDevice, _T("Image/bigMap.raw"), 513, 513, 34, 34, d3dxvScale);
+	m_ppObjects[0] = new CHeightMapTerrain(pd3dDevice, _T("Image/Terrain/bigMap2.raw"), 513, 513, 34, 34, d3dxvScale);
 	m_ppObjects[0]->SetTexture(pTerrainTexture);
+
+	m_d3dsrcTextureArray = CreateTexture2DArray(pd3dDevice, _T("TreeArray/tree"), 3);
+
+
+
 
 
 	CMaterial *pTerrainMaterial = new CMaterial();
@@ -782,6 +790,117 @@ void CTerrainShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 	m_ppObjects[0]->SetMaterial(pTerrainMaterial);
+}
+
+ID3D11ShaderResourceView* CTerrainShader::CreateTexture2DArray(ID3D11Device* pd3dDevice, TCHAR* pPath, int nTextures)
+{
+	D3DX11_IMAGE_LOAD_INFO d3dxImageLoadInfo;
+	d3dxImageLoadInfo.Width = D3DX11_FROM_FILE;
+	d3dxImageLoadInfo.Height = D3DX11_FROM_FILE;
+	d3dxImageLoadInfo.Depth = D3DX11_FROM_FILE;
+	d3dxImageLoadInfo.FirstMipLevel = 0;
+	d3dxImageLoadInfo.MipLevels = D3DX11_FROM_FILE;
+	d3dxImageLoadInfo.Usage = D3D11_USAGE_STAGING;
+	d3dxImageLoadInfo.BindFlags = 0;
+	d3dxImageLoadInfo.CpuAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+	d3dxImageLoadInfo.MiscFlags = 0;
+	d3dxImageLoadInfo.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	d3dxImageLoadInfo.Filter = D3DX11_FILTER_NONE;
+	d3dxImageLoadInfo.MipFilter = D3DX11_FILTER_LINEAR;
+	d3dxImageLoadInfo.pSrcInfo = 0;
+
+	ID3D11Texture2D** pd3dTextures = new ID3D11Texture2D*[nTextures];
+	_TCHAR pstrTexturesName[80];
+	//for (int i = 0; i < nTextures; i++)
+	//{
+	//	_stprintf_s(pstrTexturesName, 80, _T("%s%02d.dds"), pPath, i);
+	//	D3DX11CreateTextureFromFile(pd3dDevice, pstrTexturesName, &d3dxImageLoadInfo, 0,
+	//		(ID3D11Resource**)&pd3dTextures[i], 0);
+	//}
+
+	D3DX11CreateTextureFromFile(pd3dDevice, _T("Image/Terrain/grass-diffuse.png"), &d3dxImageLoadInfo, 0,
+		(ID3D11Resource**)&pd3dTextures[0], 0);
+	D3DX11CreateTextureFromFile(pd3dDevice, _T("Image/Terrain/dirt-diffuse.png"), &d3dxImageLoadInfo, 0,
+		(ID3D11Resource**)&pd3dTextures[1], 0);
+	D3DX11CreateTextureFromFile(pd3dDevice, _T("Image/Terrain/Terrain-RockPath.png"), &d3dxImageLoadInfo, 0,
+		(ID3D11Resource**)&pd3dTextures[2], 0);
+
+	//D3DX11CreateTextureFromFile(pd3dDevice, _T("TreeArray/Tree3.dds"), &d3dxImageLoadInfo, 0,
+	//	(ID3D11Resource**)&pd3dTextures[3], 0);
+	D3D11_TEXTURE2D_DESC d3xTexture2DDesc;
+	ZeroMemory(&d3xTexture2DDesc, sizeof(d3xTexture2DDesc));
+	pd3dTextures[0]->GetDesc(&d3xTexture2DDesc);
+
+
+	//===============================================
+
+	D3D11_TEXTURE2D_DESC d3dTexture2DArrayDesc;
+	d3dTexture2DArrayDesc.Width = d3xTexture2DDesc.Width;
+	d3dTexture2DArrayDesc.Height = d3xTexture2DDesc.Height;
+	d3dTexture2DArrayDesc.MipLevels = d3xTexture2DDesc.MipLevels;
+	d3dTexture2DArrayDesc.ArraySize = nTextures;
+
+	d3dTexture2DArrayDesc.Format = d3xTexture2DDesc.Format;
+	d3dTexture2DArrayDesc.SampleDesc.Count = 1;
+	d3dTexture2DArrayDesc.SampleDesc.Quality = 0;
+	d3dTexture2DArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dTexture2DArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	d3dTexture2DArrayDesc.CPUAccessFlags = 0;
+	d3dTexture2DArrayDesc.MiscFlags = 0;
+
+	ID3D11Texture2D* pd3dTexture2DArray;
+	pd3dDevice->CreateTexture2D(&d3dTexture2DArrayDesc, 0, &pd3dTexture2DArray);
+
+	//
+	// Copy individual texture elements into texture array.
+	//
+
+	// for each texture element...
+	ID3D11DeviceContext* pd3dDeviceContext;
+	pd3dDevice->GetImmediateContext(&pd3dDeviceContext);
+	D3D11_MAPPED_SUBRESOURCE d3dMappedTexture2D;
+	for (int t = 0; t < nTextures; t++)
+	{
+		for (UINT m = 0; m < d3xTexture2DDesc.MipLevels; m++)
+		{
+			pd3dDeviceContext->Map(pd3dTextures[t], m, D3D11_MAP_READ, 0, &d3dMappedTexture2D);
+			pd3dDeviceContext->UpdateSubresource(pd3dTexture2DArray, D3D11CalcSubresource(m, t, d3xTexture2DDesc.MipLevels),
+				0, d3dMappedTexture2D.pData, d3dMappedTexture2D.RowPitch, d3dMappedTexture2D.DepthPitch);
+			pd3dDeviceContext->Unmap(pd3dTextures[t], m);
+		}
+	}
+	//
+	// Create a resource view to the texture array.
+	//
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC d3dTexturesSRCDesc;
+	d3dTexturesSRCDesc.Format = d3dTexture2DArrayDesc.Format;
+	d3dTexturesSRCDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	d3dTexturesSRCDesc.Texture2DArray.MostDetailedMip = 0;
+	d3dTexturesSRCDesc.Texture2DArray.MipLevels = d3dTexture2DArrayDesc.MipLevels;
+	d3dTexturesSRCDesc.Texture2DArray.FirstArraySlice = 0;
+	d3dTexturesSRCDesc.Texture2DArray.ArraySize = nTextures;
+
+	ID3D11ShaderResourceView* pd3dsrcArray = 0;
+	(pd3dDevice->CreateShaderResourceView(pd3dTexture2DArray, &d3dTexturesSRCDesc, &pd3dsrcArray));
+
+	if (pd3dTexture2DArray)
+		pd3dTexture2DArray->Release();
+
+	for (int i = 0; i < nTextures; i++)
+		if (pd3dTextures[i])
+			pd3dTextures[i]->Release();
+	delete[]pd3dTextures;
+
+	return (pd3dsrcArray);
+}
+
+
+void  CTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+{
+	pd3dDeviceContext->PSSetShaderResources(0x03, 1, &m_d3dsrcTextureArray);
+	CShader::Render(pd3dDeviceContext, pCamera);
 }
 CHeightMapTerrain *CTerrainShader::GetTerrain()
 {
@@ -1279,7 +1398,7 @@ void   CWaveShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial,
 
 	CWaveObject *pPlane = new  CWaveObject(pd3dDevice);
 	m_ppObjects[0] = pPlane;
-	m_ppObjects[0]->SetPosition(1200.0f, 14.0f, 1200.0f);
+	m_ppObjects[0]->SetPosition(2700.0f, 220.0f, 960.0f);
 	CreateCameraPositionBuffer(pd3dDevice);
 
 
@@ -1661,27 +1780,7 @@ void   CWizardShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[1] = pWizardObject2;
 	m_ppObjects[2] = pWizardObject3;
 
-	ID3D11SamplerState *pd3dSamplerState = NULL;
-	D3D11_SAMPLER_DESC d3dSamplerDesc;
-	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	d3dSamplerDesc.MinLOD = 0;
-	d3dSamplerDesc.MaxLOD = 0;
-	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
 
-	//텍스쳐 리소스를 생성한다.
-	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
-	m_pTexture = new CTexture(1, 1, 0, 0);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/StoneKing.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pTexture->SetTexture(0, pd3dsrvTexture);
-	m_pTexture->SetSampler(0, pd3dSamplerState);
-	pd3dsrvTexture->Release();
-
-	pd3dSamplerState->Release();
 
 
 
@@ -1691,93 +1790,60 @@ void   CWizardShader::BuildObjects(ID3D11Device *pd3dDevice)
 	//GameManager->m_ppMonster[GameManager->m_nMonsterNum++] = m_ppObjects[1];
 
 
-	FILE *pFile = NULL;
-	//// 애니메이션 결과 행렬?
-	//::_wfopen_s(&pFile, L"Data/goodWalk_Ani.txt", L"rb, ccs = UNICODE");
-	//// 애니메이션 시간.
-	//::fread(&m_llAniTime, sizeof(long long), 1, pFile);
-	//// 본 인덱스 카운트.
-	//::fread(&m_uiBoneIndexCount, sizeof(unsigned int), 1, pFile);
-	//std::cout << m_llAniTime << std::endl;
-	//std::cout << m_uiBoneIndexCount << std::endl;
-
-
-
-	_wfopen_s(&pFile, L"Data/StoneKing_AttackReady.txt", L"rt");
-	fscanf_s(pFile, "%d \n", &m_llAniTime);
-	fscanf_s(pFile, "%d \n", &m_uiBoneIndexCount);
-
-	//m_llAniTime = 1260/10; //200
-	//m_uiBoneIndexCount = 33; //32
+	//FILE *pFile = NULL;
+	//_wfopen_s(&pFile, L"Data/StoneKing_AttackReady.txt", L"rt");
+	//fscanf_s(pFile, "%d \n", &m_llAniTime);
+	//fscanf_s(pFile, "%d \n", &m_uiBoneIndexCount);
 
 
 
 
-	m_ppResultMatrix = new D3DXMATRIX*[m_llAniTime / 10];
+	//m_ppResultMatrix = new D3DXMATRIX*[m_llAniTime / 10];
 
-	for (long long i = 0; i < m_llAniTime / 10; ++i)
-	{
-		// 최종 행렬 -> 매 초마다 해당하는    (포인터 배열을 가지고 있는)
-		m_ppResultMatrix[i] = new D3DXMATRIX[m_uiBoneIndexCount];
-	}
+	//for (long long i = 0; i < m_llAniTime / 10; ++i)
+	//{
+	//	// 최종 행렬 -> 매 초마다 해당하는    (포인터 배열을 가지고 있는)
+	//	m_ppResultMatrix[i] = new D3DXMATRIX[m_uiBoneIndexCount];
+	//}
 
 
-	//for (long long i = 0; i < m_llAniTime; ++i)
+	//for (long long i = 0; i < m_llAniTime / 10; ++i)
+	//{
 	//	for (unsigned int j = 0; j < m_uiBoneIndexCount; ++j)
-	//		::fread(m_ppResultMatrix[i][j], sizeof(D3DXMATRIX), 1, pFile);
-	//	
-
-	for (long long i = 0; i < m_llAniTime / 10; ++i)
-	{
-		for (unsigned int j = 0; j < m_uiBoneIndexCount; ++j)
-		{
-			//cout << i << "  " << j << endl;
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&m_ppResultMatrix[i][j]._11, &m_ppResultMatrix[i][j]._12, &m_ppResultMatrix[i][j]._13, &m_ppResultMatrix[i][j]._14);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&m_ppResultMatrix[i][j]._21, &m_ppResultMatrix[i][j]._22, &m_ppResultMatrix[i][j]._23, &m_ppResultMatrix[i][j]._24);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&m_ppResultMatrix[i][j]._31, &m_ppResultMatrix[i][j]._32, &m_ppResultMatrix[i][j]._33, &m_ppResultMatrix[i][j]._34);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&m_ppResultMatrix[i][j]._41, &m_ppResultMatrix[i][j]._42, &m_ppResultMatrix[i][j]._43, &m_ppResultMatrix[i][j]._44);
-		}
-	}
-	::fclose(pFile);
+	//	{
+	//		//cout << i << "  " << j << endl;
+	//		fscanf_s(pFile, "%f %f %f %f  \n",
+	//			&m_ppResultMatrix[i][j]._11, &m_ppResultMatrix[i][j]._12, &m_ppResultMatrix[i][j]._13, &m_ppResultMatrix[i][j]._14);
+	//		fscanf_s(pFile, "%f %f %f %f  \n",
+	//			&m_ppResultMatrix[i][j]._21, &m_ppResultMatrix[i][j]._22, &m_ppResultMatrix[i][j]._23, &m_ppResultMatrix[i][j]._24);
+	//		fscanf_s(pFile, "%f %f %f %f  \n",
+	//			&m_ppResultMatrix[i][j]._31, &m_ppResultMatrix[i][j]._32, &m_ppResultMatrix[i][j]._33, &m_ppResultMatrix[i][j]._34);
+	//		fscanf_s(pFile, "%f %f %f %f  \n",
+	//			&m_ppResultMatrix[i][j]._41, &m_ppResultMatrix[i][j]._42, &m_ppResultMatrix[i][j]._43, &m_ppResultMatrix[i][j]._44);
+	//	}
+	//}
+	//::fclose(pFile);
 
 
 
-	// 어떻게 96개가 나오지???
-	m_pvscbResultMatrix = new VS_CB_RESULT_MATRIX*[m_llAniTime / 10];
+	//// 어떻게 96개가 나오지???
+	//m_pvscbResultMatrix = new VS_CB_RESULT_MATRIX*[m_llAniTime / 10];
 
-	for (int i = 0; i < m_llAniTime / 10; ++i)
-		m_pvscbResultMatrix[i] = new VS_CB_RESULT_MATRIX();
+	//for (int i = 0; i < m_llAniTime / 10; ++i)
+	//	m_pvscbResultMatrix[i] = new VS_CB_RESULT_MATRIX();
 
-	// 각 시간마다 곱해야할 뼈 행렬들(32개?)
-	for (int i = 0; i < m_llAniTime / 10; ++i)
-	{
-		for (int j = 0; j < m_uiBoneIndexCount; ++j)
-		{
-			m_pvscbResultMatrix[i]->m_d3dxmtxResult[j] = m_ppResultMatrix[i][j];
-			/*cout << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._11 << " " << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._12 << "  "
-			<< m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._13 << " " << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._14 << endl
-
-			<< m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._21 << " " << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._22 << "  "
-			<< m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._23 << " " << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._24 << endl
-
-			<< m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._31 << " " << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._32 << "  "
-			<< m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._33 << " " << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._34 << endl
-
-			<< m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._41 << " " << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._42 << "  "
-			<< m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._43 << " " << m_pvscbResultMatrix[i]->m_d3dxmtxResult[j]._44 << endl;
-			cout << endl << endl;*/
-			//m_pvscbResultMatrix[0]->m_d3dxmtxResult[0]; //0 ~ 95까지..
-		}
-	}
+	//// 각 시간마다 곱해야할 뼈 행렬들(32개?)
+	//for (int i = 0; i < m_llAniTime / 10; ++i)
+	//{
+	//	for (int j = 0; j < m_uiBoneIndexCount; ++j)
+	//	{
+	//		m_pvscbResultMatrix[i]->m_d3dxmtxResult[j] = m_ppResultMatrix[i][j];
+	//	}
+	//}
 
 
-//	m_ppObjects[0]->SetPosition(1400.0f, +0.0f, 0.0f);
-//	m_ppObjects[1]->SetPosition(1400.0f, +0.0f, 0.0f); //100
-	CreateShaderVariables(pd3dDevice);
+
+	//CreateShaderVariables(pd3dDevice);
 }
 CWizardShader::~CWizardShader()
 {
@@ -1830,47 +1896,39 @@ void CWizardShader::UpdateShaderVariable(ID3D11DeviceContext *pd3dDeviceContext,
 void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
-	if (m_pTexture)
-		m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext);
+	//if (m_pTexture)
+	//	m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext);
 
 
-	CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
-	m_fTimePos += GameTimer->GetTimeElapsed();
-	//m_fTimePos +=  0.0001f;
+	//CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
+	//m_fTimePos += GameTimer->GetTimeElapsed();
 
 
-	long long NowTime = m_fTimePos * 1000;
-	if (NowTime >= m_llAniTime)
-	{
-		NowTime -= m_llAniTime;
-		m_fTimePos = 0;
-	}
+
+	//long long NowTime = m_fTimePos * 1000;
+	//if (NowTime >= m_llAniTime)
+	//{
+	//	NowTime -= m_llAniTime;
+	//	m_fTimePos = 0;
+	//}
+	//D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
+	//pd3dDeviceContext->Map(m_pd3dcbResult, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+	//m_cbMapData = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
+
+	//for (int i = 0; i <MaxBone; i++) //왼쪽   /////// NowTime 설정 잘할것.. 아직 못 고쳤음. NowTime = 32, i = 83
+	//	m_cbMapData->m_d3dxmtxResult[i] = m_ppResultMatrix[NowTime / 10][i]; //[시간][본인덱스]
+	//pd3dDeviceContext->Unmap(m_pd3dcbResult, 0);
+	//if (m_pd3dcbResult != NULL)
+	//	pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_RESULT_MATRIX, 1, &m_pd3dcbResult);
 
 
-	//cout << NowTime << endl;
+	//**********************************************************
+	//************************************************************
 
-	// 이게 무엇인고..
 
-
-	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
-	pd3dDeviceContext->Map(m_pd3dcbResult, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
-	m_cbMapData = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
-
-	for (int i = 0; i <MaxBone; i++) //왼쪽   /////// NowTime 설정 잘할것.. 아직 못 고쳤음. NowTime = 32, i = 83
-		m_cbMapData->m_d3dxmtxResult[i] = m_ppResultMatrix[NowTime / 10][i]; //[시간][본인덱스]
 	
-
-	pd3dDeviceContext->Unmap(m_pd3dcbResult, 0);
-
-
-	if (m_pd3dcbResult != NULL)
-		pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_RESULT_MATRIX, 1, &m_pd3dcbResult);
-
-	//for (int i = 0; i < m_nObjects; i++)
-	//	m_ppObjects[i]->Render(pd3dDeviceContext, pCamera);
-
-
-
+	
+	
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
@@ -1900,21 +1958,26 @@ void CWizardShader::AnimateObjects(float fTimeElapsed)
 }
 
 
-CFixedObjectShader::CFixedObjectShader()
+CTreeObjectShader::CTreeObjectShader()
 {
+	m_uiWoodNum = m_uiLeavesNum = m_uiTreeNum = m_uiTallStoneNum = 0;
 }
-CFixedObjectShader::~CFixedObjectShader()
+CTreeObjectShader::~CTreeObjectShader()
 {
 }
 
 
-void  CFixedObjectShader::CreateShader(ID3D11Device *pd3dDevice)
+void  CTreeObjectShader::CreateShader(ID3D11Device *pd3dDevice)
 {
 	D3D11_INPUT_ELEMENT_DESC d3dInputElements[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 3, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "INSTANCEPOS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCEPOS", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCEPOS", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCEPOS", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 	};
 	UINT nElements = ARRAYSIZE(d3dInputElements);
 
@@ -1923,17 +1986,370 @@ void  CFixedObjectShader::CreateShader(ID3D11Device *pd3dDevice)
 
 
 
-	CreateVertexShaderFromFile(pd3dDevice, L"Tree.fx", "VS", "vs_5_0", &m_pd3dVertexShader, d3dInputElements, nElements, &m_pd3dVertexLayout);
-	CreatePixelShaderFromFile(pd3dDevice, L"Tree.fx", "PS", "ps_5_0", &m_pd3dPixelShader);
+	CreateVertexShaderFromFile(pd3dDevice, L"Tree.fx", "VSInstancedTexturedLightingColor", "vs_5_0", &m_pd3dVertexShader, d3dInputElements, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Tree.fx", "PSInstancedTexturedLightingColor", "ps_5_0", &m_pd3dPixelShader);
 
 }
-void   CFixedObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
+void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
+{
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = 0;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	//텍스쳐 리소스를 생성한다.
+	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
+	m_pWoodTexture = new CTexture(3, 1, 0, 0);
+
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/Tree 3-4 Diffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pWoodTexture ->SetTexture(0, pd3dsrvTexture);
+	pd3dsrvTexture->Release();
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/LeavesDiffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pWoodTexture->SetTexture(1, pd3dsrvTexture);
+	pd3dsrvTexture->Release();
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/Rock-Multiple-01.png"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pWoodTexture->SetTexture(2, pd3dsrvTexture);
+	pd3dsrvTexture->Release();
+
+
+
+	m_pWoodTexture ->SetSampler(0, pd3dSamplerState);
+	pd3dSamplerState->Release();
+
+
+	//m_pLeavesTexture = new CTexture(1, 1, 0, 0);
+	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/LeavesDiffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
+	//m_pLeavesTexture->SetTexture(0, pd3dsrvTexture);
+	//m_pLeavesTexture->SetSampler(0, pd3dSamplerState);
+	//pd3dsrvTexture->Release();
+
+	//pd3dsrvTexture->Release();
+
+
+
+	//에러의 원인
+	m_nInstanceBufferStride = sizeof(VS_VB_INSTANCE);
+	m_nInstanceBufferOffset = 0;
+
+	string strFileName1 = "Data/NewTree02_Vertex.txt";
+	string strFileName2 = "Data/NewFantaLeaves02_Vertex.txt";
+	string strFileName3 = "Data/NewRockTall01_Vertex.txt";
+	CFixedMesh* pWoodMesh = new CFixedMesh(pd3dDevice, strFileName1);
+	CFixedMesh* pLeavesMesh = new CFixedMesh(pd3dDevice, strFileName2);
+	CFixedMesh * pTallStoneMesh = new CFixedMesh(pd3dDevice, strFileName3);
+
+	int  i = 0;
+	//m_nObjects = 200;
+	m_nObjects = TREE_NUM + TALL_STONE_NUM;
+	m_ppObjects = new CGameObject*[m_nObjects];
+	CWoodObject *pWoodObject = NULL;
+	CLeavesObject *pLeavesObject  = NULL;
+	/*구는 3가지 종류(재질에 따라)이다. 다른 재질의 구들이 번갈아 나열되도록 한다. 재질의 종류에 따라 k가 0, 1, 2의 값을 가지고 k에 따라 객체의 위치를 다르게 설정한다.*/
+	
+	int x = 0;
+	int z;
+	for (int x = 0; x < 10; x++)
+	{
+		for (int z = 0; z < 10; z++)
+		{
+			pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
+			pWoodObject->SetMesh(pWoodMesh);
+			pWoodObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
+			pWoodObject->SetPosition(x * 500 + 0, 165.0f, z * 300 + 0);
+			m_ppObjects[i++] = pWoodObject;
+		}
+	}
+	m_pd3dWoodInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TREE_NUM / 2, m_nInstanceBufferStride, NULL);
+	pWoodMesh->AssembleToVertexBuffer(1, &m_pd3dWoodInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
+
+
+	for (int x = 0; x < 10; x++)
+	{
+		for (int z = 0; z < 10; z++)
+		{
+			pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
+			pLeavesObject->SetMesh(pLeavesMesh);
+			pLeavesObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
+			pLeavesObject->SetPosition(x * 500, 265.0f + 0, 10.0f + (z * 300) + 0);
+			m_ppObjects[i++] = pLeavesObject;
+		}
+	}
+	m_pd3dLeavesInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TREE_NUM / 2, m_nInstanceBufferStride, NULL);
+	pLeavesMesh->AssembleToVertexBuffer(1, &m_pd3dLeavesInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
+	
+	
+	// Create TallStone
+	for (int x = 0; x < 10; x++)
+	{
+		for (int z = 0; z < 2; z++)
+		{
+			pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
+			pWoodObject->SetMesh(pTallStoneMesh);
+			pWoodObject->Scale(D3DXVECTOR3(10.0, 10.0, 10.0));
+			pWoodObject->SetPosition(x * 50 , 30.0f, z * 30 + 0);
+			m_ppObjects[i++] = pWoodObject;
+		}
+	}
+	m_pd3dTallStoneInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TALL_STONE_NUM, m_nInstanceBufferStride, NULL);
+	pTallStoneMesh->AssembleToVertexBuffer(1, &m_pd3dTallStoneInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
+
+
+}
+
+
+
+void CTreeObjectShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+{
+	OnPrepareRender(pd3dDeviceContext);
+	if (m_pMaterial)
+		CIlluminatedShader::UpdateShaderVariable(pd3dDeviceContext, &m_pMaterial->m_Material);
+
+	if (m_pWoodTexture)
+	{
+		m_pWoodTexture->UpdateSamplerShaderVariable(pd3dDeviceContext, 0, 0);
+		m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
+	}
+	//m_pWoodTexture->UpdateShaderVariable(pd3dDeviceContext);
+
+	int nWoodObjects = TREE_NUM / 2;
+
+	int nWoodInstances = 0;
+	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
+	pd3dDeviceContext->Map(m_pd3dWoodInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+	VS_VB_INSTANCE *pnSphereInstances = (VS_VB_INSTANCE *)d3dMappedResource.pData;
+	for (int j = 0; j < TREE_NUM / 2; j++)
+	{
+		if (m_ppObjects[j]->IsVisible(pCamera))
+		{
+			if (m_ppObjects[j]->IsVisible(pCamera))
+			{
+				D3DXMatrixTranspose(&pnSphereInstances[nWoodInstances++].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
+			}
+		}
+	}
+	pd3dDeviceContext->Unmap(m_pd3dWoodInstanceBuffer, 0);
+
+	CMesh *pWoodMesh = m_ppObjects[0]->GetMesh();
+	pWoodMesh->RenderInstanced(pd3dDeviceContext, nWoodInstances, 0);
+
+
+	//if (m_pLeavesTexture)  m_pLeavesTexture->UpdateShaderVariable(pd3dDeviceContext);
+	if (m_pWoodTexture)
+	{
+		m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 1, 0);
+		//m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
+	}
+
+	int nLeavesInstances = 0;
+	pd3dDeviceContext->Map(m_pd3dLeavesInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+	VS_VB_INSTANCE *pLeavesInstances = (VS_VB_INSTANCE *)d3dMappedResource.pData;
+	for (int j = nWoodObjects; j < TREE_NUM; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			if (m_ppObjects[j]->IsVisible(pCamera))
+			{
+				D3DXMatrixTranspose(&pLeavesInstances[nLeavesInstances++].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
+
+			}
+		}
+	}
+	pd3dDeviceContext->Unmap(m_pd3dLeavesInstanceBuffer, 0);
+
+	CMesh *pLeavsMesh = m_ppObjects[TREE_NUM- 1]->GetMesh();
+	pLeavsMesh->RenderInstanced(pd3dDeviceContext, nLeavesInstances, 0);
+
+
+	//TallStone
+	if (m_pWoodTexture)
+	{
+		m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 2, 0);
+		//m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
+	}
+	int nTallStoneInstances = 0;
+	pd3dDeviceContext->Map(m_pd3dTallStoneInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+	VS_VB_INSTANCE *pTallStoneInstances = (VS_VB_INSTANCE *)d3dMappedResource.pData;
+	for (int j = TREE_NUM; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			if (m_ppObjects[j]->IsVisible(pCamera))
+			{
+				D3DXMatrixTranspose(&pTallStoneInstances[nTallStoneInstances++].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
+
+			}
+		}
+	}
+	pd3dDeviceContext->Unmap(m_pd3dTallStoneInstanceBuffer, 0);
+
+	CMesh *pTallStoneMesh = m_ppObjects[m_nObjects - 1]->GetMesh();
+	pTallStoneMesh->RenderInstanced(pd3dDeviceContext, nTallStoneInstances, 0);
+
+
+
+
+}
+
+
+
+CGrassShader::CGrassShader()
+{
+}
+CGrassShader::~CGrassShader()
+{
+}
+
+
+void CGrassShader::CreateShader(ID3D11Device *pd3dDevice)
+{
+	D3D11_INPUT_ELEMENT_DESC d3dInputElements[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "INSTANCEPOS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCEPOS", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCEPOS", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCEPOS", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+	};
+	UINT nElements = ARRAYSIZE(d3dInputElements);
+
+	//CreateVertexShaderFromCompiledFile(pd3dDevice, L"Human_VS.fxo", d3dInputElements, nElements);
+	//CreatePixelShaderFromCompiledFile(pd3dDevice, L"Human_PS.fxo");
+
+
+
+	CreateVertexShaderFromFile(pd3dDevice, L"Tree.fx", "VSInstancedTexturedLightingColor", "vs_5_0", &m_pd3dVertexShader, d3dInputElements, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Tree.fx", "PSInstancedTexturedLightingColor", "ps_5_0", &m_pd3dPixelShader);
+
+}
+void  CGrassShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
 
-	m_nObjects = 1;
+
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = 0;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	//텍스쳐 리소스를 생성한다.
+	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
+	m_pWoodTexture = new CTexture(1, 1, 0, 0);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Tree 3-4 Diffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pWoodTexture->SetTexture(0, pd3dsrvTexture);
+	m_pWoodTexture->SetSampler(0, pd3dSamplerState);
+	pd3dsrvTexture->Release();
+
+
+
+	pd3dSamplerState->Release();
+
+
+
+	//에러의 원인
+	//m_nInstanceBufferStride = sizeof(D3DXMATRIX);
+	m_nInstanceBufferStride = sizeof(VS_VB_INSTANCE);
+	m_nInstanceBufferOffset = 0;
+
+	//CCubeMeshTextured *pCubeMesh = new CCubeMeshTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
+	//CSphereMeshTextured *pSphereMesh = new CSphereMeshTextured(pd3dDevice, 12.0f, 20, 20);
+
+	string strFileName1 = "Data/NewTree02_Vertex.txt";
+	string strFileName2 = "Data/NewFantaLeaves02_Vertex.txt";
+	CFixedMesh* pWoodMesh = new CFixedMesh(pd3dDevice, strFileName1);
+	CFixedMesh* pLeavesMesh = new CFixedMesh(pd3dDevice, strFileName2);
+
+
+	//float fTerrainWidth = pHeightMapTerrain->GetWidth();
+	//float fTerrainLength = pHeightMapTerrain->GetLength();
+
+	/*두 가지(직육면체와 구) 객체들을 지형에 일정한 간격으로 배치한다. 지형의 표면에 직육면체를 배치하고 직육면체 위에 구가 배치된다. 직육면체와 구는 빨강색, 녹색, 파랑색이 반복되도록 배치된다.*/
+	int  i = 0;
+	m_nObjects = 500;
+
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-	CTreeObject *pPlane = new  CTreeObject(pd3dDevice);
-	m_ppObjects[0] = pPlane;
-	m_ppObjects[0]->SetPosition(2400.0f, +50.0f, 2400.0f);
+	D3DXVECTOR3 d3dxvRotateAxis;
+	CRotatingObject *pRotatingObject = NULL;
+
+	CWoodObject *pWoodObject = NULL;
+	CLeavesObject *pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
+	/*구는 3가지 종류(재질에 따라)이다. 다른 재질의 구들이 번갈아 나열되도록 한다. 재질의 종류에 따라 k가 0, 1, 2의 값을 가지고 k에 따라 객체의 위치를 다르게 설정한다.*/
+
+	int x = 0;
+	int z;
+	for (int x = 0; x < 50; x++)
+	{
+		for (int z = 0; z < 5; z++)
+		{
+			pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
+			pWoodObject->SetMesh(pWoodMesh);
+			pWoodObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
+			pWoodObject->SetPosition(x * 140, 65.0f, z * 140);
+			m_ppObjects[i++] = pWoodObject;
+
+		}
+	}
+	m_pd3dWoodInstanceBuffer = CreateInstanceBuffer(pd3dDevice, m_nObjects / 2, m_nInstanceBufferStride, NULL);
+	pWoodMesh->AssembleToVertexBuffer(1, &m_pd3dWoodInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
+
+
+	for (int x = 0; x < 50; x++)
+	{
+		for (int z = 0; z < 5; z++)
+		{
+			pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
+			pLeavesObject->SetMesh(pLeavesMesh);
+			pLeavesObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
+			pLeavesObject->SetPosition(x * 140, 165.0f, 10.0f + (z * 140));
+			m_ppObjects[i++] = pLeavesObject;
+
+		}
+	}
+}
+
+void CGrassShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+{
+	OnPrepareRender(pd3dDeviceContext);
+	if (m_pMaterial)
+		CIlluminatedShader::UpdateShaderVariable(pd3dDeviceContext, &m_pMaterial->m_Material);
+
+	if (m_pWoodTexture)  m_pWoodTexture->UpdateShaderVariable(pd3dDeviceContext);
+
+	int nWoodObjects = m_nObjects / 2;
+
+	int nWoodInstances = 0;
+	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
+	pd3dDeviceContext->Map(m_pd3dWoodInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+	VS_VB_INSTANCE *pnSphereInstances = (VS_VB_INSTANCE *)d3dMappedResource.pData;
+	for (int j = 0; j < m_nObjects / 2; j++)
+	{
+		if (m_ppObjects[j]->IsVisible(pCamera))
+		{
+			if (m_ppObjects[j]->IsVisible(pCamera))
+			{
+				D3DXMatrixTranspose(&pnSphereInstances[nWoodInstances++].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
+			}
+		}
+	}
+	pd3dDeviceContext->Unmap(m_pd3dWoodInstanceBuffer, 0);
+
+	CMesh *pWoodMesh = m_ppObjects[0]->GetMesh();
+	pWoodMesh->RenderInstanced(pd3dDeviceContext, nWoodInstances, 0);
+
 }

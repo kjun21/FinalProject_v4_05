@@ -398,7 +398,8 @@ CTexture::CTexture(int nTextures, int nSamplers, int nTextureStartSlot, int nSam
 
 	m_nTextures = nTextures;
 	m_ppd3dsrvTextures = new ID3D11ShaderResourceView*[m_nTextures];
-	for (int i = 0; i < m_nTextures; i++) m_ppd3dsrvTextures[i] = NULL;
+	for (int i = 0; i < m_nTextures; i++) 
+		m_ppd3dsrvTextures[i] = NULL;
 	m_nTextureStartSlot = nTextureStartSlot;
 	m_nSamplers = nSamplers;
 	m_ppd3dSamplerStates = new ID3D11SamplerState*[m_nSamplers];
@@ -606,7 +607,7 @@ void CDisplacementMappingObject::Render(ID3D11DeviceContext *pd3dDeviceContext, 
 
 CWaveObject::CWaveObject(ID3D11Device *pd3dDevice) : CGameObject(1)
 {
-	CWaveMesh *pWaveMesh = new  CWaveMesh(pd3dDevice, 80.0, 80.0, 300.0f, 50.0f, 300.0f);
+	CWaveMesh *pWaveMesh = new  CWaveMesh(pd3dDevice, 80.0, 80.0, 2360.0f, 50.0f, 560.0f);
 	SetMesh(pWaveMesh, 0);
 	m_pStonesTexture = NULL;
 	m_pWavesNormalMap1 = NULL;
@@ -617,7 +618,7 @@ CWaveObject::CWaveObject(ID3D11Device *pd3dDevice) : CGameObject(1)
 	CreateBlendingState(pd3dDevice);
 	m_pMaterial = new CMaterial();
 
-	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.3f, 0.3f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.2f, 0.3f, 1.0f, 1.0f);
 	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.4f, 0.5f, 0.7f, 1.0f);
 	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 4.0f);
 	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
@@ -710,8 +711,8 @@ void CWaveObject::UpdateShaderVariable(ID3D11DeviceContext* pd3dDeviceContext)
 }
 void CWaveObject::Animate(float fTimeElapsed)
 {
-	m_WavesDispOffset1.x += 0.01f*fTimeElapsed;
-	m_WavesDispOffset1.y += 0.03f*fTimeElapsed;
+	m_WavesDispOffset1.x += 0.01f*fTimeElapsed;  //0.01
+	m_WavesDispOffset1.y += 0.03f*fTimeElapsed;  //0.03
 
 	m_WavesDispOffset2.x += 0.01f*fTimeElapsed;
 	m_WavesDispOffset2.y += 0.03f*fTimeElapsed;
@@ -742,12 +743,12 @@ void CWaveObject::Animate(float fTimeElapsed)
 	m_WavesNormalOffset2.y += 0.05f * fTimeElapsed;
 
 	D3DXMatrixScaling(&d3dxmtxWaveScale1, 22.0f, 22.0f, 1.0f);
-	D3DXMatrixTranslation(&d3dxmtxWaveOffset1, m_WavesDispOffset1.x, m_WavesDispOffset1.y, 0.0f);
+	D3DXMatrixTranslation(&d3dxmtxWaveOffset1, m_WavesNormalOffset1.x, m_WavesNormalOffset1.y, 0.0f);
 	D3DXMatrixMultiply(&m_d3dxmtxWavesNormalTexTransform1, &d3dxmtxWaveScale1, &d3dxmtxWaveOffset1);
 
 
 	D3DXMatrixScaling(&d3dxmtxWaveScale2, 16.0f, 16.0f, 1.0f);
-	D3DXMatrixTranslation(&d3dxmtxWaveOffset2, m_WavesDispOffset2.x, m_WavesDispOffset2.y, 0.0f);
+	D3DXMatrixTranslation(&d3dxmtxWaveOffset2, m_WavesNormalOffset2.x, m_WavesNormalOffset2.y, 0.0f);
 	D3DXMatrixMultiply(&m_d3dxmtxWavesNormalTexTransform2, &d3dxmtxWaveScale2, &d3dxmtxWaveOffset2);
 
 
@@ -880,12 +881,45 @@ CWizardObject::CWizardObject(ID3D11Device *pd3dDevice, string strFileName) : CGa
 	CCharacterMesh *pHumanMesh = new CCharacterMesh(pd3dDevice, strFileName);
 	//pHumanMesh->CreateChileMesh(pd3dDevice);
 	SetMesh(pHumanMesh, 0);
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = 0;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	//텍스쳐 리소스를 생성한다.
+	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
+	m_pTexture = new CTexture(1, 1, 0, 0);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/StoneKing.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pTexture->SetTexture(0, pd3dsrvTexture);
+	m_pTexture->SetSampler(0, pd3dSamplerState);
+	pd3dsrvTexture->Release();
+
+	pd3dSamplerState->Release();
+
+
+
+
+	CreateShaderVariables(pd3dDevice);
+	AnimationClip* animationClip = NULL;
+	m_AnimationClip = CreateAnimation(animationClip);
+
+
+
 	// Rotate(-90.0, 0.0, 0.0);
 	// Scale(D3DXVECTOR3(0.8, 0.8, 0.8));
 }
 CWizardObject::~CWizardObject()
 {
 }
+
 
 void CWizardObject::Animate(float fTimeElapsed)
 {
@@ -896,49 +930,212 @@ void CWizardObject::Animate(float fTimeElapsed)
 
 void  CWizardObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
-	CShader::UpdateShaderVariable(pd3dDeviceContext, &m_d3dxmtxWorld);
-	if (m_ppMeshes && m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dDeviceContext);
+	//CShader::UpdateShaderVariable(pd3dDeviceContext, &m_d3dxmtxWorld);
+	
+	for (int i = 0; i < 5; i++)
+	{
+		if (m_AnimationClip[i].m_nAnimationState == m_nAnimationState)
+		{
+			CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
+			m_AnimationClip[i].m_fTimePos += GameTimer->GetTimeElapsed();
+
+
+			m_AnimationClip[i].llNowTime = m_AnimationClip[i].m_fTimePos * 1000;
+			if (m_AnimationClip[i].llNowTime >= m_AnimationClip[i].m_llAniTime)
+			{
+				m_AnimationClip[i].llNowTime -= m_AnimationClip[i].m_llAniTime;
+				m_AnimationClip[i].m_fTimePos = 0;
+
+				// 
+				if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1
+					|| m_nAnimationState == ANIMATAION_CLIP_ATTACK2
+					|| m_nAnimationState == ANIMATAION_CLIP_DEATH)
+					m_nAnimationState = ANIMATAION_CLIP_IDLE;
+			}
+
+			D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
+			pd3dDeviceContext->Map(m_pd3dcbAnimation, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+			m_cbMapData = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
+			
+			for (int j = 0; j < MaxBone; j++) //왼쪽
+				m_cbMapData->m_d3dxmtxResult[j] = m_AnimationClip[i].m_ppResultMatrix[m_AnimationClip[i].llNowTime / 10][j];
+			pd3dDeviceContext->Unmap(m_pd3dcbAnimation, 0);
+
+
+			if (m_pd3dcbAnimation != NULL)
+				pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_RESULT_MATRIX, 1, &m_pd3dcbAnimation);
+		}
+	}
+
+	CGameObject::Render(pd3dDeviceContext, pCamera);
+	//if (m_ppMeshes && m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dDeviceContext);
 }
 
 
-CTreeObject::CTreeObject(ID3D11Device *pd3dDevice) : CGameObject(1)
+void CWizardObject::CreateShaderVariables(ID3D11Device *pd3dDevice)
 {
-	string strFileName = "Data/Cliff1_vertex.txt";
+	//월드 변환 행렬을 위한 상수 버퍼를 생성한다.
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(VS_CB_RESULT_MATRIX);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	if (pd3dDevice->CreateBuffer(&bd, NULL, &m_pd3dcbAnimation) == S_OK)
+		std::cout << "success" << std::endl;
+
+}
+AnimationClip* CWizardObject::CreateAnimation(AnimationClip* animationClip)
+{
+	UINT uiAnimationClipNums = 5;
+	animationClip = new AnimationClip[uiAnimationClipNums];
+	animationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
+	animationClip[1].m_nAnimationState = ANIMATAION_CLIP_ATTACK1;
+	animationClip[2].m_nAnimationState = ANIMATAION_CLIP_ATTACK2;
+	animationClip[3].m_nAnimationState = ANIMATAION_CLIP_RUN;
+	animationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
+
+	animationClip[0].m_strFileName = "StoneKing_AttackReady.txt";
+	animationClip[1].m_strFileName = "StoneKing_Attack1.txt";
+	animationClip[2].m_strFileName = "StoneKing_Attack2.txt";
+	animationClip[3].m_strFileName = "StoneKing_Run.txt";
+	animationClip[4].m_strFileName = "StoneKing_Death.txt";
+
+	for (int i = 0; i < uiAnimationClipNums; i++)
+	{
+		LoadAnimation(animationClip, i);
+		//cout << i << "번째 로딩 성공" << endl;
+	}
+	return animationClip;
+}
+void CWizardObject::LoadAnimation(AnimationClip* animationClip, UINT k)
+{
+	FILE *pFile = NULL;
+	long long llAniTime = 0;
+	string strFileName = "Data/";
+	strFileName += animationClip[k].m_strFileName;
+	//_wfopen_s(&pFile, L"Data/firstStepBox001_matrix.txt", L"rt");
+	fopen_s(&pFile, strFileName.c_str(), "rt");
+	fscanf_s(pFile, "%d \n", &llAniTime);
+	fscanf_s(pFile, "%d \n", &animationClip[k].m_uiBoneIndexCount);
+	animationClip[k].m_llAniTime = llAniTime;
+
+	animationClip[k].m_ppResultMatrix = new D3DXMATRIX*[animationClip[k].m_llAniTime / 10];
+	animationClip[k].m_fTimePos = 0.0f;
+	animationClip[k].llNowTime = 0;
 
 
-	ID3D11SamplerState *pd3dSamplerState = NULL;
-	D3D11_SAMPLER_DESC d3dSamplerDesc;
-	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	d3dSamplerDesc.MinLOD = 0;
-	d3dSamplerDesc.MaxLOD = 0;
-	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+	for (long long i = 0; i < animationClip[k].m_llAniTime / 10; ++i)
+	{
+		// 최종 행렬 -> 매 초마다 해당하는    (포인터 배열을 가지고 있는)
+		animationClip[k].m_ppResultMatrix[i] = new D3DXMATRIX[animationClip[k].m_uiBoneIndexCount];
+	}
+	for (long long i = 0; i <animationClip[k].m_llAniTime / 10; ++i)
+	{
+		for (unsigned int j = 0; j < animationClip[k].m_uiBoneIndexCount; ++j)
+		{
+			//cout << i << "  " << j << endl;
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&animationClip[k].m_ppResultMatrix[i][j]._11, &animationClip[k].m_ppResultMatrix[i][j]._12, &animationClip[k].m_ppResultMatrix[i][j]._13, &animationClip[k].m_ppResultMatrix[i][j]._14);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&animationClip[k].m_ppResultMatrix[i][j]._21, &animationClip[k].m_ppResultMatrix[i][j]._22, &animationClip[k].m_ppResultMatrix[i][j]._23, &animationClip[k].m_ppResultMatrix[i][j]._24);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&animationClip[k].m_ppResultMatrix[i][j]._31, &animationClip[k].m_ppResultMatrix[i][j]._32, &animationClip[k].m_ppResultMatrix[i][j]._33, &animationClip[k].m_ppResultMatrix[i][j]._34);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&animationClip[k].m_ppResultMatrix[i][j]._41, &animationClip[k].m_ppResultMatrix[i][j]._42, &animationClip[k].m_ppResultMatrix[i][j]._43, &animationClip[k].m_ppResultMatrix[i][j]._44);
+		}
+	}
+	::fclose(pFile);
+}
 
-	//텍스쳐 리소스를 생성한다.
-	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
-	m_pTexture = new CTexture(1, 1, 0, 0);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Cliff-Diffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pTexture->SetTexture(0, pd3dsrvTexture);
-	m_pTexture->SetSampler(0, pd3dSamplerState);
-	pd3dsrvTexture->Release();
-
-	pd3dSamplerState->Release();
 
 
-	CFixedMesh *pFixedMesh = new CFixedMesh(pd3dDevice, strFileName);
-	//pHumanMesh->CreateChileMesh(pd3dDevice);
-	SetMesh(pFixedMesh, 0);
 
-	//Scale(D3DXVECTOR3(7.2, 7.2, 7.2));
 
-	Rotate(-90.0, 90.0, 0.0);
+
+
+
+
+
+
+CLeavesObject::CLeavesObject(ID3D11Device *pd3dDevice, string strFileName) : CGameObject(1)
+{
+	//string strFileName = "Data/NewFantaLeaves02_Vertex.txt";
+
+
+	//ID3D11SamplerState *pd3dSamplerState = NULL;
+	//D3D11_SAMPLER_DESC d3dSamplerDesc;
+	//ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	//d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	//d3dSamplerDesc.MinLOD = 0;
+	//d3dSamplerDesc.MaxLOD = 0;
+	//pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	////텍스쳐 리소스를 생성한다.
+	//ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
+	//m_pTexture = new CTexture(1, 1, 0, 0);
+	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/LeavesDiffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
+	//m_pTexture->SetTexture(0, pd3dsrvTexture);
+	//m_pTexture->SetSampler(0, pd3dSamplerState);
+	//pd3dsrvTexture->Release();
+
+	//pd3dSamplerState->Release();
+
+
+	//CFixedMesh *pFixedMesh = new CFixedMesh(pd3dDevice, strFileName);
+	//SetMesh(pFixedMesh, 0);
+
+
+	//Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
+
+
 	
 }
-CTreeObject::~CTreeObject()
+CLeavesObject::~CLeavesObject()
+{
+}
+
+
+
+CWoodObject::CWoodObject(ID3D11Device *pd3dDevice, string strFileName) : CGameObject(1)
+{
+	//string strFileName = "Data/NewTree02_Vertex.txt";
+
+	//ID3D11SamplerState *pd3dSamplerState = NULL;
+	//D3D11_SAMPLER_DESC d3dSamplerDesc;
+	//ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	//d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	//d3dSamplerDesc.MinLOD = 0;
+	//d3dSamplerDesc.MaxLOD = 0;
+	//pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	////텍스쳐 리소스를 생성한다.
+	//ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
+	//m_pTexture = new CTexture(1, 1, 0, 0);
+	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Tree 3-4 Diffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
+	//m_pTexture->SetTexture(0, pd3dsrvTexture);
+	//m_pTexture->SetSampler(0, pd3dSamplerState);
+	//pd3dsrvTexture->Release();
+
+	//pd3dSamplerState->Release();
+
+
+	//CFixedMesh *pFixedMesh = new CFixedMesh(pd3dDevice, strFileName);
+	//SetMesh(pFixedMesh, 0);
+	//Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
+
+
+}
+CWoodObject ::~CWoodObject()
 {
 }
 

@@ -48,7 +48,7 @@ int ClientServer::socketInit()
 
 	ZeroMemory(&addr, sizeof(addr));
 	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr("192.168.0.6");
+	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	addr.sin_port = htons(9000);
 
 	ret = WSAConnect(sock, (SOCKADDR*)&addr, sizeof(addr), NULL, NULL, NULL, NULL);
@@ -169,6 +169,7 @@ void ClientServer::processPacket(char* ptr)
 		ScPacketMove *move =
 			reinterpret_cast<ScPacketMove*>(ptr);
 		//cout << p->id << "," << p->x << "," << p->y << endl;
+		time = move->time;
 		for (int i = 0; i < ROOM_MAX_PLAYER; ++i)
 		{
 			if (Player[i].getPlayerID() == move->id)

@@ -31,10 +31,16 @@ cbuffer cbCameraPosition : register(b2)
 
 
 Texture2D gtxtTexture : register(t0);
-SamplerState gSamplerState : register(s0);
+
 
 Texture2D gtxtDetailTexture : register(t1);
 SamplerState gDetailSamplerState : register(s1);
+
+Texture2DArray gtxtLayerMapArray : register(t3);
+
+Texture2D gtxtBlendMap : register(t0);
+SamplerState gSamplerState : register(s0);
+
 
 Texture2D gtxtNormal : register(t2);
 SamplerState gssNormal : register(s2);
@@ -48,7 +54,7 @@ struct VS_DETAIL_TEXTURED_LIGHTING_COLOR_INPUT
 	float3 position : POSITION;
 	float3 normal : NORMAL;
 	float2 texCoordBase : TEXCOORD0;
-	float2 texCoordDetail : TEXCOORD1;
+	//float2 texCoordDetail : TEXCOORD1;
 };
 
 //디테일 텍스쳐와 조명을 같이 사용하는 경우 정점 쉐이더의 출력을 위한 구조체이다.
@@ -68,10 +74,12 @@ VS_DETAIL_TEXTURED_LIGHTING_COLOR_OUTPUT VSDetailTexturedLightingColor(VS_DETAIL
 	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
 	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+
+	output.texCoordDetail = input.texCoordBase;
 	output.texCoordBase = input.texCoordBase *50.0;
 
 
-	output.texCoordDetail = input.texCoordDetail;
+
 
 	return(output);
 }
@@ -80,13 +88,38 @@ float4 PSDetailTexturedLightingColor(VS_DETAIL_TEXTURED_LIGHTING_COLOR_OUTPUT in
 {
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW);
-		float4 cBaseTexColor = gtxtTexture.Sample(gSamplerState, input.texCoordBase);
-		float4 cDetailTexColor = gtxtDetailTexture.Sample(gDetailSamplerState, input.texCoordDetail);
+	//float4 cBaseTexColor = gtxtTexture.Sample(gSamplerState, input.texCoordBase);
+		//float4 cDetailTexColor = gtxtDetailTexture.Sample(gDetailSamplerState, input.texCoordDetail);
 
 
-		float4 cColor = cBaseTexColor;
+		//
+		// Texturing
+		//
+
+		// Sample layers in texture array.
+		// 베이스 텍스쳐 샘플러 스테이트를 사용하기 때문에 반드시 고치거나, 수정할것.
+		float4 c0 = gtxtLayerMapArray.Sample(gSamplerState, float3(input.texCoordBase, 0.0f));
+		float4 c1 = gtxtLayerMapArray.Sample(gSamplerState, float3(input.texCoordBase, 1.0f));
+		float4 c2 = gtxtLayerMapArray.Sample(gSamplerState, float3(input.texCoordBase, 2.0f));
+
+		// Sample the blend map.
+		float4 t = gtxtBlendMap.Sample(gSamplerState, input.texCoordDetail);
+
+		// Blend the layers on top of each other.
+		float4 texColor = c0;
+		//b는 길
+		texColor = lerp(texColor, c1, t.b);
+	   // texColor = lerp(texColor, c2, t.r);
+  	  //  texColor = lerp(texColor, c3, t.b);
+
+	return   texColor;
+
+
+
+
+		//float4 cColor = cBaseTexColor;
 			//float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-		return cColor;
+		//return cColor;
 		//return(cColor*cIllumination);
 }
 

@@ -104,9 +104,9 @@ void CPlayer::Rotate(DWORD dwDirection, DWORD dwAttack)
 
 		}
 		m_d3dxvPreDir = d3dxvDirection;
-		cout << m_d3dxvLook.x << "  " << m_d3dxvLook.y << "  " << m_d3dxvLook.z << endl;
+	//	cout << m_d3dxvLook.x << "  " << m_d3dxvLook.y << "  " << m_d3dxvLook.z << endl;
 		//서버 키입력 받는 부분
-		/*ClientServer *s = ClientServer::getInstangce();
+	/*	ClientServer *s = ClientServer::getInstangce();
 		s->keyDown(m_d3dxvLook);*/
 	
 	}
@@ -273,11 +273,16 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, bool bUpdateVelocity)
 	{
 
 		//플레이어를 현재 위치 벡터에서 d3dxvShift 벡터 만큼 이동한다.
-		D3DXVECTOR3 d3dxvPosition = m_d3dxvPosition + d3dxvShift;
+		D3DXVECTOR3 d3dxvPosition;
+
+		//서버
+		//m_d3dxvPosition = s->Player[0].getPlayerPosition();
+		//클라
+		d3dxvPosition = m_d3dxvPosition + d3dxvShift;
 		m_d3dxvPosition = d3dxvPosition;
 
 		////서버 플레이어 위치 변경에 따라 좌표 바꿔주는 부분
-		//m_d3dxvPosition = s->Player[0].getPlayerPosition();
+		
 		//플레이어의 위치가 변경되었으므로 카메라의 위치도 d3dxvShift 벡터 만큼 이동한다.
 		m_pCamera->Move(d3dxvShift);
 	}
@@ -508,7 +513,7 @@ void CPlayer::OnPrepareRender()
 	m_d3dxmtxWorld._41 = m_d3dxvPosition.x;
 	m_d3dxmtxWorld._42 = m_d3dxvPosition.y;
 	m_d3dxmtxWorld._43 = m_d3dxvPosition.z;
-
+	cout << "현재 위치" << m_d3dxvPosition.x << "  " << m_d3dxvPosition.y << "  " << m_d3dxvPosition.z << endl;
 
 	
 
@@ -614,7 +619,7 @@ void CTerrainPlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(D3DXVECTOR3(0.0f, 400.0f, -150.0f)); // 원래 마지막  20 -50   // 250.0f, -150.0f
+		m_pCamera->SetOffset(D3DXVECTOR3(0.0f, 450.0f, -300.0f)); // 원래 마지막  20 -50   // 250.0f, -150.0f
 		m_pCamera->GenerateProjectionMatrix(1.01f, 50000.0f, ASPECT_RATIO, 60.0f);
 
 		m_pCamera->DSCreateShaderVariables(pd3dDevice);
@@ -643,6 +648,7 @@ void CTerrainPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	if (d3dxvPlayerPosition.y < fHeight)
 	{
+		//cout << "현재 y  " << fHeight << endl;
 		D3DXVECTOR3 d3dxvPlayerVelocity = GetVelocity();
 		d3dxvPlayerVelocity.y = 0.0f;
 		SetVelocity(d3dxvPlayerVelocity);

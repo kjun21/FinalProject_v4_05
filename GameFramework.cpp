@@ -328,7 +328,7 @@ void CGameFramework::BuildObjects()
 	CHeightMapTerrain *pTerrain = m_pScene->GetTerrain();
 
 	m_pPlayer->SetPosition(D3DXVECTOR3   // pTerrain->GetPeakHeight() + 1000.0f
-		(pTerrain->GetWidth()* 0.5, 6.0f, pTerrain->GetLength()* 0.5));
+		(pTerrain->GetWidth()* 0.1, 300.0f, pTerrain->GetLength()* 0.1));
 	//m_pPlayer->Scale(D3DXVECTOR3(0.3f, 0.3f, 0.3f));
 
 	//m_pPlayer->SetPosition(D3DXVECTOR3(2000.0f, 0.0f, 1880.0f));
@@ -421,16 +421,19 @@ void CGameFramework::ProcessInput()
 				&& m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2))
 			{
 				m_pPlayer->Rotate(dwDirection, dwAttack);
-				m_pPlayer->Move(dwDirection, 700.0f * GameTimer->GetTimeElapsed(), true);
+				m_pPlayer->Move(dwDirection, 3800.0f * GameTimer->GetTimeElapsed(), true);
 
 			}
 		}
 		m_pPlayer->UpdateAnimation(dwDirection, dwAttack);
 	}
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
-	m_pPlayer->Update(GameTimer->GetTimeElapsed());
+	//m_pPlayer->Update(GameTimer->GetTimeElapsed());
+	//서버
+	/*ClientServer *s = ClientServer::getInstangce();
+	m_pPlayer->Update(s->time);*/
 
-	// m_pPlayer->Update(GameTimer->GetTimeElapsed());
+	m_pPlayer->Update(GameTimer->GetTimeElapsed());
 }
 
 //  타이머에서 마지막 프레임 이후 경과된 시간을 파라메터로 전달하여 

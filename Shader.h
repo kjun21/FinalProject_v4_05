@@ -18,10 +18,6 @@ struct VS_CB_WORLD_MATRIX
 	D3DXMATRIX m_d3dxmtxWorld;
 };
 
-struct VS_CB_RESULT_MATRIX
-{
-	D3DXMATRIX m_d3dxmtxResult[200];
-};
 
 
 struct VS_VB_INSTANCE
@@ -29,6 +25,9 @@ struct VS_VB_INSTANCE
 	D3DXMATRIX m_d3dxTransform;
 	D3DXCOLOR m_d3dxColor;
 };
+
+#define TREE_NUM 200
+#define TALL_STONE_NUM 20
 
 class CShader
 {
@@ -171,7 +170,6 @@ public:
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 };
 
-
 class CInstancingShader : public CTexturedShader
 {
 public:
@@ -193,8 +191,10 @@ private:
 	UINT m_nInstanceBufferStride;
 	UINT m_nInstanceBufferOffset;
 
+	// 사용 안함.
 	ID3D11Buffer *m_pd3dCubeInstanceBuffer;
 	ID3D11Buffer *m_pd3dSphereInstanceBuffer;
+	//
 
 public:
 	ID3D11Buffer *CreateInstanceBuffer(ID3D11Device *pd3dDevice, int nObjects, UINT nBufferStride, void *pBufferData);
@@ -208,6 +208,7 @@ public:
 	virtual ~CDetailTexturedShader();
 
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
+	
 };
 
 //CTerrainShader 클래스의 베이스 클래스를 CDetailTexturedIlluminatedShader 클래스로 변경한다.
@@ -246,10 +247,14 @@ class CTerrainShader : public CDetailTexturedIlluminatedShader
 public:
 	CTerrainShader();
 	virtual ~CTerrainShader();
-
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
-
+	ID3D11ShaderResourceView* CreateTexture2DArray(ID3D11Device* pd3dDevice,
+		TCHAR* pPath, int nTextures);
 	CHeightMapTerrain *GetTerrain();
+protected:
+	ID3D11ShaderResourceView* m_d3dsrcTextureArray;
+	ID3D11ShaderResourceView* m_d3dsrcBlendMap;
 };
 class CNormalMappingShader : public CTexturedShader
 {
@@ -380,27 +385,60 @@ public:
 	static ID3D11Buffer	 *m_pd3dcbResult;
 protected:
 	CTexture* m_pTexture;
-	long long m_llAniTime;
-	UINT m_uiBoneIndexCount;
 
-	// 뭐임 이거???
-	//ID3D11Buffer *g_pd3dcbBoneMatrix = nullptr;
+
 	D3DXMATRIX **m_ppResultMatrix;
-
-
 	VS_CB_RESULT_MATRIX **m_pvscbResultMatrix;
-	//VS_CB_RESULT_MATRIX *m_cbResult;
+
+	//맵에서 버텍스 포인터를 얻어온단다.
 	VS_CB_RESULT_MATRIX *m_cbMapData;
 
+
+	UINT m_uiBoneIndexCount;
+	long long m_llAniTime;
 	float m_fTimePos;
 };
 
-class CFixedObjectShader : public CShader
+class CTreeObjectShader : public CInstancingShader
 {
 public:
-	CFixedObjectShader();
-	virtual ~CFixedObjectShader();
+	CTreeObjectShader();
+	virtual ~CTreeObjectShader();
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
+protected:
+	ID3D11Buffer *m_pd3dWoodInstanceBuffer;
+	ID3D11Buffer *m_pd3dLeavesInstanceBuffer;
+	ID3D11Buffer *m_pd3dTallStoneInstanceBuffer;
+
+	UINT m_nInstanceBufferStride;
+	UINT m_nInstanceBufferOffset;
+	CTexture* m_pWoodTexture;
+	CTexture* m_pLeavesTexture;
+	CMaterial* m_pMaterial;
+
+	UINT m_uiWoodNum;
+	UINT m_uiLeavesNum;
+	UINT m_uiTreeNum;
+	UINT m_uiTallStoneNum;
+
 //	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
+};
+
+class CGrassShader : public CInstancingShader
+{
+public:
+	CGrassShader();
+	virtual ~CGrassShader();
+	virtual void CreateShader(ID3D11Device *pd3dDevice);
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
+protected:
+	ID3D11Buffer *m_pd3dWoodInstanceBuffer;
+	UINT m_nInstanceBufferStride;
+	UINT m_nInstanceBufferOffset;
+	CTexture* m_pWoodTexture;
+
+	CMaterial* m_pMaterial;
 };

@@ -18,10 +18,17 @@ CFixedMesh::CFixedMesh(ID3D11Device *pd3dDevice, string strFileName) : CMeshText
 	::fread(m_pd3dxvPositions, sizeof(D3DXVECTOR3), m_nVertices, pFile);
 	//::fread(&m_nIndices, sizeof(UINT), 1, pFile);
 
-//	m_pnIndices = new UINT[m_nIndices];
+	//m_pnIndices = new UINT[m_nIndices];
 	//::fread(m_pnIndices, sizeof(UINT), m_nIndices, pFile);
 	::fread(pd3dxvNormals, sizeof(D3DXVECTOR3), m_nVertices, pFile);
 	::fread(pd3dxvTexCoords, sizeof(D3DXVECTOR2), m_nVertices, pFile);
+	//for (int i = 0; i < m_nVertices; i++)
+	//{
+	//	//pd3dxvTexCoords[i].y = 1.0f - pd3dxvTexCoords[i].y;
+	//	pd3dxvTexCoords[i].y = 1.0f - pd3dxvTexCoords[i].y;
+	//	cout <<i<<"번째   " <<pd3dxvTexCoords[i].x<<"   "<<pd3dxvTexCoords[i].y << endl;
+	//}
+
 	::fclose(pFile);
 
 
@@ -95,9 +102,30 @@ CFixedMesh::CFixedMesh(ID3D11Device *pd3dDevice, string strFileName) : CMeshText
 	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(max.x, max.y, max.z);
 
 
+
+	//D3D11_RASTERIZER_DESC d3dxRasterizer;
+	//ZeroMemory(&d3dxRasterizer, sizeof(D3D11_RASTERIZER_DESC));
+	//d3dxRasterizer.FillMode = D3D11_FILL_WIREFRAME;
+	//d3dxRasterizer.CullMode = D3D11_CULL_BACK;
+	//pd3dDevice->CreateRasterizerState(&d3dxRasterizer, &m_pd3dRasterizerState);
 }
 
 
 CFixedMesh::~CFixedMesh()
 {
+}
+
+void CFixedMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
+{
+	//메쉬의 정점은 여러 개의 정점 버퍼로 표현된다.
+	pd3dDeviceContext->IASetVertexBuffers(m_nSlot, m_nBuffers, m_ppd3dVertexBuffers, m_pnVertexStrides, m_pnVertexOffsets);
+	pd3dDeviceContext->IASetIndexBuffer(m_pd3dIndexBuffer, m_dxgiIndexFormat, m_nIndexOffset);
+	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
+
+	if (m_pd3dIndexBuffer)
+		pd3dDeviceContext->DrawIndexed(m_nIndices, m_nStartIndex, m_nBaseVertex);
+	else
+		pd3dDeviceContext->Draw(m_nVertices, m_nStartVertex);
+	pd3dDeviceContext->RSSetState(NULL);
 }
