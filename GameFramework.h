@@ -85,7 +85,12 @@ private:
 	ID3D11DepthStencilView *m_pd3dDepthStencilView;
 public:
 	bool CreateRenderTargetDepthStencilView();
+
 public:
+	 void SetRenderTarget(ID3D11DeviceContext* pd3dDeviceContext, ID3D11DepthStencilView* pd3dDepthStencilView)
+	{
+		pd3dDeviceContext->OMSetRenderTargets(1, &m_pd3dRenderTargetView, pd3dDepthStencilView);
+	}
 	CPlayerShader *m_pPlayerShader;
 	CSkyBoxShader* m_pSkyBoxShader;
 

@@ -25,6 +25,9 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{0a4d10b7-3a4d-46bf-a612-712cf688b488}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ShaderFile">
+      <UniqueIdentifier>{aaa12116-9356-4e50-a6aa-60e98279e9d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameFramework.cpp">
@@ -98,6 +101,12 @@
     </ClCompile>
     <ClCompile Include="FixedMesh.cpp">
       <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeObjectShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="WaveShader.cpp">
+      <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -185,18 +194,50 @@
     <ClInclude Include="FixedMesh.h">
       <Filter>Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="TreeObjectShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="WaveShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="DisplacementMapping.fx" />
-    <FxCompile Include="Effect.fx" />
-    <FxCompile Include="Light.fx" />
-    <FxCompile Include="NormalMapping.fx" />
-    <FxCompile Include="Shader.fx" />
-    <FxCompile Include="Terrain.fx" />
-    <FxCompile Include="Test.fx" />
-    <FxCompile Include="Wave.fx" />
-    <FxCompile Include="SkyBox.fx" />
-    <FxCompile Include="Tree.fx" />
+    <FxCompile Include="DisplacementMapping.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Effect.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Light.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="NormalMapping.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="SkyBox.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Terrain.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Test.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Tree.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Wave.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Reflection.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Refraction.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LabProject.rc">

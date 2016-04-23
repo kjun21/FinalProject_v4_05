@@ -90,6 +90,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FixedMesh.cpp" />
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="TreeObjectShader.cpp" />
     <ClCompile Include="WaveMesh.cpp" />
     <ClCompile Include="CRotatingObject.cpp" />
     <ClCompile Include="CubeMesh.cpp" />
@@ -112,6 +113,9 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Vertex.cpp" />
+    <ClCompile Include="WaveShader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AirplaneMesh.h" />
@@ -119,6 +123,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FixedMesh.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="TreeObjectShader.h" />
     <ClInclude Include="WaveMesh.h" />
     <ClInclude Include="CRotatingObject.h" />
     <ClInclude Include="CubeMesh.h" />
@@ -145,6 +150,9 @@
     <ClInclude Include="struct.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="WaveShader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="DisplacementMapping.fx">
@@ -162,6 +170,12 @@
     <FxCompile Include="NormalMapping.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Reflection.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Refraction.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shader.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

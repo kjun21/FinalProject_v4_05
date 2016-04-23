@@ -513,7 +513,7 @@ void CPlayer::OnPrepareRender()
 	m_d3dxmtxWorld._41 = m_d3dxvPosition.x;
 	m_d3dxmtxWorld._42 = m_d3dxvPosition.y;
 	m_d3dxmtxWorld._43 = m_d3dxvPosition.z;
-	cout << "현재 위치" << m_d3dxvPosition.x << "  " << m_d3dxvPosition.y << "  " << m_d3dxvPosition.z << endl;
+//	cout << "현재 위치" << m_d3dxvPosition.x << "  " << m_d3dxvPosition.y << "  " << m_d3dxvPosition.z << endl;
 
 	
 

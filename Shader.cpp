@@ -55,7 +55,7 @@ void CShader::OnPrepareRender(ID3D11DeviceContext *pd3dDeviceContext)
 }
 
 
-void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 
@@ -499,7 +499,7 @@ void CPlayerShader::LoadAnimation(AnimationClip* animationClip, UINT k)
 
 
 
-void CPlayerShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void CPlayerShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	//3인칭 카메라일 때 플레이어를 렌더링한다.
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
@@ -565,6 +565,7 @@ void CInstancingShader::CreateShader(ID3D11Device *pd3dDevice)
 
 	// VSInstancedTexturedLightingColor
 }
+
 
 ID3D11Buffer *CInstancingShader::CreateInstanceBuffer(ID3D11Device *pd3dDevice, int nObjects, UINT nBufferStride, void *pBufferData)
 {
@@ -660,7 +661,7 @@ void CInstancingShader::BuildObjects(ID3D11Device *pd3dDevice, CHeightMapTerrain
 }
 
 
-void CInstancingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void CInstancingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)
@@ -897,10 +898,10 @@ ID3D11ShaderResourceView* CTerrainShader::CreateTexture2DArray(ID3D11Device* pd3
 }
 
 
-void  CTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void  CTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	pd3dDeviceContext->PSSetShaderResources(0x03, 1, &m_d3dsrcTextureArray);
-	CShader::Render(pd3dDeviceContext, pCamera);
+	CShader::Render(pd3dDeviceContext, pd3dDepthStencilView, pCamera);
 }
 CHeightMapTerrain *CTerrainShader::GetTerrain()
 {
@@ -1027,6 +1028,17 @@ CSkyBoxShader::CSkyBoxShader()
 CSkyBoxShader::~CSkyBoxShader()
 {
 }
+void CSkyBoxShader::CreateShader(ID3D11Device *pd3dDevice)
+{
+	D3D11_INPUT_ELEMENT_DESC d3dInputElements[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	UINT nElements = ARRAYSIZE(d3dInputElements);
+	CreateVertexShaderFromFile(pd3dDevice, L"Wave.fx", "VSSkyBox", "vs_5_0", &m_pd3dVertexShader, d3dInputElements, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Wave.fx", "PSSkyBox", "ps_5_0", &m_pd3dPixelShader);
+}
+
 
 void CSkyBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
@@ -1037,7 +1049,7 @@ void CSkyBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[0] = pSkyBox;
 }
 
-void CSkyBoxShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void CSkyBoxShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	CShader::OnPrepareRender(pd3dDeviceContext);
 
@@ -1130,7 +1142,7 @@ void  CNormalMappingShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pM
 	m_ppObjects[0]->SetPosition(1400.0f, 20.0f, 2048.0f);
 
 }
-void  CNormalMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void  CNormalMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)
@@ -1184,7 +1196,7 @@ void   CTextureLightingShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial 
 
 
 }
-void   CTextureLightingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void   CTextureLightingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)
@@ -1247,7 +1259,7 @@ void CTessellationShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMat
 	m_ppObjects[0]->SetPosition(1200.0f, 12.0f, 2048.0f);
 	CreateCameraPositionBuffer(pd3dDevice);
 }
-void    CTessellationShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void    CTessellationShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	pd3dDeviceContext->HSSetShader(m_pd3dHullShader, NULL, 0);
@@ -1321,7 +1333,7 @@ void   CDisplacementMappingShader::BuildObjects(ID3D11Device *pd3dDevice, CMater
 
 
 }
-void   CDisplacementMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void   CDisplacementMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)
@@ -1354,88 +1366,7 @@ void   CDisplacementMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext
 	pd3dDeviceContext->DSSetShader(NULL, NULL, 0);
 }
 
-CWaveShader::CWaveShader()
-{
-}
 
-CWaveShader ::~CWaveShader()
-{
-}
-
-void  CWaveShader::CreateShader(ID3D11Device *pd3dDevice)
-{
-	D3D11_INPUT_ELEMENT_DESC d3dInputElements[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 3, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
-	UINT nElements = ARRAYSIZE(d3dInputElements);
-
-	//CreateVertexShaderFromCompiledFile(pd3dDevice, L"DisplacementMapping_VS.fxo", d3dInputElements, nElements);
-	//CreatePixelShaderFromCompiledFile(pd3dDevice, L"DisplacementMapping_PS.fxo");
-	//CreateHullShaderFromCompiledFile(pd3dDevice, L"DisplacementMapping_HS.fxo");
-	//CreateDomainShaderFromCompiledFile(pd3dDevice, L"DisplacementMapping_DS.fxo");
-
-
-
-	CreateVertexShaderFromFile(pd3dDevice, L"Wave.fx", "VS", "vs_5_0", &m_pd3dVertexShader, d3dInputElements, nElements, &m_pd3dVertexLayout);
-	CreatePixelShaderFromFile(pd3dDevice, L"Wave.fx", "PS", "ps_5_0", &m_pd3dPixelShader);
-	CreateHullShaderFromFile(pd3dDevice, L"Wave.fx", "HS", "hs_5_0", &m_pd3dHullShader);
-	CreateDomainShaderFromFile(pd3dDevice, L"Wave.fx", "DS", "ds_5_0", &m_pd3dDomainShader);
-
-}
-void   CWaveShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial, CTexture *pTexture)
-{
-	/*m_pMaterial = pMaterial;
-	if (pMaterial) pMaterial->AddRef();
-	m_pTexture = pTexture;
-	if (pTexture) pTexture->AddRef();*/
-
-	m_nObjects = 1;
-	m_ppObjects = new CGameObject*[m_nObjects];
-
-	CWaveObject *pPlane = new  CWaveObject(pd3dDevice);
-	m_ppObjects[0] = pPlane;
-	m_ppObjects[0]->SetPosition(2700.0f, 220.0f, 960.0f);
-	CreateCameraPositionBuffer(pd3dDevice);
-
-
-
-}
-void  CWaveShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
-{
-	OnPrepareRender(pd3dDeviceContext);
-	//if (m_pMaterial)
-	//	CIlluminatedShader::UpdateShaderVariable(pd3dDeviceContext, &m_pMaterial->m_Material);
-	//if (m_pTexture)  //텍스쳐
-	//	m_pTexture->UpdateShaderVariable(pd3dDeviceContext);
-
-	pd3dDeviceContext->HSSetShader(m_pd3dHullShader, NULL, 0);
-	pd3dDeviceContext->DSSetShader(m_pd3dDomainShader, NULL, 0);
-	//카메라-투영 행렬을 도메인 셰이더에 연결한다.
-	//pCamera->DSUpdateShaderVariables(pd3dDeviceContext);
-
-	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
-	pd3dDeviceContext->Map(m_pd3dcbCameraPosition, 0, D3D11_MAP_WRITE_DISCARD, 0,
-		&d3dMappedResource);
-	D3DXVECTOR4 *pcbCameraPosition = (D3DXVECTOR4*)d3dMappedResource.pData;
-	pcbCameraPosition->x = pCamera->GetPosition().x;
-	pcbCameraPosition->y = pCamera->GetPosition().y;
-	pcbCameraPosition->z = pCamera->GetPosition().z;
-	pd3dDeviceContext->Unmap(m_pd3dcbCameraPosition, 0);
-
-	//정점 셰이더에 카메라 좌표를 연결한다.
-	pd3dDeviceContext->VSSetConstantBuffers(0x03, 1, &m_pd3dcbCameraPosition);
-
-	m_ppObjects[0]->Render(pd3dDeviceContext, pCamera);
-
-	pd3dDeviceContext->HSSetConstantBuffers(NULL, NULL, NULL);
-	pCamera->DSClearShaderVariables(pd3dDeviceContext);
-	pd3dDeviceContext->HSSetShader(NULL, NULL, 0);
-	pd3dDeviceContext->DSSetShader(NULL, NULL, 0);
-}
 
 
 
@@ -1580,7 +1511,7 @@ void   CTessellationTerrainShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 }
-void   CTessellationTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void   CTessellationTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	pd3dDeviceContext->HSSetShader(m_pd3dHullShader, NULL, 0);
@@ -1664,7 +1595,7 @@ void   CTestTessellationShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial
 
 
 }
-void   CTestTessellationShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void   CTestTessellationShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 
@@ -1893,7 +1824,7 @@ void CWizardShader::UpdateShaderVariable(ID3D11DeviceContext *pd3dDeviceContext,
 
 
 
-void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	//if (m_pTexture)
@@ -1958,398 +1889,8 @@ void CWizardShader::AnimateObjects(float fTimeElapsed)
 }
 
 
-CTreeObjectShader::CTreeObjectShader()
-{
-	m_uiWoodNum = m_uiLeavesNum = m_uiTreeNum = m_uiTallStoneNum = 0;
-}
-CTreeObjectShader::~CTreeObjectShader()
-{
-}
 
 
-void  CTreeObjectShader::CreateShader(ID3D11Device *pd3dDevice)
-{
-	D3D11_INPUT_ELEMENT_DESC d3dInputElements[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "INSTANCEPOS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCEPOS", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCEPOS", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCEPOS", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
-	};
-	UINT nElements = ARRAYSIZE(d3dInputElements);
 
-	//CreateVertexShaderFromCompiledFile(pd3dDevice, L"Human_VS.fxo", d3dInputElements, nElements);
-	//CreatePixelShaderFromCompiledFile(pd3dDevice, L"Human_PS.fxo");
 
 
-
-	CreateVertexShaderFromFile(pd3dDevice, L"Tree.fx", "VSInstancedTexturedLightingColor", "vs_5_0", &m_pd3dVertexShader, d3dInputElements, nElements, &m_pd3dVertexLayout);
-	CreatePixelShaderFromFile(pd3dDevice, L"Tree.fx", "PSInstancedTexturedLightingColor", "ps_5_0", &m_pd3dPixelShader);
-
-}
-void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
-{
-	ID3D11SamplerState *pd3dSamplerState = NULL;
-	D3D11_SAMPLER_DESC d3dSamplerDesc;
-	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	d3dSamplerDesc.MinLOD = 0;
-	d3dSamplerDesc.MaxLOD = 0;
-	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
-
-	//텍스쳐 리소스를 생성한다.
-	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
-	m_pWoodTexture = new CTexture(3, 1, 0, 0);
-
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/Tree 3-4 Diffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pWoodTexture ->SetTexture(0, pd3dsrvTexture);
-	pd3dsrvTexture->Release();
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/LeavesDiffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pWoodTexture->SetTexture(1, pd3dsrvTexture);
-	pd3dsrvTexture->Release();
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/Rock-Multiple-01.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pWoodTexture->SetTexture(2, pd3dsrvTexture);
-	pd3dsrvTexture->Release();
-
-
-
-	m_pWoodTexture ->SetSampler(0, pd3dSamplerState);
-	pd3dSamplerState->Release();
-
-
-	//m_pLeavesTexture = new CTexture(1, 1, 0, 0);
-	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/LeavesDiffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	//m_pLeavesTexture->SetTexture(0, pd3dsrvTexture);
-	//m_pLeavesTexture->SetSampler(0, pd3dSamplerState);
-	//pd3dsrvTexture->Release();
-
-	//pd3dsrvTexture->Release();
-
-
-
-	//에러의 원인
-	m_nInstanceBufferStride = sizeof(VS_VB_INSTANCE);
-	m_nInstanceBufferOffset = 0;
-
-	string strFileName1 = "Data/NewTree02_Vertex.txt";
-	string strFileName2 = "Data/NewFantaLeaves02_Vertex.txt";
-	string strFileName3 = "Data/NewRockTall01_Vertex.txt";
-	CFixedMesh* pWoodMesh = new CFixedMesh(pd3dDevice, strFileName1);
-	CFixedMesh* pLeavesMesh = new CFixedMesh(pd3dDevice, strFileName2);
-	CFixedMesh * pTallStoneMesh = new CFixedMesh(pd3dDevice, strFileName3);
-
-	int  i = 0;
-	//m_nObjects = 200;
-	m_nObjects = TREE_NUM + TALL_STONE_NUM;
-	m_ppObjects = new CGameObject*[m_nObjects];
-	CWoodObject *pWoodObject = NULL;
-	CLeavesObject *pLeavesObject  = NULL;
-	/*구는 3가지 종류(재질에 따라)이다. 다른 재질의 구들이 번갈아 나열되도록 한다. 재질의 종류에 따라 k가 0, 1, 2의 값을 가지고 k에 따라 객체의 위치를 다르게 설정한다.*/
-	
-	int x = 0;
-	int z;
-	for (int x = 0; x < 10; x++)
-	{
-		for (int z = 0; z < 10; z++)
-		{
-			pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
-			pWoodObject->SetMesh(pWoodMesh);
-			pWoodObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
-			pWoodObject->SetPosition(x * 500 + 0, 165.0f, z * 300 + 0);
-			m_ppObjects[i++] = pWoodObject;
-		}
-	}
-	m_pd3dWoodInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TREE_NUM / 2, m_nInstanceBufferStride, NULL);
-	pWoodMesh->AssembleToVertexBuffer(1, &m_pd3dWoodInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
-
-
-	for (int x = 0; x < 10; x++)
-	{
-		for (int z = 0; z < 10; z++)
-		{
-			pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
-			pLeavesObject->SetMesh(pLeavesMesh);
-			pLeavesObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
-			pLeavesObject->SetPosition(x * 500, 265.0f + 0, 10.0f + (z * 300) + 0);
-			m_ppObjects[i++] = pLeavesObject;
-		}
-	}
-	m_pd3dLeavesInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TREE_NUM / 2, m_nInstanceBufferStride, NULL);
-	pLeavesMesh->AssembleToVertexBuffer(1, &m_pd3dLeavesInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
-	
-	
-	// Create TallStone
-	for (int x = 0; x < 10; x++)
-	{
-		for (int z = 0; z < 2; z++)
-		{
-			pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
-			pWoodObject->SetMesh(pTallStoneMesh);
-			pWoodObject->Scale(D3DXVECTOR3(10.0, 10.0, 10.0));
-			pWoodObject->SetPosition(x * 50 , 30.0f, z * 30 + 0);
-			m_ppObjects[i++] = pWoodObject;
-		}
-	}
-	m_pd3dTallStoneInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TALL_STONE_NUM, m_nInstanceBufferStride, NULL);
-	pTallStoneMesh->AssembleToVertexBuffer(1, &m_pd3dTallStoneInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
-
-
-}
-
-
-
-void CTreeObjectShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
-{
-	OnPrepareRender(pd3dDeviceContext);
-	if (m_pMaterial)
-		CIlluminatedShader::UpdateShaderVariable(pd3dDeviceContext, &m_pMaterial->m_Material);
-
-	if (m_pWoodTexture)
-	{
-		m_pWoodTexture->UpdateSamplerShaderVariable(pd3dDeviceContext, 0, 0);
-		m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
-	}
-	//m_pWoodTexture->UpdateShaderVariable(pd3dDeviceContext);
-
-	int nWoodObjects = TREE_NUM / 2;
-
-	int nWoodInstances = 0;
-	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
-	pd3dDeviceContext->Map(m_pd3dWoodInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
-	VS_VB_INSTANCE *pnSphereInstances = (VS_VB_INSTANCE *)d3dMappedResource.pData;
-	for (int j = 0; j < TREE_NUM / 2; j++)
-	{
-		if (m_ppObjects[j]->IsVisible(pCamera))
-		{
-			if (m_ppObjects[j]->IsVisible(pCamera))
-			{
-				D3DXMatrixTranspose(&pnSphereInstances[nWoodInstances++].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
-			}
-		}
-	}
-	pd3dDeviceContext->Unmap(m_pd3dWoodInstanceBuffer, 0);
-
-	CMesh *pWoodMesh = m_ppObjects[0]->GetMesh();
-	pWoodMesh->RenderInstanced(pd3dDeviceContext, nWoodInstances, 0);
-
-
-	//if (m_pLeavesTexture)  m_pLeavesTexture->UpdateShaderVariable(pd3dDeviceContext);
-	if (m_pWoodTexture)
-	{
-		m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 1, 0);
-		//m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
-	}
-
-	int nLeavesInstances = 0;
-	pd3dDeviceContext->Map(m_pd3dLeavesInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
-	VS_VB_INSTANCE *pLeavesInstances = (VS_VB_INSTANCE *)d3dMappedResource.pData;
-	for (int j = nWoodObjects; j < TREE_NUM; j++)
-	{
-		if (m_ppObjects[j])
-		{
-			if (m_ppObjects[j]->IsVisible(pCamera))
-			{
-				D3DXMatrixTranspose(&pLeavesInstances[nLeavesInstances++].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
-
-			}
-		}
-	}
-	pd3dDeviceContext->Unmap(m_pd3dLeavesInstanceBuffer, 0);
-
-	CMesh *pLeavsMesh = m_ppObjects[TREE_NUM- 1]->GetMesh();
-	pLeavsMesh->RenderInstanced(pd3dDeviceContext, nLeavesInstances, 0);
-
-
-	//TallStone
-	if (m_pWoodTexture)
-	{
-		m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 2, 0);
-		//m_pWoodTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
-	}
-	int nTallStoneInstances = 0;
-	pd3dDeviceContext->Map(m_pd3dTallStoneInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
-	VS_VB_INSTANCE *pTallStoneInstances = (VS_VB_INSTANCE *)d3dMappedResource.pData;
-	for (int j = TREE_NUM; j < m_nObjects; j++)
-	{
-		if (m_ppObjects[j])
-		{
-			if (m_ppObjects[j]->IsVisible(pCamera))
-			{
-				D3DXMatrixTranspose(&pTallStoneInstances[nTallStoneInstances++].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
-
-			}
-		}
-	}
-	pd3dDeviceContext->Unmap(m_pd3dTallStoneInstanceBuffer, 0);
-
-	CMesh *pTallStoneMesh = m_ppObjects[m_nObjects - 1]->GetMesh();
-	pTallStoneMesh->RenderInstanced(pd3dDeviceContext, nTallStoneInstances, 0);
-
-
-
-
-}
-
-
-
-CGrassShader::CGrassShader()
-{
-}
-CGrassShader::~CGrassShader()
-{
-}
-
-
-void CGrassShader::CreateShader(ID3D11Device *pd3dDevice)
-{
-	D3D11_INPUT_ELEMENT_DESC d3dInputElements[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "INSTANCEPOS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCEPOS", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCEPOS", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCEPOS", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
-	};
-	UINT nElements = ARRAYSIZE(d3dInputElements);
-
-	//CreateVertexShaderFromCompiledFile(pd3dDevice, L"Human_VS.fxo", d3dInputElements, nElements);
-	//CreatePixelShaderFromCompiledFile(pd3dDevice, L"Human_PS.fxo");
-
-
-
-	CreateVertexShaderFromFile(pd3dDevice, L"Tree.fx", "VSInstancedTexturedLightingColor", "vs_5_0", &m_pd3dVertexShader, d3dInputElements, nElements, &m_pd3dVertexLayout);
-	CreatePixelShaderFromFile(pd3dDevice, L"Tree.fx", "PSInstancedTexturedLightingColor", "ps_5_0", &m_pd3dPixelShader);
-
-}
-void  CGrassShader::BuildObjects(ID3D11Device *pd3dDevice)
-{
-
-
-
-	ID3D11SamplerState *pd3dSamplerState = NULL;
-	D3D11_SAMPLER_DESC d3dSamplerDesc;
-	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	d3dSamplerDesc.MinLOD = 0;
-	d3dSamplerDesc.MaxLOD = 0;
-	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
-
-	//텍스쳐 리소스를 생성한다.
-	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
-	m_pWoodTexture = new CTexture(1, 1, 0, 0);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Tree 3-4 Diffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pWoodTexture->SetTexture(0, pd3dsrvTexture);
-	m_pWoodTexture->SetSampler(0, pd3dSamplerState);
-	pd3dsrvTexture->Release();
-
-
-
-	pd3dSamplerState->Release();
-
-
-
-	//에러의 원인
-	//m_nInstanceBufferStride = sizeof(D3DXMATRIX);
-	m_nInstanceBufferStride = sizeof(VS_VB_INSTANCE);
-	m_nInstanceBufferOffset = 0;
-
-	//CCubeMeshTextured *pCubeMesh = new CCubeMeshTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
-	//CSphereMeshTextured *pSphereMesh = new CSphereMeshTextured(pd3dDevice, 12.0f, 20, 20);
-
-	string strFileName1 = "Data/NewTree02_Vertex.txt";
-	string strFileName2 = "Data/NewFantaLeaves02_Vertex.txt";
-	CFixedMesh* pWoodMesh = new CFixedMesh(pd3dDevice, strFileName1);
-	CFixedMesh* pLeavesMesh = new CFixedMesh(pd3dDevice, strFileName2);
-
-
-	//float fTerrainWidth = pHeightMapTerrain->GetWidth();
-	//float fTerrainLength = pHeightMapTerrain->GetLength();
-
-	/*두 가지(직육면체와 구) 객체들을 지형에 일정한 간격으로 배치한다. 지형의 표면에 직육면체를 배치하고 직육면체 위에 구가 배치된다. 직육면체와 구는 빨강색, 녹색, 파랑색이 반복되도록 배치된다.*/
-	int  i = 0;
-	m_nObjects = 500;
-
-	m_ppObjects = new CGameObject*[m_nObjects];
-
-	D3DXVECTOR3 d3dxvRotateAxis;
-	CRotatingObject *pRotatingObject = NULL;
-
-	CWoodObject *pWoodObject = NULL;
-	CLeavesObject *pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
-	/*구는 3가지 종류(재질에 따라)이다. 다른 재질의 구들이 번갈아 나열되도록 한다. 재질의 종류에 따라 k가 0, 1, 2의 값을 가지고 k에 따라 객체의 위치를 다르게 설정한다.*/
-
-	int x = 0;
-	int z;
-	for (int x = 0; x < 50; x++)
-	{
-		for (int z = 0; z < 5; z++)
-		{
-			pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
-			pWoodObject->SetMesh(pWoodMesh);
-			pWoodObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
-			pWoodObject->SetPosition(x * 140, 65.0f, z * 140);
-			m_ppObjects[i++] = pWoodObject;
-
-		}
-	}
-	m_pd3dWoodInstanceBuffer = CreateInstanceBuffer(pd3dDevice, m_nObjects / 2, m_nInstanceBufferStride, NULL);
-	pWoodMesh->AssembleToVertexBuffer(1, &m_pd3dWoodInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
-
-
-	for (int x = 0; x < 50; x++)
-	{
-		for (int z = 0; z < 5; z++)
-		{
-			pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
-			pLeavesObject->SetMesh(pLeavesMesh);
-			pLeavesObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
-			pLeavesObject->SetPosition(x * 140, 165.0f, 10.0f + (z * 140));
-			m_ppObjects[i++] = pLeavesObject;
-
-		}
-	}
-}
-
-void CGrassShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
-{
-	OnPrepareRender(pd3dDeviceContext);
-	if (m_pMaterial)
-		CIlluminatedShader::UpdateShaderVariable(pd3dDeviceContext, &m_pMaterial->m_Material);
-
-	if (m_pWoodTexture)  m_pWoodTexture->UpdateShaderVariable(pd3dDeviceContext);
-
-	int nWoodObjects = m_nObjects / 2;
-
-	int nWoodInstances = 0;
-	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
-	pd3dDeviceContext->Map(m_pd3dWoodInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
-	VS_VB_INSTANCE *pnSphereInstances = (VS_VB_INSTANCE *)d3dMappedResource.pData;
-	for (int j = 0; j < m_nObjects / 2; j++)
-	{
-		if (m_ppObjects[j]->IsVisible(pCamera))
-		{
-			if (m_ppObjects[j]->IsVisible(pCamera))
-			{
-				D3DXMatrixTranspose(&pnSphereInstances[nWoodInstances++].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
-			}
-		}
-	}
-	pd3dDeviceContext->Unmap(m_pd3dWoodInstanceBuffer, 0);
-
-	CMesh *pWoodMesh = m_ppObjects[0]->GetMesh();
-	pWoodMesh->RenderInstanced(pd3dDeviceContext, nWoodInstances, 0);
-
-}

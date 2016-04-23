@@ -109,7 +109,7 @@ float4 PSDetailTexturedLightingColor(VS_DETAIL_TEXTURED_LIGHTING_COLOR_OUTPUT in
 		float4 texColor = c0;
 		//b´Â ±æ
 		texColor = lerp(texColor, c1, t.b);
-	   // texColor = lerp(texColor, c2, t.r);
+	    texColor = lerp(texColor, c2, t.a);
   	  //  texColor = lerp(texColor, c3, t.b);
 
 	return   texColor;

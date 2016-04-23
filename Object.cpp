@@ -607,7 +607,7 @@ void CDisplacementMappingObject::Render(ID3D11DeviceContext *pd3dDeviceContext, 
 
 CWaveObject::CWaveObject(ID3D11Device *pd3dDevice) : CGameObject(1)
 {
-	CWaveMesh *pWaveMesh = new  CWaveMesh(pd3dDevice, 80.0, 80.0, 2360.0f, 50.0f, 560.0f);
+	CWaveMesh *pWaveMesh = new  CWaveMesh(pd3dDevice, 80.0, 80.0, 800.0f, 50.0f, 1560.0f);
 	SetMesh(pWaveMesh, 0);
 	m_pStonesTexture = NULL;
 	m_pWavesNormalMap1 = NULL;
@@ -768,6 +768,7 @@ void CWaveObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamer
 	pd3dDeviceContext->OMSetBlendState(m_pd3dBlendingState, blendFactors, 0xfffffff);
 	CGameObject::Render(pd3dDeviceContext, pCamera);
 	pd3dDeviceContext->OMSetBlendState(0, NULL, 0xffffffff);
+
 	//CShader::UpdateShaderVariable(pd3dDeviceContext, &m_d3dxmtxWorld);
 	//³ë¸»¸ÊÀ» ÇÈ¼¿, µµ¸ÞÀÎ ¼ÎÀÌ´õ¿¡ ¿¬°á
 	//m_pNoramlMap->UpdateShaderVariable(pd3dDeviceContext);

@@ -82,8 +82,8 @@ float4 PS(VS_TEXTURED_LIGHTING_COLOR_OUTPUT  input) : SV_Target
 {
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW);
-			//float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord) * cIllumination;
-		float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord);
+			float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord) * cIllumination;
+		//float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord);
 
 		
 		clip(cColor.a - 0.1f);
@@ -127,10 +127,10 @@ float4 PSInstancedTexturedLightingColor(VS_INSTANCED_TEXTURED_LIGHTING_COLOR_OUT
 {
 	input.normalW = normalize(input.normalW);
 
-//	float4 cIllumination = Lighting(input.positionW, input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
 		//float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord) * cIllumination;
 
-		float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord);
+	float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord) * cIllumination;
 			clip(cColor.a - 0.1f);
 		return(cColor);
 }

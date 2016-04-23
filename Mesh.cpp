@@ -1083,25 +1083,29 @@ CSkyBoxMesh::CSkyBoxMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, 
 	d3dSamplerDesc.MaxLOD = 0;
 	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
 
-	m_pSkyboxTexture = new CTexture(6, 1, 0, 0);
-	m_pSkyboxTexture->SetSampler(0, pd3dSamplerState);
-	pd3dSamplerState->Release();
-	m_pSkyboxTexture->AddRef();
-	//왠지 중요할거 같은부분이다.
-	OnChangeSkyBoxTextures(pd3dDevice, 4);
+	//*********************
 
-
-	//m_pSkyboxTexture = new CTexture(1, 1, 0, 0);
+	//m_pSkyboxTexture = new CTexture(6, 1, 0, 0);
 	//m_pSkyboxTexture->SetSampler(0, pd3dSamplerState);
 	//pd3dSamplerState->Release();
 	//m_pSkyboxTexture->AddRef();
+	////왠지 중요할거 같은부분이다.
+	//OnChangeSkyBoxTextures(pd3dDevice, 4);
 
 
-	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, L"skyBox.dds", NULL, NULL, &m_pd3dsrvCubeMap, NULL);
-	////pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &m_pd3dSamplerState);
+	//********************************
 
-	//m_pSkyboxTexture->SetTexture(0, m_pd3dsrvCubeMap);
-	//m_pd3dsrvCubeMap->Release();
+	m_pSkyboxTexture = new CTexture(1, 1, 7, 0);
+	m_pSkyboxTexture->SetSampler(0, pd3dSamplerState);
+	pd3dSamplerState->Release();
+	m_pSkyboxTexture->AddRef();
+
+
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, L"Image/grasscube1024.dds", NULL, NULL, &m_pd3dsrvCubeMap, NULL);
+	//pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &m_pd3dSamplerState);
+
+	m_pSkyboxTexture->SetTexture(0, m_pd3dsrvCubeMap);
+	m_pd3dsrvCubeMap->Release();
 
 
 }
@@ -1154,27 +1158,27 @@ void CSkyBoxMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	pd3dDeviceContext->IASetIndexBuffer(m_pd3dIndexBuffer, m_dxgiIndexFormat, m_nIndexOffset);
 	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
-	//스카이 박스를 그리기 위한 샘플러 상태 객체와 깊이 스텐실 상태 객체를 설정한다.
-	m_pSkyboxTexture->UpdateSamplerShaderVariable(pd3dDeviceContext, 0, 0);
-	pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
-
-	//스카이 박스의 6개 면(사각형)을 순서대로 그린다.
-	for (int i = 0; i < 6; i++)
-	{
-		//스카이 박스의 각 면(사각형)을 그릴 때 사용할 텍스쳐를 설정한다.
-		m_pSkyboxTexture->UpdateTextureShaderVariable(pd3dDeviceContext, i, 0);
-		pd3dDeviceContext->DrawIndexed(4, 0, i * 4);
-	}
-
-
-
-
+	////스카이 박스를 그리기 위한 샘플러 상태 객체와 깊이 스텐실 상태 객체를 설정한다.
+	//m_pSkyboxTexture->UpdateSamplerShaderVariable(pd3dDeviceContext, 0, 0);
 	//pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
-	//m_pSkyboxTexture->UpdateShaderVariable(pd3dDeviceContext);
-	////pd3dDeviceContext->PSSetSamplers(3, 1, &m_pd3dSamplerState);
-	////pd3dDeviceContext->PSSetShaderResources(2, 1, &m_pd3dsrvCubeMap);
+
+	////스카이 박스의 6개 면(사각형)을 순서대로 그린다.
 	//for (int i = 0; i < 6; i++)
+	//{
+	//	//스카이 박스의 각 면(사각형)을 그릴 때 사용할 텍스쳐를 설정한다.
+	//	m_pSkyboxTexture->UpdateTextureShaderVariable(pd3dDeviceContext, i, 0);
 	//	pd3dDeviceContext->DrawIndexed(4, 0, i * 4);
+	//}
+
+
+
+
+	pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
+	m_pSkyboxTexture->UpdateShaderVariable(pd3dDeviceContext);
+	//pd3dDeviceContext->PSSetSamplers(3, 1, &m_pd3dSamplerState);
+	//pd3dDeviceContext->PSSetShaderResources(2, 1, &m_pd3dsrvCubeMap);
+	for (int i = 0; i < 6; i++)
+		pd3dDeviceContext->DrawIndexed(4, 0, i * 4);
 
 
 	pd3dDeviceContext->OMSetDepthStencilState(NULL, 1);

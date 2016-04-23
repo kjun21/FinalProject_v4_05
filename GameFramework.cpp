@@ -10,6 +10,9 @@ using namespace std;
 CGameTimer* CGameTimer::Timer;
 CGameManager* CGameManager::GameManager;
 
+
+
+
 // Direct3D 디바이스, 스왑 체인, 디바이스 컨텍스트, 그리고 렌더 타겟 뷰 인터페이스 포인터를 NULL로 초기화한다.
 CGameFramework::CGameFramework()
 {
@@ -27,6 +30,8 @@ CGameFramework::CGameFramework()
 	_tcscpy_s(m_pszBuffer, _T("LapProject ("));
 
 	m_pPlayerShader = NULL;
+
+	srand((unsigned int)time(NULL));
 
 	m_pCamera = NULL;
 
@@ -162,6 +167,7 @@ bool CGameFramework::CreateRenderTargetDepthStencilView()
 
 	//렌더 타겟과 같은 크기의 깊이 버퍼(Depth Buffer)를 생성한다.
 	D3D11_TEXTURE2D_DESC d3dDepthStencilBufferDesc;
+	cout << m_nWndClientWidth << "  " << m_nWndClientHeight << endl;
 	ZeroMemory(&d3dDepthStencilBufferDesc, sizeof(D3D11_TEXTURE2D_DESC));
 	d3dDepthStencilBufferDesc.Width = m_nWndClientWidth;
 	d3dDepthStencilBufferDesc.Height = m_nWndClientHeight;
@@ -421,8 +427,8 @@ void CGameFramework::ProcessInput()
 				&& m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2))
 			{
 				m_pPlayer->Rotate(dwDirection, dwAttack);
-				m_pPlayer->Move(dwDirection, 3800.0f * GameTimer->GetTimeElapsed(), true);
-
+				m_pPlayer->Move(dwDirection, 360.0f * GameTimer->GetTimeElapsed(), true);
+				// 180.
 			}
 		}
 		m_pPlayer->UpdateAnimation(dwDirection, dwAttack);
@@ -488,9 +494,9 @@ void CGameFramework::FrameAdvance()
 
 	//CCamera *pCamera = (m_pPlayer) ? m_pPlayer->GetCamera() : NULL;
 
-	m_pSkyBoxShader->Render(m_pd3dDeviceContext, m_pCamera);
-	if (m_pPlayerShader) m_pPlayerShader->Render(m_pd3dDeviceContext, m_pCamera);
-	if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, m_pCamera);
+	m_pSkyBoxShader->Render(m_pd3dDeviceContext, m_pd3dDepthStencilView, m_pCamera);
+	if (m_pPlayerShader) m_pPlayerShader->Render(m_pd3dDeviceContext, m_pd3dDepthStencilView, m_pCamera);
+	if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, m_pd3dDepthStencilView, m_pCamera);
 
 
 	/*렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지운다.

@@ -49,6 +49,9 @@ Texture2D gtxtNormal2 : register(t2);
 //SamplerState gssNormal2 : register(s2);
 
 
+TextureCube gtxtCubeMapSkyBox : register(t7);
+SamplerState gssSkyBox : register(s0);
+
 
 //===================================================
 //=====================테셀레이션=======================
@@ -77,6 +80,7 @@ struct VS_OUTPUT
 	float2 waveNormalTex1 : TEXCOORD4;
 
 	float fTessFactor : TESSFACTOR;
+	//float3 fCameraPosition : TEXCOORD5;
 };
 
 VS_OUTPUT VS(VS_INPUT input)
@@ -108,7 +112,7 @@ VS_OUTPUT VS(VS_INPUT input)
 	float fDistToCamera = distance(output.vPositionW, gvCameraPosition2.xyz) + 0.0f;
 	float fTessFactor = saturate((gfMinDistance - fDistToCamera) / (gfMinDistance - gfMaxDistance));
 	output.fTessFactor = gfMinTessFactor + fTessFactor * (gfMaxTessFactor - gfMinTessFactor);
-
+	//outpu.fCameraPosition = gvCameraPosition2.xyz;
 	return output;
 }
 
@@ -153,6 +157,7 @@ struct HS_OUTPUT
 	float2 waveDispTex1   : TEXCOORD2;
 	float2 waveNormalTex0 : TEXCOORD3;
 	float2 waveNormalTex1 : TEXCOORD4;
+	//float3 fCameraPosition :  TEXCOORD5;
 };
 
 // 헐 셰이더 함수는 패치의 모든 제어점을 입력 받음.
@@ -179,6 +184,7 @@ HS_OUTPUT HS(InputPatch<VS_OUTPUT, 3> input,
 	output.waveDispTex1 = input[i].waveDispTex1;
 	output.waveNormalTex0 = input[i].waveNormalTex0;
 	output.waveNormalTex1 = input[i].waveNormalTex1;
+	//output.fCameraPosition = input[i].fCameraPosition;
 
 	return output;
 
@@ -196,6 +202,7 @@ struct DS_OUTPUT
 	float2 waveDispTex1   : TEXCOORD2;
 	float2 waveNormalTex0 : TEXCOORD3;
 	float2 waveNormalTex1 : TEXCOORD4;
+	//float3 fCameraPosition :  TEXCOORD5;
 };
 
 [domain("tri")]
@@ -233,7 +240,7 @@ DS_OUTPUT DS(HS_CONSTANT_OUTPUT input, float3 uv : SV_DomainLocation,
 
 	// Project to homogeneous clip space.
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-
+	
 
 
 	//float fHeight = gtxtNormal.SampleLevel(gssNormal1, output.texCoord, 0.0).a;
@@ -265,13 +272,21 @@ float4 PS(DS_OUTPUT input) : SV_Target
 
 		//평균을 낸다.
 		float3 bumpedNormalW = normalize(normalW1 + normalW2);
-
 		float4 cIllumination = Lighting(input.positionW, bumpedNormalW);
 		//float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord) * cIllumination;
-		float4 cColor = float4(0.3f, 0.7f, 0.8f, 1.0f) *  cIllumination;
 
+		// 스카이 박스 반사 벡타
+		float3 vCamerPosition = gvCameraPosition.xyz;
+		float3 eyeDir = input.positionW - vCamerPosition;
+		eyeDir = normalize(eyeDir);
+		float3 reflectionVector = reflect(eyeDir, bumpedNormalW);
+		float4 cReflectionColor = gtxtCubeMapSkyBox.Sample(gssSkyBox, eyeDir);
+		float4 reflectMaterial = float4(0.4, 0.4, 0.4, 1.0f);
+
+		float4 cColor =  cIllumination + (reflectMaterial* cReflectionColor);
+		//float4 cColor =   cIllumination;
 	//cColor = cColor * cIllumination;
-	cColor.a = 0.2;
+	cColor.a = 0.65;
 	return(cColor);
 
 
@@ -300,3 +315,29 @@ float4 PS(DS_OUTPUT input) : SV_Target
 //===============================변위 매핑=======================
 //============================================================
 
+struct VS_SKYBOX_CUBEMAP_INPUT
+{
+	float3 position : POSITION;
+};
+struct VS_SKYBOX_CUBEMAP_OUTPUT
+{
+	float3 position : POSITION;
+	float4 positionH : SV_POSITION;
+};
+
+
+
+VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
+{
+	VS_SKYBOX_CUBEMAP_OUTPUT output = (VS_SKYBOX_CUBEMAP_OUTPUT)0;
+	output.positionH = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+
+	output.position = input.position;
+	return output;
+}
+
+float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_Target
+{
+	float4 cColor = gtxtCubeMapSkyBox.Sample(gssSkyBox, input.position);
+	return cColor;
+}

@@ -16,19 +16,8 @@ CFixedMesh::CFixedMesh(ID3D11Device *pd3dDevice, string strFileName) : CMeshText
 
 
 	::fread(m_pd3dxvPositions, sizeof(D3DXVECTOR3), m_nVertices, pFile);
-	//::fread(&m_nIndices, sizeof(UINT), 1, pFile);
-
-	//m_pnIndices = new UINT[m_nIndices];
-	//::fread(m_pnIndices, sizeof(UINT), m_nIndices, pFile);
 	::fread(pd3dxvNormals, sizeof(D3DXVECTOR3), m_nVertices, pFile);
 	::fread(pd3dxvTexCoords, sizeof(D3DXVECTOR2), m_nVertices, pFile);
-	//for (int i = 0; i < m_nVertices; i++)
-	//{
-	//	//pd3dxvTexCoords[i].y = 1.0f - pd3dxvTexCoords[i].y;
-	//	pd3dxvTexCoords[i].y = 1.0f - pd3dxvTexCoords[i].y;
-	//	cout <<i<<"¹øÂ°   " <<pd3dxvTexCoords[i].x<<"   "<<pd3dxvTexCoords[i].y << endl;
-	//}
-
 	::fclose(pFile);
 
 
@@ -100,7 +89,6 @@ CFixedMesh::CFixedMesh(ID3D11Device *pd3dDevice, string strFileName) : CMeshText
 
 	m_bcBoundingCube.m_d3dxvMinimum = D3DXVECTOR3(min.x, min.y, min.z);
 	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(max.x, max.y, max.z);
-
 
 
 	//D3D11_RASTERIZER_DESC d3dxRasterizer;
