@@ -67,6 +67,15 @@ void CCamera::GenerateViewMatrix()
 {
 	D3DXMatrixLookAtLH(&m_d3dxmtxView, &m_d3dxvPosition, &m_pPlayer->GetPosition(), &m_d3dxvUp);
 }
+void CCamera::CreateReflectionMatrix(float fWaterHeight)
+{
+	D3DXVECTOR3 d3dxvUp = D3DXVECTOR3(0.0f, 1.0f, 1.0f);
+	m_d3dxvPosition.y =  - m_d3dxvPosition.y + (fWaterHeight * 2);
+	D3DXMatrixLookAtLH(&m_d3dxmtxReflectionView, &m_d3dxvPosition, &m_pPlayer->GetPosition(), &d3dxvUp);
+
+}
+
+
 // 카메라의 z-축을 기준으로 카메라의 좌표축들이 직교하도록 카메라 변환행렬을 갱신한다.
 void CCamera::RegenerateViewMatrix()
 {
@@ -127,6 +136,21 @@ void CCamera::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext)
 	//상수 버퍼를 슬롯(VS_SLOT_CAMERA)에 설정한다.
 	pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_CAMERA, 1, &m_pd3dcbCamera);
 }
+void CCamera::UpdateReflectionMatrixShaderVariables(ID3D11DeviceContext *pd3dDeviceContext)
+{
+	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
+	/*상수 버퍼의 메모리 주소를 가져와서 카메라 변환 행렬과 투영 변환 행렬을 복사한다. 쉐이더에서 행렬의 행과 열이 바뀌는 것에 주의하라.*/
+	pd3dDeviceContext->Map(m_pd3dcbCamera, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+	VS_CB_CAMERA *pcbViewProjection = (VS_CB_CAMERA *)d3dMappedResource.pData;
+	D3DXMatrixTranspose(&pcbViewProjection->m_d3dxmtxView, &m_d3dxmtxReflectionView);
+	D3DXMatrixTranspose(&pcbViewProjection->m_d3dxmtxProjection, &m_d3dxmtxProjection);
+	pd3dDeviceContext->Unmap(m_pd3dcbCamera, 0);
+
+	//상수 버퍼를 슬롯(VS_SLOT_CAMERA)에 설정한다.
+	pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_CAMERA, 1, &m_pd3dcbCamera);
+}
+
+
 void CCamera::DSCreateShaderVariables(ID3D11Device *pd3dDevice)
 {
 	D3D11_BUFFER_DESC bd;

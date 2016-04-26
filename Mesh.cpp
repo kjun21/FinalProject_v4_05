@@ -2407,6 +2407,9 @@ CCharacterMesh::CCharacterMesh(ID3D11Device *pd3dDevice, string strFileName) : C
 
 	m_bcBoundingCube.m_d3dxvMinimum = D3DXVECTOR3(min.x, min.y, min.z);
 	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(max.x, max.y, max.z);
+
+	cout << "최소" << min.x << "   " << min .y<< "   " << min.z << endl;
+	cout << "최대" << max.x << "   " << max.y << "  " << max.z << endl;
 }
 
 CCharacterMesh::~CCharacterMesh()
@@ -2458,4 +2461,94 @@ void  CCharacterMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 
 	pd3dDeviceContext->RSSetState(NULL);
+}
+
+CBoundingMesh::CBoundingMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice)
+{
+	m_nVertices = 8;
+	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	float fx = fWidth, fy = fHeight, fz = fDepth;
+
+	m_pd3dxvPositions = new D3DXVECTOR3[m_nVertices];
+
+	m_pd3dxvPositions[0] = D3DXVECTOR3(-fx, +fy, -fz);
+	m_pd3dxvPositions[1] = D3DXVECTOR3(+fx, +fy, -fz);
+	m_pd3dxvPositions[2] = D3DXVECTOR3(+fx, +fy, +fz);
+	m_pd3dxvPositions[3] = D3DXVECTOR3(-fx, +fy, +fz);
+	m_pd3dxvPositions[4] = D3DXVECTOR3(-fx, -fy, -fz);
+	m_pd3dxvPositions[5] = D3DXVECTOR3(+fx, -fy, -fz);
+	m_pd3dxvPositions[6] = D3DXVECTOR3(+fx, -fy, +fz);
+	m_pd3dxvPositions[7] = D3DXVECTOR3(-fx, -fy, +fz);
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR3)* m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pd3dxvPositions;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dPositionBuffer);
+
+	m_nIndices = 36;
+	m_pnIndices = new UINT[m_nIndices];
+
+	m_pnIndices[0] = 3; m_pnIndices[1] = 1; m_pnIndices[2] = 0;
+	m_pnIndices[3] = 2; m_pnIndices[4] = 1; m_pnIndices[5] = 3;
+	m_pnIndices[6] = 0; m_pnIndices[7] = 5; m_pnIndices[8] = 4;
+	m_pnIndices[9] = 1; m_pnIndices[10] = 5; m_pnIndices[11] = 0;
+	m_pnIndices[12] = 3; m_pnIndices[13] = 4; m_pnIndices[14] = 7;
+	m_pnIndices[15] = 0; m_pnIndices[16] = 4; m_pnIndices[17] = 3;
+	m_pnIndices[18] = 1; m_pnIndices[19] = 6; m_pnIndices[20] = 5;
+	m_pnIndices[21] = 2; m_pnIndices[22] = 6; m_pnIndices[23] = 1;
+	m_pnIndices[24] = 2; m_pnIndices[25] = 7; m_pnIndices[26] = 6;
+	m_pnIndices[27] = 3; m_pnIndices[28] = 7; m_pnIndices[29] = 2;
+	m_pnIndices[30] = 6; m_pnIndices[31] = 4; m_pnIndices[32] = 5;
+	m_pnIndices[33] = 7; m_pnIndices[34] = 4; m_pnIndices[35] = 6;
+
+
+
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(UINT) * m_nIndices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pnIndices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dIndexBuffer);
+
+	//구 메쉬의 정점 버퍼(색상 버퍼)를 생성한다.
+	D3DXCOLOR *pd3dxColors = new D3DXCOLOR[m_nVertices];
+	for (int i = 0; i < m_nVertices; i++)
+		pd3dxColors[i] = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+		//pd3dxColors[i] = RANDOM_COLOR;
+
+	//정점의 두 번째 요소를 나타내는 버퍼를 생성한다.
+	d3dBufferDesc.ByteWidth = sizeof(D3DXCOLOR) * m_nVertices;
+	d3dBufferData.pSysMem = pd3dxColors;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dColorBuffer);
+	delete[] pd3dxColors;
+
+	//정점을 나타내는 두 개의 버퍼와 정보를 입력 조립기로 전달할 수 있는 형태로 구성한다.
+	ID3D11Buffer *ppd3dBuffers[2] = { m_pd3dPositionBuffer, m_pd3dColorBuffer };
+	UINT pnBufferStrides[2] = { sizeof(D3DXVECTOR3), sizeof(D3DXCOLOR) };
+	UINT pnBufferOffsets[2] = { 0, 0 };
+	AssembleToVertexBuffer(2, ppd3dBuffers, pnBufferStrides, pnBufferOffsets);
+
+
+	m_bcBoundingCube.m_d3dxvMinimum = D3DXVECTOR3(-fx, -fy, -fz);
+	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(+fx, +fy, +fz);
+
+
+	D3D11_RASTERIZER_DESC d3dxRasterizer;
+	ZeroMemory(&d3dxRasterizer, sizeof(D3D11_RASTERIZER_DESC));
+	d3dxRasterizer.FillMode = D3D11_FILL_WIREFRAME;
+	d3dxRasterizer.CullMode = D3D11_CULL_BACK;
+	pd3dDevice->CreateRasterizerState(&d3dxRasterizer, &m_pd3dRasterizerState);
+}
+CBoundingMesh::~CBoundingMesh()
+{
+
 }

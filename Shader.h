@@ -9,7 +9,7 @@
 #include "CRotatingObject.h"
 #include "AirplaneMesh.h"
 #include "AirplanePlayer.h"
-
+#include "Direct3DBase.h"
 
 #define MAXANINUM  1
 
@@ -64,7 +64,7 @@ public:
 	virtual void ReleaseObjects();
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void OnPrepareRender(ID3D11DeviceContext *pd3dDeviceContext);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera = NULL);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera = NULL);
 
 protected:
 	ID3D11VertexShader *m_pd3dVertexShader;
@@ -120,7 +120,7 @@ public:
 
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
-	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	CPlayer *GetPlayer(int nIndex = 0) { return((CPlayer *)m_ppObjects[nIndex]); }
 	//virtual void AnimateObjects(float fTimeElapsed);
@@ -185,7 +185,7 @@ public:
 
 public:
 	virtual void BuildObjects(ID3D11Device *pd3dDevice, CHeightMapTerrain *pHeightMapTerrain, CMaterial *pMaterial, CTexture *pTexture, int k);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 
 	//다음 멤버변수를 추가한다.
 private:
@@ -228,7 +228,7 @@ public:
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 };
 
 class CTexturedIlluminatedShader : public CIlluminatedShader
@@ -254,7 +254,7 @@ class CTerrainShader : public CDetailTexturedIlluminatedShader
 public:
 	CTerrainShader();
 	virtual ~CTerrainShader();
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 	ID3D11ShaderResourceView* CreateTexture2DArray(ID3D11Device* pd3dDevice,
 		TCHAR* pPath, int nTextures);
@@ -276,7 +276,7 @@ public:
 
 	virtual void BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial, CTexture *pTexture);
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 };
 
 class CTextureLightingShader : public CTexturedShader
@@ -292,7 +292,7 @@ public:
 
 	virtual void BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial, CTexture *pTexture);
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 };
 
 class CTessellationShader : public CTexturedShader
@@ -306,7 +306,7 @@ public:
 	virtual ~CTessellationShader();
 	virtual void BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial, CTexture *pTexture);
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 };
 
 
@@ -320,7 +320,7 @@ public:
 
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial, CTexture *pTexture);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 
 };
 
@@ -334,7 +334,7 @@ public:
 
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial, CTexture *pTexture);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 };
 
 
@@ -349,7 +349,7 @@ public:
 
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 };
 
 class CHumanShader : public CShader
@@ -371,7 +371,7 @@ public:
 	virtual ~CWizardShader();
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
-	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	virtual void UpdateShaderVariable(ID3D11DeviceContext *pd3dDeviceContext, 
 		VS_CB_RESULT_MATRIX **pResult, VS_CB_RESULT_MATRIX *mapdata, int k);
@@ -396,3 +396,10 @@ protected:
 	float m_fTimePos;
 };
 
+class CCrushBoxShader : public CShader
+{
+public:
+	CCrushBoxShader();
+	virtual ~CCrushBoxShader();
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+};

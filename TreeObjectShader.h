@@ -24,7 +24,7 @@ public:
 	virtual ~CTreeObjectShader();
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 protected:
 	ID3D11Buffer *m_pd3dWoodInstanceBuffer;
 	ID3D11Buffer *m_pd3dLeavesInstanceBuffer;

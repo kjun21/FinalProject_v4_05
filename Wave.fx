@@ -27,6 +27,13 @@ cbuffer cbCameraPosition : register(b3)
 	float4 gvCameraPosition2 : packoffset(c0);
 };
 
+cbuffer cbReflectionMatrix : register(b4)
+{
+	float4 gmtxReflection : packoffset(c0);
+};
+
+
+
 // 파도 변위 행렬들
 cbuffer cbWaveMatrices : register(b6)
 {
@@ -47,6 +54,9 @@ SamplerState gssNormal1 : register(s1);
 
 Texture2D gtxtNormal2 : register(t2);
 //SamplerState gssNormal2 : register(s2);
+
+Texture2D gtxtRefraction : register(t3);
+Texture2D gtxtReflection : register(t4);
 
 
 TextureCube gtxtCubeMapSkyBox : register(t7);
@@ -78,6 +88,7 @@ struct VS_OUTPUT
 	float2 waveDispTex1   : TEXCOORD2;
 	float2 waveNormalTex0 : TEXCOORD3;
 	float2 waveNormalTex1 : TEXCOORD4;
+
 
 	float fTessFactor : TESSFACTOR;
 	//float3 fCameraPosition : TEXCOORD5;
@@ -202,6 +213,9 @@ struct DS_OUTPUT
 	float2 waveDispTex1   : TEXCOORD2;
 	float2 waveNormalTex0 : TEXCOORD3;
 	float2 waveNormalTex1 : TEXCOORD4;
+
+	//float4 reflectionPosition : TEXCOORD5;
+	//float4 refractionPosition : TEXCOORD6;
 	//float3 fCameraPosition :  TEXCOORD5;
 };
 
@@ -232,8 +246,8 @@ DS_OUTPUT DS(HS_CONSTANT_OUTPUT input, float3 uv : SV_DomainLocation,
 	float fHeight2 = gtxtNormal2.SampleLevel(gssNormal1, output.waveDispTex1, mipLevel).a;
 
 	// 원래 상수 버퍼로 전달한다.
-	float fHeightScale1 = 8.4;  //0.4
-	float fHeightScale2 = 7.2; //1.2
+	float fHeightScale1 = 1.4;  //0.4   8.4
+	float fHeightScale2 = 4.2; //1.2   7.2
 
 	output.positionW.y += fHeightScale1 * fHeight1;
 	output.positionW.y += fHeightScale2 * fHeight1;
@@ -241,6 +255,15 @@ DS_OUTPUT DS(HS_CONSTANT_OUTPUT input, float3 uv : SV_DomainLocation,
 	// Project to homogeneous clip space.
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	
+	//matrix reflectProjectWorld;
+	//matrix viewProjectWorld;
+	//// Create the reflection projection world matrix.
+	//output.reflectionPosition = mul(float4(output.positionW, 1), gmtxReflection);
+	//output.reflectionPosition = mul(output.reflectionPosition, gmtxProjection);
+	//// 굴절
+	//output.refractionPosition = mul(float4(output.positionW, 1), gmtxView);
+	//output.refractionPosition = mul(output.refractionPosition, gmtxProjection);
+
 
 
 	//float fHeight = gtxtNormal.SampleLevel(gssNormal1, output.texCoord, 0.0).a;
@@ -264,9 +287,9 @@ float4 PS(DS_OUTPUT input) : SV_Target
 	normalMapSample1 = 2.0f * normalMapSample1 - 1.0f;
 	float3 normalW1 = mul(normalMapSample1, TBN);
 
-    //2번 노말맵 추출.
-	float3 normalMapSample2 = gtxtNormal2.Sample(gssNormal1, input.waveNormalTex1).rgb;
-	normalMapSample2 = 2.0f * normalMapSample2 - 1.0f;
+		//2번 노말맵 추출.
+		float3 normalMapSample2 = gtxtNormal2.Sample(gssNormal1, input.waveNormalTex1).rgb;
+		normalMapSample2 = 2.0f * normalMapSample2 - 1.0f;
 	float3 normalW2 = mul(normalMapSample2, TBN);
 
 
@@ -279,16 +302,47 @@ float4 PS(DS_OUTPUT input) : SV_Target
 		float3 vCamerPosition = gvCameraPosition.xyz;
 		float3 eyeDir = input.positionW - vCamerPosition;
 		eyeDir = normalize(eyeDir);
-		float3 reflectionVector = reflect(eyeDir, bumpedNormalW);
+	float3 reflectionVector = reflect(eyeDir, bumpedNormalW);
 		float4 cReflectionColor = gtxtCubeMapSkyBox.Sample(gssSkyBox, eyeDir);
-		float4 reflectMaterial = float4(0.4, 0.4, 0.4, 1.0f);
+		float4 reflectMaterial = float4(0.2, 0.3, 0.9, 1.0f);
 
-		float4 cColor =  cIllumination + (reflectMaterial* cReflectionColor);
+
+
+
+	//float2 reflectTexCoord;
+	//float2 refractTexCoord;
+	//float4 reflectionColor;
+	//float4 	refractionColor;
+	//float reflectRefractScale = 0.3;
+	////bumpedNormalW = (bumpedNormalW.xyz * 2.0f) - 1.0f;
+
+	//// -1~ +1 범위에 텍스쳐 좌표안에서 반사와 굴절 좌표 둘다 바꾼다.
+	//// Calculate the projected reflection texture coordinates.
+	//reflectTexCoord.x = input.reflectionPosition.x / input.reflectionPosition.w / 2.0f + 0.5f;
+	//reflectTexCoord.y = -input.reflectionPosition.y / input.reflectionPosition.w / 2.0f + 0.5f;
+
+	//// Calculate the projected refraction texture coordinates.
+	//refractTexCoord.x = input.refractionPosition.x / input.refractionPosition.w / 2.0f + 0.5f;
+	//refractTexCoord.y = -input.refractionPosition.y / input.refractionPosition.w / 2.0f + 0.5f;
+
+	//reflectTexCoord = reflectTexCoord + (bumpedNormalW.xy * reflectRefractScale);
+	//refractTexCoord = refractTexCoord + (bumpedNormalW.xy * reflectRefractScale);
+
+	//// 다음, 업데이트된 텍스쳐 샘플링 좌표들을 기초로한 반사와 굴절 픽셀을 추출한다.
+	//// Sample the texture pixels from the textures using the updated texture coordinates.
+	//reflectionColor = gtxtReflection.Sample(gssNormal1, reflectTexCoord);
+	//refractionColor = gtxtRefraction.Sample(gssNormal1, refractTexCoord);
+	//float4 CreatedColor = lerp(reflectionColor, refractionColor, 0.6f);
+
+
+
+	///float4 cColor = cIllumination + refractionColor;
+	float4 cColor = cIllumination + (reflectMaterial* cReflectionColor) ;
 		//float4 cColor =   cIllumination;
-	//cColor = cColor * cIllumination;
-	cColor.a = 0.65;
+		//cColor = cColor * cIllumination;
+		cColor.a = 0.60;
 	return(cColor);
-
+}
 
 
 
@@ -310,7 +364,7 @@ float4 PS(DS_OUTPUT input) : SV_Target
 
 
 	//return float4(1.0f, 0.0f, 0.0f, 1.0f);
-}
+
 //============================================================
 //===============================변위 매핑=======================
 //============================================================

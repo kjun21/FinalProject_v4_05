@@ -102,8 +102,8 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 	string strFileName6 = "Data/NewRockTall01_Vertex.txt";
 
 	string strFileName7 = "Data/NewRockTall02_Vertex.txt";
-
-
+	// 최소 x : -53.8551 z: -51.4314
+	// 최대 x : 53.8551   z:  -51.4314
 	CFixedMesh* pWoodMesh = new CFixedMesh(pd3dDevice, strFileName1);
 	CFixedMesh* pLeavesMesh = new CFixedMesh(pd3dDevice, strFileName2);
 
@@ -122,6 +122,7 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects = new CGameObject*[m_nObjects];
 	CWoodObject *pWoodObject = NULL;
 	CLeavesObject *pLeavesObject = NULL;
+
 
 
 
@@ -242,7 +243,7 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 
-void CTreeObjectShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void CTreeObjectShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)

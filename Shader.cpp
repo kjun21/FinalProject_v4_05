@@ -55,7 +55,7 @@ void CShader::OnPrepareRender(ID3D11DeviceContext *pd3dDeviceContext)
 }
 
 
-void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 
@@ -235,8 +235,8 @@ void CShader::CreateShader(ID3D11Device *pd3dDevice)
 
 
 
-	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VS", "vs_5_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
-	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PS", "ps_5_0", &m_pd3dPixelShader);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSDiffusedColor", "vs_5_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSDiffusedColor", "ps_5_0", &m_pd3dPixelShader);
 }
 
 void CShader::CreateShaderVariables(ID3D11Device *pd3dDevice)
@@ -499,7 +499,7 @@ void CPlayerShader::LoadAnimation(AnimationClip* animationClip, UINT k)
 
 
 
-void CPlayerShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void CPlayerShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	//3인칭 카메라일 때 플레이어를 렌더링한다.
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
@@ -661,7 +661,7 @@ void CInstancingShader::BuildObjects(ID3D11Device *pd3dDevice, CHeightMapTerrain
 }
 
 
-void CInstancingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void CInstancingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)
@@ -764,10 +764,12 @@ void CTerrainShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pd3dsrvBlendMap->Release();
 
 	pd3dDetailSamplerState->Release();
-
-
+	// 17*4
+	// bigMap2  , 513, 513, 34, 34
 	D3DXVECTOR3 d3dxvScale(8.0f, 2.0f, 8.0f); //"Image/black.raw" 257  // T("Image/9.raw"), 513, 513, 513, 513
-	m_ppObjects[0] = new CHeightMapTerrain(pd3dDevice, _T("Image/Terrain/bigMap2.raw"), 513, 513, 34, 34, d3dxvScale);
+	m_ppObjects[0] = new CHeightMapTerrain(pd3dDevice, _T("Image/Terrain/terrain.raw"), 1025, 1025, 33, 33, d3dxvScale);
+	//m_ppObjects[0] = new CHeightMapTerrain(pd3dDevice, _T("Image/Terrain/bigMap2.raw"), 513, 513, 33, 33, d3dxvScale);
+
 	m_ppObjects[0]->SetTexture(pTerrainTexture);
 
 	m_d3dsrcTextureArray = CreateTexture2DArray(pd3dDevice, _T("TreeArray/tree"), 3);
@@ -898,10 +900,10 @@ ID3D11ShaderResourceView* CTerrainShader::CreateTexture2DArray(ID3D11Device* pd3
 }
 
 
-void  CTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void  CTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	pd3dDeviceContext->PSSetShaderResources(0x03, 1, &m_d3dsrcTextureArray);
-	CShader::Render(pd3dDeviceContext, pd3dDepthStencilView, pCamera);
+	CShader::Render(pd3dDeviceContext, m_pDirect3D, pCamera);
 }
 CHeightMapTerrain *CTerrainShader::GetTerrain()
 {
@@ -1049,7 +1051,7 @@ void CSkyBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[0] = pSkyBox;
 }
 
-void CSkyBoxShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void CSkyBoxShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	CShader::OnPrepareRender(pd3dDeviceContext);
 
@@ -1142,7 +1144,7 @@ void  CNormalMappingShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pM
 	m_ppObjects[0]->SetPosition(1400.0f, 20.0f, 2048.0f);
 
 }
-void  CNormalMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void  CNormalMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)
@@ -1196,7 +1198,7 @@ void   CTextureLightingShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial 
 
 
 }
-void   CTextureLightingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void   CTextureLightingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)
@@ -1259,7 +1261,7 @@ void CTessellationShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMat
 	m_ppObjects[0]->SetPosition(1200.0f, 12.0f, 2048.0f);
 	CreateCameraPositionBuffer(pd3dDevice);
 }
-void    CTessellationShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void    CTessellationShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	pd3dDeviceContext->HSSetShader(m_pd3dHullShader, NULL, 0);
@@ -1333,7 +1335,7 @@ void   CDisplacementMappingShader::BuildObjects(ID3D11Device *pd3dDevice, CMater
 
 
 }
-void   CDisplacementMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void   CDisplacementMappingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	if (m_pMaterial)
@@ -1511,7 +1513,7 @@ void   CTessellationTerrainShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 }
-void   CTessellationTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void   CTessellationTerrainShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	pd3dDeviceContext->HSSetShader(m_pd3dHullShader, NULL, 0);
@@ -1595,7 +1597,7 @@ void   CTestTessellationShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial
 
 
 }
-void   CTestTessellationShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void   CTestTessellationShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 
@@ -1824,7 +1826,7 @@ void CWizardShader::UpdateShaderVariable(ID3D11DeviceContext *pd3dDeviceContext,
 
 
 
-void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	//if (m_pTexture)
@@ -1857,9 +1859,6 @@ void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthSt
 	//************************************************************
 
 
-	
-	
-	
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
@@ -1870,7 +1869,6 @@ void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, ID3D11DepthSt
 			}
 		}
 	}
-
 }
 
 void CWizardShader::AnimateObjects(float fTimeElapsed)
@@ -1888,9 +1886,66 @@ void CWizardShader::AnimateObjects(float fTimeElapsed)
 	}
 }
 
+CCrushBoxShader::CCrushBoxShader()
+{
+}
+CCrushBoxShader::~CCrushBoxShader()
+{}
 
 
+void CCrushBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
+{
+	//m_ppObjects[0] = pPlane;
+	////pWoodObject->SetPosition(x * 600 + 200, 325.0f, (z * 400) + 450);
+	//m_ppObjects[0]->SetPosition(200.0f, 325.0f, 450.0f);
 
 
+	m_nObjects = 1;
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	CBoundingBoxObject *pPlane = new CBoundingBoxObject(pd3dDevice);
+	m_ppObjects[0] = pPlane;
+	m_ppObjects[0]->SetPosition(410.4f, 262.0f, 410.4f);
+
+	//FILE* fp;
+	//fopen_s(&fp, "Player_CrushData.txt", "w");
+	//fprintf(fp, "%d \n", 1);
+	//for (int j = 0; j < m_nObjects; j++)
+	//{
+	//	fprintf(fp, "%lf %lf %lf %lf %lf \n", m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().y, m_ppObjects[j]->GetPosition().z, 490.0f, 500.0f);
+	//}
+	//fclose(fp);
+
+}
 
 
+// 나무0번 
+//int i = 0;
+//for (int z = 0; z < 9; z++)
+//{
+//	for (int x = 0; x < 4; x++)
+//	{
+//		CBoundingBoxObject *pPlane = new CBoundingBoxObject(pd3dDevice);
+//		m_ppObjects[i] = pPlane;
+//
+//		if (x == 0) //가장 처음
+//			m_ppObjects[i]->SetPosition(x * 600 + 200, 325.0f, (z * 400) + 450);
+//		else
+//			m_ppObjects[i]->SetPosition(x * 600 + 650, 325.0f, (z * 400) + 350);
+//		i++;
+//	}
+//}
+//
+//
+//FILE* fp;
+//fopen_s(&fp, "tree0.txt", "w");
+//fprintf(fp, "%d \n", 0);
+//for (int j = 0; j < m_nObjects; j++)
+//{
+//	fprintf(fp, "%lf %lf %lf %lf %lf \n", m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().y, m_ppObjects[j]->GetPosition().z, 53.8551f, 51.4314f);
+//}
+//fclose(fp);
+//
+
+//호수01
+// m_ppObjects[0]->SetPosition(740.0f, 190.0f, 1100.0f);

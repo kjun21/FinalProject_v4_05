@@ -436,5 +436,11 @@ class CLeavesObject : public CGameObject
 public:
 	CLeavesObject(ID3D11Device *pd3dDevice, string strFileName);
 	virtual ~CLeavesObject();
+};
 
+class CBoundingBoxObject : public CGameObject
+{
+public:
+	CBoundingBoxObject(ID3D11Device *pd3dDevice);
+	virtual ~CBoundingBoxObject();
 };

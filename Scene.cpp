@@ -68,7 +68,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	pd3dSamplerState->Release();
 
 
-	m_nShaders = 6 + 1 + 1;
+	m_nShaders = 6 + 1;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	//첫 번째로 그릴 객체는 스카이 박스이다.
@@ -181,17 +181,37 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppShaders[5] = pTreeObjectShader;
 
 
-	CRefractionShader* pGrassShader = new CRefractionShader();
-	pGrassShader ->CreateShader(pd3dDevice);
-	pGrassShader->BuildObjects(pd3dDevice);
-	m_ppShaders[6] = pGrassShader;
+	//CRefractionShader* pGrassShader = new CRefractionShader();
+	//pGrassShader ->CreateShader(pd3dDevice);
+	//pGrassShader->BuildObjects(pd3dDevice);
+	//m_ppShaders[6] = pGrassShader;
+
+	//CReflectionShader* pReflectionShader = new CReflectionShader();
+	//pReflectionShader->CreateShader(pd3dDevice);
+	//pReflectionShader->BuildObjects(pd3dDevice);
+	//m_ppShaders[7] = pReflectionShader;
+
+
+
+	//CGeneralShader* pGeneralShader = new CGeneralShader();
+	//pGeneralShader->CreateShader(pd3dDevice);
+	//pGeneralShader->BuildObjects(pd3dDevice);
+	//m_ppShaders[6] = pGeneralShader;
 
 
 	CWaveShader* pWaveShader = new CWaveShader();
 	pWaveShader->CreateShader(pd3dDevice);
 	pWaveShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
-	m_ppShaders[7] = pWaveShader;
+	m_ppShaders[6] = pWaveShader;
+	
+	
+	//CCrushBoxShader* pCrushBoxShaser = new CCrushBoxShader();
+	//pCrushBoxShaser->CreateShader(pd3dDevice);
+	//pCrushBoxShaser->BuildObjects(pd3dDevice);
+	//m_ppShaders[8] = pCrushBoxShaser;
+
 	CreateShaderVariables(pd3dDevice);
+
 }
 
 void CScene::ReleaseObjects()
@@ -260,13 +280,13 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera)
+void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext,  CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	if (m_pLights && m_pd3dcbLights) UpdateShaderVariable(pd3dDeviceContext, m_pLights);
 
 	for (int i = 0; i < m_nShaders; i++)
 	{
-		m_ppShaders[i]->Render(pd3dDeviceContext, pd3dDepthStencilView, pCamera);
+		m_ppShaders[i]->Render(pd3dDeviceContext, m_pDirect3D, pCamera);
 	}
 }
 
@@ -317,10 +337,17 @@ void CScene::CreateShaderVariables(ID3D11Device *pd3dDevice)
 
 	m_pLights->m_pLights[0].m_bEnable = 1.0f;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
+	//m_pLights->m_pLights[0].m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
+	//m_pLights->m_pLights[0].m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	//m_pLights->m_pLights[0].m_d3dxcSpecular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	//m_pLights->m_pLights[0].m_d3dxvDirection = D3DXVECTOR3(0.0f, -0.31622f, -0.9486f);
+
 	m_pLights->m_pLights[0].m_d3dxcAmbient = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights->m_pLights[0].m_d3dxcDiffuse = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
 	m_pLights->m_pLights[0].m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
 	m_pLights->m_pLights[0].m_d3dxvDirection = D3DXVECTOR3(0.0f, -0.31622f, -0.9486f);
+
+
 
 	m_pLights->m_pLights[1].m_bEnable = 1.0f;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
@@ -332,18 +359,18 @@ void CScene::CreateShaderVariables(ID3D11Device *pd3dDevice)
 
 	//m_pLights->m_pLights[2].m_bEnable = 1.0f;
 	//m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
-	//m_pLights->m_pLights[2].m_d3dxcAmbient = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);
+	//m_pLights->m_pLights[2].m_d3dxcAmbient = D3DXCOLOR(0.5f, 0.5f, 0.2f, 1.0f);
 	//m_pLights->m_pLights[2].m_d3dxcDiffuse = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);
 	//m_pLights->m_pLights[2].m_d3dxcSpecular = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
-	//m_pLights->m_pLights[2].m_d3dxvDirection = D3DXVECTOR3(0.0f, -1.0f, 0.0f);
+	//m_pLights->m_pLights[2].m_d3dxvDirection = D3DXVECTOR3(0.987f, -1.0f, 0.0f);
 
 
-	m_pLights->m_pLights[2].m_bEnable = 1.0f;
-	m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[2].m_d3dxcAmbient = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
-	m_pLights->m_pLights[2].m_d3dxcDiffuse = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);
-	m_pLights->m_pLights[2].m_d3dxcSpecular = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
-	m_pLights->m_pLights[2].m_d3dxvDirection = D3DXVECTOR3(0.0f, -0.707f, 0.707f);
+	//m_pLights->m_pLights[2].m_bEnable = 1.0f;
+	//m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
+	//m_pLights->m_pLights[2].m_d3dxcAmbient = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+	//m_pLights->m_pLights[2].m_d3dxcDiffuse = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);
+	//m_pLights->m_pLights[2].m_d3dxcSpecular = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+	//m_pLights->m_pLights[2].m_d3dxvDirection = D3DXVECTOR3(0.0f, -0.707f, 0.707f);
 
 
 

@@ -44,11 +44,21 @@ CGameFramework::~CGameFramework()
 //다음 함수는 응용 프로그램이 실행되면 호출된다는 것에 유의하라. 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
+	m_pDirect3D = new CDirect3DBase();
+
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
 
 	//Direct3D 디바이스, 디바이스 컨텍스트, 스왑 체인 등을 생성하는 함수를 호출한다. 
-	if (!CreateDirect3DDisplay()) return(false);
+	if (!m_pDirect3D->CreateDirect3DDisplay(m_hInstance, m_hWnd)) return(false);
+	//렌더링할 객체(게임 월드 객체)를 생성한다. 
+
+
+
+
+
+	//Direct3D 디바이스, 디바이스 컨텍스트, 스왑 체인 등을 생성하는 함수를 호출한다. 
+	//if (!CreateDirect3DDisplay()) return(false);
 
 	//렌더링할 객체(게임 월드 객체)를 생성한다. 
 	BuildObjects();
@@ -239,7 +249,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			if (m_pPlayer)
 			{
 				//m_pPlayer->ChangeCamera(m_pd3dDevice, (wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-				m_pPlayer->ChangeCamera(m_pd3dDevice, (wParam - VK_F1 + 1), GameTimer->GetTimeElapsed());
+				m_pPlayer->ChangeCamera(m_pDirect3D->GetDevice(), (wParam - VK_F1 + 1), GameTimer->GetTimeElapsed());
 				m_pCamera = m_pPlayer->GetCamera();
 				//씬에 현재 카메라를 설정한다.
 				m_pScene->SetCamera(m_pCamera);
@@ -264,18 +274,33 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		m_nWndClientWidth = LOWORD(lParam);
 		m_nWndClientHeight = HIWORD(lParam);
 
-		m_pd3dDeviceContext->OMSetRenderTargets(0, NULL, NULL);
+		cout << "윈도우 크기 변경  " << m_nWndClientWidth << "    " << m_nWndClientHeight << endl;
+	/*	m_pd3dDeviceContext->OMSetRenderTargets(0, NULL, NULL);
 
 		if (m_pd3dRenderTargetView) m_pd3dRenderTargetView->Release();
 		if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
 		if (m_pd3dDepthStencilView) m_pd3dDepthStencilView->Release();
 
-		m_pDXGISwapChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+		m_pDXGISw
+		
+		apChain->ResizeBuffers(1, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0);*/
 
-		CreateRenderTargetDepthStencilView();
+		m_pDirect3D->GetDeviceContext()->OMSetRenderTargets(0, NULL, NULL);
+
+		if (m_pDirect3D->GetRenderTargetView())m_pDirect3D->GetRenderTargetView()->Release();
+		if (m_pDirect3D->GetDepthStencilBuffer()) m_pDirect3D->GetDepthStencilBuffer()->Release();
+		if (m_pDirect3D->GetDepthStencilView()) m_pDirect3D->GetDepthStencilView()->Release();
+
+		m_pDirect3D->GetSwapChain()->ResizeBuffers(1, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+		m_pDirect3D->CreateRenderTargetDepthStencilView(m_nWndClientWidth, m_nWndClientHeight);
+
+
+		//CreateRenderTargetDepthStencilView();
+		
 
 		CCamera *pCamera = m_pPlayer->GetCamera();
-		if (pCamera) pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
+		//if (pCamera) pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
+		if (pCamera) pCamera->SetViewport(m_pDirect3D->GetDeviceContext(), 0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
 		break;
 	}
 	case WM_LBUTTONDOWN:
@@ -294,39 +319,51 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 }
 
 //다음 함수는 응용 프로그램이 종료될 때 호출된다는 것에 유의하라. 
+//주석
 void CGameFramework::OnDestroy()
 {
 	ReleaseObjects();
 
-	if (m_pd3dDeviceContext) m_pd3dDeviceContext->ClearState();
-	if (m_pd3dRenderTargetView) m_pd3dRenderTargetView->Release();
-	if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
-	if (m_pd3dDepthStencilView) m_pd3dDepthStencilView->Release();
-	if (m_pDXGISwapChain) m_pDXGISwapChain->Release();
-	if (m_pd3dDeviceContext) m_pd3dDeviceContext->Release();
-	if (m_pd3dDevice) m_pd3dDevice->Release();
+	m_pDirect3D->OnDestroy();
+	if(m_pDirect3D)
+		delete m_pDirect3D;
+	//if (m_pd3dDeviceContext) m_pd3dDeviceContext->ClearState();
+	//if (m_pd3dRenderTargetView) m_pd3dRenderTargetView->Release();
+	//if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
+	//if (m_pd3dDepthStencilView) m_pd3dDepthStencilView->Release();
+	//if (m_pDXGISwapChain) m_pDXGISwapChain->Release();
+	//if (m_pd3dDeviceContext) m_pd3dDeviceContext->Release();
+	//if (m_pd3dDevice) m_pd3dDevice->Release();
 }
 
 void CGameFramework::BuildObjects()
 {
-	CShader::CreateShaderVariables(m_pd3dDevice);
-	CIlluminatedShader::CreateShaderVariables(m_pd3dDevice);
+	/*CShader::CreateShaderVariables(m_pd3dDevice);
+	CIlluminatedShader::CreateShaderVariables(m_pd3dDevice);*/
+	CShader::CreateShaderVariables(m_pDirect3D->GetDevice());
+	CIlluminatedShader::CreateShaderVariables(m_pDirect3D->GetDevice());
+
 
 
 	m_pSkyBoxShader = new CSkyBoxShader();
-	m_pSkyBoxShader->CreateShader(m_pd3dDevice);
-	m_pSkyBoxShader->BuildObjects(m_pd3dDevice);
+	//m_pSkyBoxShader->CreateShader(m_pd3dDevice);
+	//m_pSkyBoxShader->BuildObjects(m_pd3dDevice);
+	m_pSkyBoxShader->CreateShader(m_pDirect3D->GetDevice());
+	m_pSkyBoxShader->BuildObjects(m_pDirect3D->GetDevice());
 
 
 
 	m_pScene = new CScene();
-	m_pScene->BuildObjects(m_pd3dDevice);
-
-
+//	m_pScene->BuildObjects(m_pd3dDevice);
+	m_pScene->BuildObjects(m_pDirect3D->GetDevice());
 
 	m_pPlayerShader = new CPlayerShader();
-	m_pPlayerShader->CreateShader(m_pd3dDevice);
+	/*m_pPlayerShader->CreateShader(m_pd3dDevice);
 	m_pPlayerShader->BuildObjects(m_pd3dDevice);
+*/
+	m_pPlayerShader->CreateShader(m_pDirect3D->GetDevice());
+	m_pPlayerShader->BuildObjects(m_pDirect3D->GetDevice());
+
 	m_pPlayer = m_pPlayerShader->GetPlayer();
 
 	/*지형의 xz-평면의 가운데에 플레이어가 위치하도록 한다. 플레이어의 y-좌표가 지형의 높이 보다 크고
@@ -335,6 +372,7 @@ void CGameFramework::BuildObjects()
 
 	m_pPlayer->SetPosition(D3DXVECTOR3   // pTerrain->GetPeakHeight() + 1000.0f
 		(pTerrain->GetWidth()* 0.1, 300.0f, pTerrain->GetLength()* 0.1));
+
 	//m_pPlayer->Scale(D3DXVECTOR3(0.3f, 0.3f, 0.3f));
 
 	//m_pPlayer->SetPosition(D3DXVECTOR3(2000.0f, 0.0f, 1880.0f));
@@ -344,7 +382,9 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetCameraUpdatedContext(pTerrain);
 
 	m_pCamera = m_pPlayer->GetCamera();
-	m_pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	//m_pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pCamera->SetViewport(m_pDirect3D->GetDeviceContext(), 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	
 	m_pCamera->GenerateViewMatrix();
 
 
@@ -427,7 +467,7 @@ void CGameFramework::ProcessInput()
 				&& m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2))
 			{
 				m_pPlayer->Rotate(dwDirection, dwAttack);
-				m_pPlayer->Move(dwDirection, 360.0f * GameTimer->GetTimeElapsed(), true);
+				m_pPlayer->Move(dwDirection, 1000.0f * GameTimer->GetTimeElapsed(), true);
 				// 180.
 			}
 		}
@@ -478,8 +518,10 @@ void CGameFramework::FrameAdvance()
 	AnimateObjects();
 
 	float fClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
-	if (m_pd3dRenderTargetView) m_pd3dDeviceContext->ClearRenderTargetView(m_pd3dRenderTargetView, fClearColor);
-	if (m_pd3dDepthStencilView) m_pd3dDeviceContext->ClearDepthStencilView(m_pd3dDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	//if (m_pd3dRenderTargetView) m_pd3dDeviceContext->ClearRenderTargetView(m_pd3dRenderTargetView, fClearColor);
+	//if (m_pd3dDepthStencilView) m_pd3dDeviceContext->ClearDepthStencilView(m_pd3dDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	if (m_pDirect3D->GetRenderTargetView()) m_pDirect3D->GetDeviceContext()-> ClearRenderTargetView(m_pDirect3D->GetRenderTargetView(), fClearColor);
+	if (m_pDirect3D->GetDepthStencilView()) m_pDirect3D->GetDeviceContext()->ClearDepthStencilView(m_pDirect3D->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 
 
@@ -487,23 +529,25 @@ void CGameFramework::FrameAdvance()
 	// 카메라-투형 행렬을 정점 셰이더에 연결한다.
 	if (m_pPlayer)
 	{
-		m_pPlayer->UpdateShaderVariables(m_pd3dDeviceContext);
-		m_pPlayer->GetCamera()->DSUpdateShaderVariables(m_pd3dDeviceContext);
+		m_pPlayer->UpdateShaderVariables(m_pDirect3D->GetDeviceContext());
+		m_pPlayer->GetCamera()->DSUpdateShaderVariables(m_pDirect3D->GetDeviceContext());
 	}
 	
 
 	//CCamera *pCamera = (m_pPlayer) ? m_pPlayer->GetCamera() : NULL;
 
-	m_pSkyBoxShader->Render(m_pd3dDeviceContext, m_pd3dDepthStencilView, m_pCamera);
-	if (m_pPlayerShader) m_pPlayerShader->Render(m_pd3dDeviceContext, m_pd3dDepthStencilView, m_pCamera);
-	if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, m_pd3dDepthStencilView, m_pCamera);
+	m_pSkyBoxShader->Render(m_pDirect3D->GetDeviceContext(),                                    m_pDirect3D, m_pCamera);
+	if (m_pPlayerShader) m_pPlayerShader->Render(m_pDirect3D->GetDeviceContext(), m_pDirect3D, m_pCamera);
+	if (m_pScene) m_pScene->Render(m_pDirect3D->GetDeviceContext(),                           m_pDirect3D, m_pCamera);
 
 
 	/*렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지운다.
 	이제 플레이어를 렌더링하면 플레이어는 무조건 그려질 것이다.*/
-	m_pd3dDeviceContext->ClearDepthStencilView(m_pd3dDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_pDirect3D->GetDeviceContext()->ClearDepthStencilView(m_pDirect3D->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	m_pDXGISwapChain->Present(0, 0);
+	m_pDirect3D->GetSwapChain()->Present(0, 0);
+	//m_pDXGISwapChain->Present(0, 0);
+
 	GameTimer->GetFrameRate(m_pszBuffer + 12, 37);
 	//m_GameTimer.GetFrameRate(m_pszBuffer + 12, 37);
 	::SetWindowText(m_hWnd, m_pszBuffer);

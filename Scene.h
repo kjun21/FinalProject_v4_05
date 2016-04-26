@@ -12,8 +12,8 @@
 
 #include "CRotatingObject.h"
 #include "CubeMesh.h"
-
-#define MAX_LIGHTS		3
+#include "Direct3DBase.h"
+#define MAX_LIGHTS		2
 #define POINT_LIGHT		1.0f
 #define SPOT_LIGHT		2.0f
 #define DIRECTIONAL_LIGHT	3.0f
@@ -65,7 +65,7 @@ public:
 
 	bool ProcessInput();
     void AnimateObjects(float fTimeElapsed);
-	void Render(ID3D11DeviceContext*pd3dDeviceContext, ID3D11DepthStencilView *pd3dDepthStencilView, CCamera *pCamera);
+	void Render(ID3D11DeviceContext*pd3dDeviceContext,  CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 
 
 public:

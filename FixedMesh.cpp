@@ -77,6 +77,10 @@ CFixedMesh::CFixedMesh(ID3D11Device *pd3dDevice, string strFileName) : CMeshText
 	D3DXVECTOR3 min = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 max = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
+
+	//for (int i = 0; i < m_nVertices; i++)
+	//	cout << m_pd3dxvPositions[i].x << "   " << m_pd3dxvPositions[i].y << endl;
+
 	for (int i = 0; i < m_nVertices; ++i){
 		if (m_pd3dxvPositions[i].x < min.x) min.x = m_pd3dxvPositions[i].x;
 		if (m_pd3dxvPositions[i].y < min.y) min.y = m_pd3dxvPositions[i].y;
@@ -90,6 +94,10 @@ CFixedMesh::CFixedMesh(ID3D11Device *pd3dDevice, string strFileName) : CMeshText
 	m_bcBoundingCube.m_d3dxvMinimum = D3DXVECTOR3(min.x, min.y, min.z);
 	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(max.x, max.y, max.z);
 
+
+
+	//cout << "최소" << min.x << "   " << min .y<< "   " << min.z << endl;
+	//cout << "최대" << max.x << "   " << max.y << "  " << max.z << endl;
 
 	//D3D11_RASTERIZER_DESC d3dxRasterizer;
 	//ZeroMemory(&d3dxRasterizer, sizeof(D3D11_RASTERIZER_DESC));

@@ -400,3 +400,12 @@ protected:
 	vector<CCharacterMesh*> m_vChildList;
 	CCharacterMesh** pChildMeshs;
 };
+
+class CBoundingMesh : public CMesh
+{
+public:
+	ID3D11Buffer* m_pd3dColorBuffer;
+	CBoundingMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth);
+	virtual ~CBoundingMesh();
+};
+

@@ -6,7 +6,7 @@
 #include "AirplanePlayer.h"
 #include "AirplaneMesh.h"
 #include "GameManager.h"
-
+#include "Direct3DBase.h"
 
 class CGameFramework
 {
@@ -65,6 +65,7 @@ private:
 	//다음은 프레임 레이트를 주 윈도우의 캡션에 출력하기 위한 문자열이다.
 	_TCHAR						m_pszBuffer[50];
 
+	CDirect3DBase* m_pDirect3D;
 
 
 	CPlayer *m_pPlayer;
@@ -73,6 +74,9 @@ private:
 	ID3D11PixelShader*      g_pPixelShader;
 
 private:
+	ID3D11Texture2D *m_pd3dDepthStencilBuffer;
+	ID3D11DepthStencilView *m_pd3dDepthStencilView;
+private:
 	ID3D11Buffer *m_pd3dcbColor;
 
 
@@ -80,9 +84,7 @@ private:
 	POINT	m_ptOldCursorPos;
 
 
-private:
-	ID3D11Texture2D *m_pd3dDepthStencilBuffer;
-	ID3D11DepthStencilView *m_pd3dDepthStencilView;
+
 public:
 	bool CreateRenderTargetDepthStencilView();
 

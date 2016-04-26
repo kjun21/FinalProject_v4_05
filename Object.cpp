@@ -361,6 +361,8 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D11Device *pd3dDevice, LPCTSTR pFileName
 
 	int cxQuadsPerBlock = nBlockWidth - 1; //  257 - 1
 	int czQuadsPerBlock = nBlockLength - 1;// 257 - 1
+	// 67 
+	//1024   1024
 
 	// d3dxvScale(8.0f, 2.0f, 8.0f);
 	m_d3dxvScale = d3dxvScale;
@@ -607,7 +609,8 @@ void CDisplacementMappingObject::Render(ID3D11DeviceContext *pd3dDeviceContext, 
 
 CWaveObject::CWaveObject(ID3D11Device *pd3dDevice) : CGameObject(1)
 {
-	CWaveMesh *pWaveMesh = new  CWaveMesh(pd3dDevice, 80.0, 80.0, 800.0f, 50.0f, 1560.0f);
+	CWaveMesh *pWaveMesh = new  CWaveMesh(pd3dDevice, 80.0, 80.0, 900.0f, 50.0f, 1980.0f); //800 1900
+	//80.0, 80.0, 800.0f, 50.0f, 1560.0f);
 	SetMesh(pWaveMesh, 0);
 	m_pStonesTexture = NULL;
 	m_pWavesNormalMap1 = NULL;
@@ -618,9 +621,9 @@ CWaveObject::CWaveObject(ID3D11Device *pd3dDevice) : CGameObject(1)
 	CreateBlendingState(pd3dDevice);
 	m_pMaterial = new CMaterial();
 
-	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.2f, 0.3f, 1.0f, 1.0f);
-	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.4f, 0.5f, 0.7f, 1.0f);
-	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 4.0f);
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.4f, 0.4f, 0.7f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.1f, 0.1f, 0.4f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
 	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
@@ -653,7 +656,7 @@ void CWaveObject::CreateTextures(ID3D11Device *pd3dDevice)
 	pd3dsrvTexture->Release();
 
 	m_pWavesNormalMap2 = new CTexture(1, 1, 2, 1);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/waves1.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/water1.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
 	m_pWavesNormalMap2->SetTexture(0, pd3dsrvTexture);
 	m_pWavesNormalMap2->SetSampler(0, pd3dSamplerState);
 	pd3dsrvTexture->Release();
@@ -727,7 +730,7 @@ void CWaveObject::Animate(float fTimeElapsed)
 	D3DXMatrixMultiply(&m_d3dxmtxWavesDispTexTransform1, &d3dxmtxWaveScale1, &d3dxmtxWaveOffset1);
 
 	D3DXMATRIX d3dxmtxWaveScale2;
-	D3DXMatrixScaling(&d3dxmtxWaveScale2, 2.0f, 2.0f, 1.0f);
+	D3DXMatrixScaling(&d3dxmtxWaveScale2, 1.0f, 1.0f, 1.0f);
 	D3DXMATRIX d3dxmtxWaveOffset2;
 	D3DXMatrixTranslation(&d3dxmtxWaveOffset2, m_WavesDispOffset2.x, m_WavesDispOffset2.y, 0.0f);
 	
@@ -1140,3 +1143,16 @@ CWoodObject ::~CWoodObject()
 {
 }
 
+CBoundingBoxObject::CBoundingBoxObject(ID3D11Device *pd3dDevice) : CGameObject(1)
+{
+	// ³ª¹«01 53.8551f, 73.0353f, 51.4314f
+	// ¹° 490.0f, 73.0353f, 500.0f
+	CBoundingMesh* pHumanMesh = new CBoundingMesh(pd3dDevice, 14.0f, 60.0f, 14.0f);
+	SetMesh(pHumanMesh, 0);
+}
+
+CBoundingBoxObject::~CBoundingBoxObject()
+{
+
+
+}
