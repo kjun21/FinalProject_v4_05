@@ -351,6 +351,10 @@ void CGameFramework::BuildObjects()
 	m_pSkyBoxShader->CreateShader(m_pDirect3D->GetDevice());
 	m_pSkyBoxShader->BuildObjects(m_pDirect3D->GetDevice());
 
+	string strFileName = "Data/warrior_Vertex.txt";
+	CCharacterMesh *pWarriorMesh = new CCharacterMesh(m_pDirect3D->GetDevice(), strFileName);
+
+
 
 
 	m_pScene = new CScene();
@@ -362,9 +366,19 @@ void CGameFramework::BuildObjects()
 	m_pPlayerShader->BuildObjects(m_pd3dDevice);
 */
 	m_pPlayerShader->CreateShader(m_pDirect3D->GetDevice());
-	m_pPlayerShader->BuildObjects(m_pDirect3D->GetDevice());
+	m_pPlayerShader->BuildObjects(m_pDirect3D->GetDevice(), pWarriorMesh);
 
 	m_pPlayer = m_pPlayerShader->GetPlayer();
+
+
+	m_pOtherPlayerShader = new CWizardShader();
+	m_pOtherPlayerShader->CreateShader(m_pDirect3D->GetDevice());;
+	m_pOtherPlayerShader->BuildObjects(m_pDirect3D->GetDevice(), pWarriorMesh);;
+
+
+
+
+
 
 	/*지형의 xz-평면의 가운데에 플레이어가 위치하도록 한다. 플레이어의 y-좌표가 지형의 높이 보다 크고
 	중력이 작용하도록 플레이어를 설정하였으므로 플레이어는 점차적으로 하강하게 된다.*/
@@ -405,9 +419,11 @@ void CGameFramework::ReleaseObjects()
 
 	if (m_pPlayerShader) m_pPlayerShader->ReleaseObjects();
 	if (m_pPlayerShader) delete m_pPlayerShader;
+	if (m_pOtherPlayerShader) delete m_pOtherPlayerShader;
 }
 void CGameFramework::ProcessInput()
 {
+	ClientServer *s = ClientServer::getInstangce();
 	bool bProcessedByScene = false;
 	if (m_pScene) bProcessedByScene = m_pScene->ProcessInput();
 
@@ -427,11 +443,32 @@ void CGameFramework::ProcessInput()
 			if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 			if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
-			if (pKeyBuffer['Q'] & 0xF0) dwAttack = ATTACK01;
-			if (pKeyBuffer['W'] & 0xF0) dwAttack = ATTACK02;
+			if ((pKeyBuffer['Q'] & 0xF0)    && m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK1)
+			{
+				dwAttack = ATTACK01;
+				//서버 공격키 입력
+				ClientServer *s = ClientServer::getInstangce();
+				s->keyDownAttacket(dwAttack);		
+			}
+			else if (pKeyBuffer['W'] & 0xF0 && m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2)
+			{
+				dwAttack = ATTACK02;
+				//서버 공격키 입력
+				ClientServer *s = ClientServer::getInstangce();
+				s->keyDownAttacket(dwAttack);	
+			}
 
-
+			//서버
+			else if(attackCutState != s->Player[0].getState())
+			{
+				s->keyUp();		
+			}
+		
 		}
+		// 키보드 입력이 없을 때
+	
+		//cout << " 이동 공격" << dwDirection << "   " << dwAttack << endl;
+
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
 		/*마우스를 캡쳐했으면 마우스가 얼마만큼 이동하였는 가를 계산한다. 마우스 왼쪽 또는 오른쪽 버튼이 눌러질 때의 메시지(WM_LBUTTONDOWN, WM_RBUTTONDOWN)를 처리할 때 마우스를 캡쳐하였다. 그러므로 마우스가 캡쳐된 것은 마우스 버튼이 눌려진 상태를 의미한다. 마우스를 좌우 또는 상하로 움직이면 플레이어를 x-축 또는 y-축으로 회전한다.*/
@@ -471,15 +508,18 @@ void CGameFramework::ProcessInput()
 				// 180.
 			}
 		}
+		// 어택값과 공격키 입력으로 결정한다.
 		m_pPlayer->UpdateAnimation(dwDirection, dwAttack);
 	}
+
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 	//m_pPlayer->Update(GameTimer->GetTimeElapsed());
 	//서버
-	/*ClientServer *s = ClientServer::getInstangce();
-	m_pPlayer->Update(s->time);*/
+	//ClientServer *s = ClientServer::getInstangce();
+	m_pPlayer->Update(s->time);
 
-	m_pPlayer->Update(GameTimer->GetTimeElapsed());
+	// 클라
+	//m_pPlayer->Update(GameTimer->GetTimeElapsed());
 }
 
 //  타이머에서 마지막 프레임 이후 경과된 시간을 파라메터로 전달하여 
@@ -492,14 +532,15 @@ void CGameFramework::AnimateObjects()
 	// 플레이어를 제외한 모든 오브젝트 업데이트 담당.
 	if (m_pScene)
 		m_pScene->AnimateObjects(GameTimer->GetTimeElapsed());
-	//m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 
 	// 이건 샘플용...
 	if (m_pPlayer)
 		m_pPlayer->Animate(GameTimer->GetTimeElapsed());
 
+	m_pOtherPlayerShader->AnimateObjects(GameTimer->GetTimeElapsed());
+
 	//서버 플레이어 초기좌표 셋팅해주는 부분
-	//m_pPlayer->SetPosition(s->Player[0].getPlayerPosition());
+	m_pPlayer->SetPosition(s->Player[0].getPlayerPosition());
 
 
 	//if (m_pPlayer)
@@ -510,6 +551,8 @@ void CGameFramework::FrameAdvance()
 {
 	CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
 	GameTimer->Tick();
+
+
 
 	//m_GameTimer.Tick();
 
@@ -531,6 +574,7 @@ void CGameFramework::FrameAdvance()
 	{
 		m_pPlayer->UpdateShaderVariables(m_pDirect3D->GetDeviceContext());
 		m_pPlayer->GetCamera()->DSUpdateShaderVariables(m_pDirect3D->GetDeviceContext());
+		
 	}
 	
 
@@ -538,6 +582,8 @@ void CGameFramework::FrameAdvance()
 
 	m_pSkyBoxShader->Render(m_pDirect3D->GetDeviceContext(),                                    m_pDirect3D, m_pCamera);
 	if (m_pPlayerShader) m_pPlayerShader->Render(m_pDirect3D->GetDeviceContext(), m_pDirect3D, m_pCamera);
+	if (m_pOtherPlayerShader) m_pOtherPlayerShader->Render(m_pDirect3D->GetDeviceContext(), m_pDirect3D, m_pCamera);
+	
 	if (m_pScene) m_pScene->Render(m_pDirect3D->GetDeviceContext(),                           m_pDirect3D, m_pCamera);
 
 
@@ -551,4 +597,6 @@ void CGameFramework::FrameAdvance()
 	GameTimer->GetFrameRate(m_pszBuffer + 12, 37);
 	//m_GameTimer.GetFrameRate(m_pszBuffer + 12, 37);
 	::SetWindowText(m_hWnd, m_pszBuffer);
+
+
 }

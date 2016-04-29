@@ -102,7 +102,7 @@ float4 PSDetailTexturedLightingColor(VS_DETAIL_TEXTURED_LIGHTING_COLOR_OUTPUT in
 		float4 c1 = gtxtLayerMapArray.Sample(gSamplerState, float3(input.texCoordBase, 1.0f));
 		float4 c2 = gtxtLayerMapArray.Sample(gSamplerState, float3(input.texCoordBase, 2.0f));
 
-		// Sample the blend map.
+		//  blend Map을 샘플링한다.
 		float4 t = gtxtBlendMap.Sample(gSamplerState, input.texCoordDetail);
 
 		// Blend the layers on top of each other.

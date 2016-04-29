@@ -94,6 +94,7 @@ public:
 		pd3dDeviceContext->OMSetRenderTargets(1, &m_pd3dRenderTargetView, pd3dDepthStencilView);
 	}
 	CPlayerShader *m_pPlayerShader;
+	CWizardShader* m_pOtherPlayerShader;
 	CSkyBoxShader* m_pSkyBoxShader;
 
 

@@ -46,6 +46,10 @@
 #include "protocol.h"
 #include "ClientServer.h"
 
+#define CRTDBG_MAP_ALLOC 
+
+
+
 #define FRAME_BUFFER_WIDTH		1200
 #define FRAME_BUFFER_HEIGHT		800
 #define VS_SLOT_CAMERA				0x00
@@ -68,10 +72,18 @@
 
 // 애니메이션 상태.
 #define ANIMATAION_CLIP_IDLE 0x00
-#define ANIMATAION_CLIP_ATTACK1 0x01
-#define ANIMATAION_CLIP_ATTACK2 0x02
-#define ANIMATAION_CLIP_RUN 0x03
+#define ANIMATAION_CLIP_RUN 0x01
+#define ANIMATAION_CLIP_ATTACK1 0x02
+#define ANIMATAION_CLIP_ATTACK2 0x03
+
+
 #define ANIMATAION_CLIP_DEATH 0x04
+
+// 공격 키 입력
+#define ATTACK01 0x50
+#define ATTACK02 0x51
+
+
 
 struct AnimationClip
 {
@@ -157,5 +169,11 @@ struct VERTEX
 
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console") 
 
+
+//#ifndef _DEBUG
+//
+//#define new new(_CLIENT_BLOCK,__FILE__,__LINE)
+//
+//#endif
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.

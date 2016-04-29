@@ -1,15 +1,26 @@
 #include"Monster.h"
-#include"protocolType.h"
+#include"Protocoltype.h"
 #pragma pack (push, 1)
 struct sectorPosition
 {
 	int sectorNumX;
 	int sectorNumZ;
 };
+enum PlayerState
+{
+	waitState,
+	moveState,
+	attackCutState,
+	attackThrustState
+};
 enum EOperationType
 {
 	Sendtype = 1,
-	Recvtype = 2
+	Recvtype,
+	MonsterMove,
+	MonsterAttack,
+	MonsterDead,
+	PlayerAttack
 };
 struct OverEx//오버렙트구조체 확장
 {

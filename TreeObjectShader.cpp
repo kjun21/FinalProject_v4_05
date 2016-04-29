@@ -174,9 +174,9 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 			pWoodObject->Scale(D3DXVECTOR3(5.0, 5.0, 5.0));
 			pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
 			if (z >= 8)
-				pWoodObject->SetPosition(290 + 900, 270.0f, 633 + (130)* (z - 8));
+				pWoodObject->SetPosition(1050 + 900, 270.0f, 1483 + (130)* (z - 8));
 			else
-				pWoodObject->SetPosition(290, 270.0f, 633 + (130)*z);
+				pWoodObject->SetPosition(670, 270.0f, 1483 + (130)*z);
 			m_ppObjects[i++] = pWoodObject;
 		}
 	}
@@ -198,9 +198,9 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 			pWoodObject->Scale(D3DXVECTOR3(5.0, 5.0, 5.0));
 			pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
 			if (z >= 8)
-				pWoodObject->SetPosition(290 + 900, 270.0f, 633 + (130)*(z - 8) + 55);
+				pWoodObject->SetPosition(1050 + 900, 270.0f, 1483 + (130)*(z - 8) + 55);
 			else
-				pWoodObject->SetPosition(290, 270.0f, 633 + (130)*z + 55);
+				pWoodObject->SetPosition(670, 270.0f, 1483 + (130)*z + 55);
 			m_ppObjects[i++] = pWoodObject;
 		}
 	}

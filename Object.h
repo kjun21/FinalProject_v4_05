@@ -13,8 +13,6 @@
 #define DIR_RIGHT	0x08
 #define DIR_UP		0x11
 #define DIR_DOWN	0x20
-#define ATTACK01 0x50
-#define ATTACK02 0x51
 
 
 
@@ -72,7 +70,11 @@ private:
 
 public:
 	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
+	void Release() 
+	{ 
+		if (--m_nReferences <= 0) 
+			delete this; 
+	}
 
 	MATERIAL m_Material;
 };
@@ -150,6 +152,8 @@ public:
 	void SetMonsterType();
 	void RenewWorldMatrix();
 	UINT GetObjectType() { return m_nObjectType; }
+	virtual void SetAnimationState(PlayerState myPlayerState) {  }
+	virtual UINT GetAnimationStat(){ return 0; }
 
 	
 private:
@@ -421,6 +425,13 @@ public:
 	void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
 	virtual void Animate(float fTimeElapsed);
+	AnimationClip* GetAnimationClip() { return m_AnimationClip; }
+	virtual void SetAnimationState(PlayerState myPlayerState) 
+	{ 
+		m_nAnimationState = myPlayerState; 
+	
+	}
+	virtual UINT GetAnimationState() { return  m_nAnimationState; }
 
 };
 

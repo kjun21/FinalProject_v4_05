@@ -608,8 +608,8 @@ void CDisplacementMappingObject::Render(ID3D11DeviceContext *pd3dDeviceContext, 
 }
 
 CWaveObject::CWaveObject(ID3D11Device *pd3dDevice) : CGameObject(1)
-{
-	CWaveMesh *pWaveMesh = new  CWaveMesh(pd3dDevice, 80.0, 80.0, 900.0f, 50.0f, 1980.0f); //800 1900
+{//990
+	CWaveMesh *pWaveMesh = new  CWaveMesh(pd3dDevice, 80.0, 80.0, 1300.0f, 50.0f, 1080.0f); //800 1900
 	//80.0, 80.0, 800.0f, 50.0f, 1560.0f);
 	SetMesh(pWaveMesh, 0);
 	m_pStonesTexture = NULL;
@@ -881,10 +881,8 @@ CWizardObject::CWizardObject(ID3D11Device *pd3dDevice, string strFileName) : CGa
 {
 	//string strFileName = "Data/walk02Box001";
 
-
-	CCharacterMesh *pHumanMesh = new CCharacterMesh(pd3dDevice, strFileName);
-	//pHumanMesh->CreateChileMesh(pd3dDevice);
-	SetMesh(pHumanMesh, 0);
+	/*CCharacterMesh *pHumanMesh = new CCharacterMesh(pd3dDevice, strFileName);
+	SetMesh(pHumanMesh, 0);*/
 
 	ID3D11SamplerState *pd3dSamplerState = NULL;
 	D3D11_SAMPLER_DESC d3dSamplerDesc;
@@ -935,7 +933,11 @@ void CWizardObject::Animate(float fTimeElapsed)
 void  CWizardObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
 	//CShader::UpdateShaderVariable(pd3dDeviceContext, &m_d3dxmtxWorld);
-	
+	//서버 애니메이션 상태 업데이트
+	//플레이어의 상태값은 struct에 PlayerState자료형이다.
+	ClientServer *s = ClientServer::getInstangce();
+	//**********************아래거 주석할것.
+	//for (auto i = 1; i < ROOM_MAX_PLAYER;++i)
 	for (int i = 0; i < 5; i++)
 	{
 		if (m_AnimationClip[i].m_nAnimationState == m_nAnimationState)
@@ -945,6 +947,7 @@ void  CWizardObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCa
 
 
 			m_AnimationClip[i].llNowTime = m_AnimationClip[i].m_fTimePos * 1000;
+			//애니메이션 재생시간이 총 재생 시간을 초과하면.
 			if (m_AnimationClip[i].llNowTime >= m_AnimationClip[i].m_llAniTime)
 			{
 				m_AnimationClip[i].llNowTime -= m_AnimationClip[i].m_llAniTime;
@@ -974,6 +977,8 @@ void  CWizardObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCa
 	CGameObject::Render(pd3dDeviceContext, pCamera);
 	//if (m_ppMeshes && m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dDeviceContext);
 }
+
+
 
 
 void CWizardObject::CreateShaderVariables(ID3D11Device *pd3dDevice)

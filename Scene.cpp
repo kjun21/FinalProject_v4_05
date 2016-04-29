@@ -68,7 +68,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	pd3dSamplerState->Release();
 
 
-	m_nShaders = 6 + 1;
+	m_nShaders = 3;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	//첫 번째로 그릴 객체는 스카이 박스이다.
@@ -110,7 +110,31 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	pWhiteMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 
 
+	CMaterial*  pWaterMaterial = new CMaterial();
+	pWaterMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);  //0,4 0.4 0.7
+	pWaterMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.1f, 0.1f, 0.3f, 1.0f);
+	pWaterMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	pWaterMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 
+
+
+
+	CTreeObjectShader* pTreeObjectShader = new CTreeObjectShader();
+	pTreeObjectShader->CreateShader(pd3dDevice);
+	pTreeObjectShader->BuildObjects(pd3dDevice);
+	m_ppShaders[1] = pTreeObjectShader;
+
+
+	CWaveShader* pWaveShader = new CWaveShader();
+	pWaveShader->CreateShader(pd3dDevice);
+	pWaveShader->BuildObjects(pd3dDevice, pWaterMaterial, p);
+	m_ppShaders[2] = pWaveShader;
+
+
+	//CWizardShader* pHuman = new CWizardShader();
+	//pHuman->CreateShader(pd3dDevice);
+	//pHuman->BuildObjects(pd3dDevice);
+	//m_ppShaders[3] = pHuman;
 
 
 
@@ -122,33 +146,27 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 
-	//CWizardShader* pHuman = new CWizardShader();
-	//pHuman->CreateShader(pd3dDevice);
-	//pHuman->BuildObjects(pd3dDevice);
-	//m_ppShaders[6] = pHuman;
 
 
 	// 같은 그리기는 모아서 한꺼번에 처리해야하는데...
-
-
-	CTessellationShader* pTessllationShader = new CTessellationShader();
-	pTessllationShader->CreateShader(pd3dDevice);
-	pTessllationShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
-	m_ppShaders[1] = pTessllationShader;
-
-
-
-	CDisplacementMappingShader* pDisplacementMappingShader = new CDisplacementMappingShader();
-	pDisplacementMappingShader->CreateShader(pd3dDevice);
-	pDisplacementMappingShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
-	m_ppShaders[2] = pDisplacementMappingShader;
+	//CTessellationShader* pTessllationShader = new CTessellationShader();
+	//pTessllationShader->CreateShader(pd3dDevice);
+	//pTessllationShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
+	//m_ppShaders[1] = pTessllationShader;
 
 
 
-	CNormalMappingShader* pNormalMappingShader = new CNormalMappingShader();
-	pNormalMappingShader->CreateShader(pd3dDevice);
-	pNormalMappingShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
-	m_ppShaders[3] = pNormalMappingShader;
+	//CDisplacementMappingShader* pDisplacementMappingShader = new CDisplacementMappingShader();
+	//pDisplacementMappingShader->CreateShader(pd3dDevice);
+	//pDisplacementMappingShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
+	//m_ppShaders[2] = pDisplacementMappingShader;
+
+
+
+	//CNormalMappingShader* pNormalMappingShader = new CNormalMappingShader();
+	//pNormalMappingShader->CreateShader(pd3dDevice);
+	//pNormalMappingShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
+	//m_ppShaders[3] = pNormalMappingShader;
 
 
 
@@ -160,10 +178,10 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 
-	CTextureLightingShader* pTextureLightingShader = new CTextureLightingShader();
-	pTextureLightingShader->CreateShader(pd3dDevice);
-	pTextureLightingShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
-	m_ppShaders[4] = pTextureLightingShader;
+	//CTextureLightingShader* pTextureLightingShader = new CTextureLightingShader();
+	//pTextureLightingShader->CreateShader(pd3dDevice);
+	//pTextureLightingShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
+	//m_ppShaders[4] = pTextureLightingShader;
 
 
 
@@ -175,10 +193,6 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 
-	CTreeObjectShader* pTreeObjectShader = new CTreeObjectShader();
-	pTreeObjectShader->CreateShader(pd3dDevice);
-	pTreeObjectShader->BuildObjects(pd3dDevice);
-	m_ppShaders[5] = pTreeObjectShader;
 
 
 	//CRefractionShader* pGrassShader = new CRefractionShader();
@@ -199,11 +213,9 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	//m_ppShaders[6] = pGeneralShader;
 
 
-	CWaveShader* pWaveShader = new CWaveShader();
-	pWaveShader->CreateShader(pd3dDevice);
-	pWaveShader->BuildObjects(pd3dDevice, pWhiteMaterial, p);
-	m_ppShaders[6] = pWaveShader;
+
 	
+
 	
 	//CCrushBoxShader* pCrushBoxShaser = new CCrushBoxShader();
 	//pCrushBoxShaser->CreateShader(pd3dDevice);

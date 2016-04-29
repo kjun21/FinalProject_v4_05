@@ -106,8 +106,8 @@ void CPlayer::Rotate(DWORD dwDirection, DWORD dwAttack)
 		m_d3dxvPreDir = d3dxvDirection;
 	//	cout << m_d3dxvLook.x << "  " << m_d3dxvLook.y << "  " << m_d3dxvLook.z << endl;
 		//서버 키입력 받는 부분
-	/*	ClientServer *s = ClientServer::getInstangce();
-		s->keyDown(m_d3dxvLook);*/
+		ClientServer *s = ClientServer::getInstangce();
+		s->keyDown(m_d3dxvLook);
 	
 	}
 }
@@ -148,23 +148,28 @@ float CPlayer::CalculateRotation(D3DXVECTOR3 d3dxvInputDir)
 
 void CPlayer::UpdateAnimation(DWORD dwDirection, DWORD dwAttack)
 {
+
+	// 공격를 하지 않고, 이동 동작 입력이 들어오면 걷는 애니메이션을 실행한다.
 	if (((dwDirection & DIR_FORWARD) || (dwDirection & DIR_BACKWARD) ||
 		(dwDirection & DIR_RIGHT) || (dwDirection & DIR_LEFT))
 		&& m_nAnimationState != ANIMATAION_CLIP_ATTACK1
 		&& m_nAnimationState != ANIMATAION_CLIP_ATTACK2)
 		m_nAnimationState = ANIMATAION_CLIP_RUN;
 
+	// 방향 값과 공격 값이 0이고, 애니메이션 현재 상태가 어택1이 아니고 어택2도 아니면)
 	else if (dwDirection == 0 && dwAttack == 0
 		&& m_nAnimationState != ANIMATAION_CLIP_ATTACK1 &&  m_nAnimationState != ANIMATAION_CLIP_ATTACK2)
 	{
 		m_nAnimationState = ANIMATAION_CLIP_IDLE;
 		// cout << m_nAnimationState << endl;
 	}
+	// 공격 입력이 어택1이거나 현재 상태가 어택1이라면
 	else if (dwAttack == ATTACK01 || m_nAnimationState == ANIMATAION_CLIP_ATTACK1)
 	{
 		//m_nAnimationState = ANIMATAION_CLIP_IDLE;
 		m_nAnimationState = ANIMATAION_CLIP_ATTACK1;
 	}
+	// 공격 모션은 위와 동일.
 	else if (dwAttack == ATTACK02 || m_nAnimationState == ANIMATAION_CLIP_ATTACK2)
 	{
 		//m_nAnimationState = ANIMATAION_CLIP_IDLE;
@@ -276,10 +281,10 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, bool bUpdateVelocity)
 		D3DXVECTOR3 d3dxvPosition;
 
 		//서버
-		//m_d3dxvPosition = s->Player[0].getPlayerPosition();
+		m_d3dxvPosition = s->Player[0].getPlayerPosition();
 		//클라
-		d3dxvPosition = m_d3dxvPosition + d3dxvShift;
-		m_d3dxvPosition = d3dxvPosition;
+		/*d3dxvPosition = m_d3dxvPosition + d3dxvShift;
+		m_d3dxvPosition = d3dxvPosition;*/
 
 		////서버 플레이어 위치 변경에 따라 좌표 바꿔주는 부분
 		
@@ -525,6 +530,7 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
 	for (int i = 0; i < 5; i++)
 	{
+		// 현재 애니메이션 상태가 일치하는 경우
 		if (m_AnimationClip[i].m_nAnimationState == m_nAnimationState)
 		{
 			CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
@@ -537,7 +543,7 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 				m_AnimationClip[i].llNowTime -= m_AnimationClip[i].m_llAniTime;
 				m_AnimationClip[i].m_fTimePos = 0;
 
-				// 
+				// 공격 애니메이션이 끝났으면 공격 모션 상태로 자동으로 바뀐다.
 				if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1
 					|| m_nAnimationState == ANIMATAION_CLIP_ATTACK2
 					|| m_nAnimationState == ANIMATAION_CLIP_DEATH)
@@ -614,7 +620,7 @@ void CTerrainPlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode
 	case THIRD_PERSON_CAMERA:
 		SetFriction(250.0f);
 		//3인칭 카메라일 때 플레이어에 y-축 방향으로 중력이 작용한다.
-		SetGravity(D3DXVECTOR3(0.0f, -300.0f, 0.0f));
+		SetGravity(D3DXVECTOR3(0.0f, -0.0f, 0.0f)); // -300
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);

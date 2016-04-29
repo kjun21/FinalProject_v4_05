@@ -11,6 +11,10 @@ CWaveShader::CWaveShader()
 
 CWaveShader ::~CWaveShader()
 {
+	//if (m_pMaterial) m_pMaterial->Release();
+	//if (m_pMaterial)m_pMaterial->Release();
+	//if (m_pTexture)m_pTexture->Release();
+
 }
 
 void  CWaveShader::CreateShader(ID3D11Device *pd3dDevice)
@@ -56,10 +60,12 @@ void CWaveShader::CreateConstantBuffer(ID3D11Device *pd3dDevice)
 
 void   CWaveShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial, CTexture *pTexture)
 {
-	/*m_pMaterial = pMaterial;
+	m_pMaterial = pMaterial;
 	if (pMaterial) pMaterial->AddRef();
-	m_pTexture = pTexture;
-	if (pTexture) pTexture->AddRef();*/
+
+
+	//m_pTexture = pTexture;
+	//if (pTexture) pTexture->AddRef();
 
 	// 굴절 생성할 때 필요하다.
 	//CreateConstantBuffer(pd3dDevice);
@@ -68,15 +74,15 @@ void   CWaveShader::BuildObjects(ID3D11Device *pd3dDevice, CMaterial *pMaterial,
 
 	CWaveObject *pPlane = new  CWaveObject(pd3dDevice);
 	m_ppObjects[0] = pPlane;
-	m_ppObjects[0]->SetPosition(750.0f, 240.0f, 1100.0f); //220
+	m_ppObjects[0]->SetPosition(1310.0f, 246.0f, 1990.0f); //220    1950
 	CreateCameraPositionBuffer(pd3dDevice);
 
 
-	m_pMaterial = new CMaterial();
-	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);  //0,4 0.4 0.7
-	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.1f, 0.1f, 0.3f, 1.0f);
-	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
-	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
+	//m_pMaterial = new CMaterial();
+	//m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);  //0,4 0.4 0.7
+	//m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.1f, 0.1f, 0.3f, 1.0f);
+	//m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	//m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 
 
 

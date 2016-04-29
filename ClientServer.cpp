@@ -138,8 +138,10 @@ void ClientServer::processPacket(char* ptr)
 			reinterpret_cast<ScPacketMove*>(ptr);
 		myId = login->id;
 		Player[0].setPlayerID(myId);
+		Player[0].setPlayerPosition(login->position);
+		Player[0].setState(login->state);
 		Player[0].setPlay(true);
-		cout << "myId : " << Player[myId].getPlayerID() << endl;
+		cout << "myId : " << Player[0].getPlayerID() << endl;
 		break;
 	}
 	case SC_PLAYER_LIST:
@@ -168,14 +170,16 @@ void ClientServer::processPacket(char* ptr)
 		//		cout << "movePacket" << endl;
 		ScPacketMove *move =
 			reinterpret_cast<ScPacketMove*>(ptr);
-		//cout << p->id << "," << p->x << "," << p->y << endl;
 		time = move->time;
+		//cout << p->id << "," << p->x << "," << p->y << endl;
 		for (int i = 0; i < ROOM_MAX_PLAYER; ++i)
 		{
 			if (Player[i].getPlayerID() == move->id)
 			{
-				Player[i].setPlayerPosition(move->position);
 				Player[i].setPlayerDirection(move->direction);
+				Player[i].setPlayerPosition(move->position);
+				Player[i].setState(move->state);
+				break;
 			}
 		}
 		//Player[move->id].setPlayerPosition(move->position);
@@ -195,8 +199,63 @@ void ClientServer::processPacket(char* ptr)
 		memcpy_s(&objectList, sizeof(objectList), &object->objects, sizeof(object->objects));
 		break;
 	}
+	case SC_PUT_PLAYER:
+	{
+		ScPacektPutPlayer *put = reinterpret_cast<ScPacektPutPlayer*>(ptr);
+		for (int i = 0; i < ROOM_MAX_PLAYER; ++i)
+		{
+			if (put->id == Player[i].getPlayerID())
+			{
+				Player[i].setPlayerPosition(put->position);
+				//Player[i].setPlayerDirection(put->direction);
+				Player[i].setState(put->state);
+				Player[i].setPlay(true);
+				break;
+			}
+			else if (-1 == Player[i].getPlayerID())
+			{
+				Player[i].setPlayerPosition(put->position);
+				//Player[i].setPlayerDirection(put->direction);
+				Player[i].setPlayerID(put->id);
+				Player[i].setState(put->state);
+				Player[i].setPlay(true);
+				break;
+			}
+		}
+		break;
+	}
+	case SC_REMOVE_PLAYER:
+	{
+		ScPacketRemoveObject *remove = reinterpret_cast<ScPacketRemoveObject*>(ptr);
+		for (int i = 0; i < ROOM_MAX_PLAYER; ++i)
+		{
+			if (remove->id == Player[i].getPlayerID())
+			{
+				Player[i].setPlayerPosition(D3DXVECTOR3(-10.0, 0, -10.0));
+				Player[i].setPlay(false);
+				//cout << Player[i].getPlayerPosition().x <<" "<< Player[i].getPlayerPosition().z << endl;
+				break;
+			}
+		}
+		break;
+	}
+	case SC_STATE_UPDATE:
+	{
+		ScPacketUpdateState *stateup = reinterpret_cast<ScPacketUpdateState*>(ptr);
+		for (int i = 0; i < ROOM_MAX_PLAYER; ++i)
+		{
+			if (stateup->id == Player[i].getPlayerID())
+			{
+				Player[i].setState(stateup->state);
+				std::cout <<i<<"ÀÇ »óÅÂ : "<<Player[i].getState() << std::endl;
+				break;
+			}
+		}
+		break;
+	}
 	}
 }
+
 
 void ClientServer::sendPacket(SOCKET s, void* buf)
 {
@@ -224,8 +283,29 @@ void ClientServer::sendPacket(SOCKET s, void* buf)
 	}
 	//cout << "client data send" << endl;
 }
-
 int ClientServer::getMyId()
 {
 	return myId;
+}
+
+void ClientServer::keyUp()
+{
+	CsPacketKeyUp upPacket;
+	upPacket.packetSize = sizeof(CsPacketKeyUp);
+	upPacket.packetType = CS_STOP;
+	sendPacket(sock, &upPacket);
+}
+void ClientServer::keyDownAttacket(DWORD key)
+{
+	CspacketAttack attack;
+	attack.packetSize = sizeof(CspacketAttack);
+	if (key == ATTACK01)
+	{
+		attack.packetType = CS_USE_SKILL_Q;
+	}
+	else if (key == ATTACK02)
+	{
+		attack.packetType = CS_USE_SKILL_W;
+	}
+	sendPacket(sock, &attack);
 }

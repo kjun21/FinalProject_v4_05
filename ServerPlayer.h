@@ -19,10 +19,13 @@ class ServerPlayer
 	int the_number_of_player;
 	double clear_time;
 	bool play;
+	PlayerState myState;
 
 public:
 	ServerPlayer();
 	~ServerPlayer();
+	void setState(PlayerState state) { myState = state; }
+	PlayerState getState() { return myState; }
 
 	bool getPlay();
 	D3DXVECTOR3 getPlayerPosition();

@@ -109,7 +109,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// 클래스의 OnCreate() 함수를 호출하여 프레임워크 객체를 초기화하도록 한다.
 	s->setSocketHWND(hMainWnd);
 	//서버 초기화 부분
-	//s->socketInit();
+	s->socketInit();
 
 	gGameFramework.OnCreate(hInstance, hMainWnd);
 

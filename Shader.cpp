@@ -24,6 +24,10 @@ CShader::~CShader()
 	if (m_pd3dVertexShader) m_pd3dVertexShader->Release();
 	if (m_pd3dVertexLayout) m_pd3dVertexLayout->Release();
 	if (m_pd3dPixelShader) m_pd3dPixelShader->Release();
+	//테셀레이션 사용
+	if (m_pd3dcbCameraPosition) m_pd3dcbCameraPosition->Release();
+	if (m_pd3dHullShader) m_pd3dHullShader->Release();
+	if (m_pd3dDomainShader) m_pd3dDomainShader->Release();
 }
 
 void CShader::BuildObjects(ID3D11Device *pd3dDevice)
@@ -333,6 +337,7 @@ CPlayerShader::CPlayerShader()
 
 CPlayerShader::~CPlayerShader()
 {
+	if (m_pTexture) m_pTexture->Release();
 }
 
 
@@ -374,7 +379,7 @@ void CPlayerShader::CreateShaderVariables(ID3D11Device *pd3dDevice)
 }
 
 
-void CPlayerShader::BuildObjects(ID3D11Device *pd3dDevice)
+void CPlayerShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarriorMesh)
 {
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
@@ -409,10 +414,10 @@ void CPlayerShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 
-	string strFileName = "Data/warrior_Vertex.txt";
-	CCharacterMesh* pPlayerMesh = new CCharacterMesh(pd3dDevice, strFileName);
+	//string strFileName = "Data/warrior_Vertex.txt";
+	//CCharacterMesh* pPlayerMesh = new CCharacterMesh(pd3dDevice, strFileName);
 	CTerrainPlayer *pTerrainPlayer = new CTerrainPlayer(pd3dDevice, 1);
-	pTerrainPlayer->SetMesh(pPlayerMesh);
+	pTerrainPlayer->SetMesh(pWarriorMesh);
 
 	AnimationClip* animationClip = NULL;
 	//animationClip = new AnimationClip;
@@ -426,6 +431,30 @@ void CPlayerShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pTerrainPlayer->SetMaterial(pPlayerMaterial);
 	pTerrainPlayer->SetAnimationClip(animationClip);
 	m_ppObjects[0] = pTerrainPlayer;
+
+
+
+	string strFileName = "Data/warrior_Vertex.txt";
+	//CWizardObject* pWizardObject1 = new CWizardObject(pd3dDevice, strFileName);
+	//CWizardObject* pWizardObject2 = new CWizardObject(pd3dDevice, strFileName);
+	//CWizardObject* pWizardObject3 = new CWizardObject(pd3dDevice, strFileName);
+
+
+	////CCharacterMesh *pHumanMesh = new CCharacterMesh(pd3dDevice, strFileName);
+	//pWizardObject1->SetMesh(pWarriorMesh);
+	//pWizardObject2->SetMesh(pWarriorMesh);
+	//pWizardObject3->SetMesh(pWarriorMesh);
+
+
+
+
+	//m_ppObjects[1] = pWizardObject1;
+	//m_ppObjects[2] = pWizardObject2;
+	//m_ppObjects[3] = pWizardObject3;
+
+	//m_ppObjects[1]->SetPosition(D3DXVECTOR3(200, 260.0f, 200.0f));
+	//m_ppObjects[2]->SetPosition(D3DXVECTOR3(200, 260.0f, 400.0f));
+	//m_ppObjects[3]->SetPosition(D3DXVECTOR3(200, 260.0f, 600.0f));
 
 
 
@@ -717,6 +746,7 @@ CTerrainShader::CTerrainShader()
 
 CTerrainShader::~CTerrainShader()
 {
+	if (m_d3dsrcTextureArray) m_d3dsrcTextureArray->Release();
 }
 
 void CTerrainShader::BuildObjects(ID3D11Device *pd3dDevice)
@@ -735,7 +765,7 @@ void CTerrainShader::BuildObjects(ID3D11Device *pd3dDevice)
 	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	d3dSamplerDesc.MinLOD = 0;
 	d3dSamplerDesc.MaxLOD = 0;
-	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dBaseSamplerState);
+	//pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dBaseSamplerState);
 
 	ID3D11SamplerState *pd3dDetailSamplerState = NULL;
 	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -1109,6 +1139,8 @@ CNormalMappingShader::CNormalMappingShader()
 
 CNormalMappingShader::~CNormalMappingShader()
 {
+	if (m_pMaterial)m_pMaterial->Release();
+	if (m_pTexture)m_pTexture->Release();
 }
 
 void CNormalMappingShader::CreateShader(ID3D11Device *pd3dDevice)
@@ -1161,6 +1193,8 @@ CTextureLightingShader::CTextureLightingShader()
 
 CTextureLightingShader::~CTextureLightingShader()
 {
+	if (m_pMaterial)m_pMaterial->Release();
+	if (m_pTexture)m_pTexture->Release();
 }
 
 void  CTextureLightingShader::CreateShader(ID3D11Device *pd3dDevice)
@@ -1215,6 +1249,8 @@ CTessellationShader::CTessellationShader()
 
 CTessellationShader::~CTessellationShader()
 {
+	if (m_pMaterial)m_pMaterial->Release();
+	if (m_pTexture)m_pTexture->Release();
 }
 
 
@@ -1291,6 +1327,7 @@ CDisplacementMappingShader::CDisplacementMappingShader()
 
 CDisplacementMappingShader::~CDisplacementMappingShader()
 {
+
 }
 
 void  CDisplacementMappingShader::CreateShader(ID3D11Device *pd3dDevice)
@@ -1550,6 +1587,8 @@ CTestTessellationShader::CTestTessellationShader()
 
 CTestTessellationShader::~CTestTessellationShader()
 {
+	if (m_pMaterial)m_pMaterial->Release();
+	if (m_pTexture)m_pTexture->Release();
 }
 
 void  CTestTessellationShader::CreateShader(ID3D11Device *pd3dDevice)
@@ -1698,23 +1737,38 @@ void  CWizardShader::CreateShader(ID3D11Device *pd3dDevice)
 }
 
 // 구분값.
-void   CWizardShader::BuildObjects(ID3D11Device *pd3dDevice)
+void   CWizardShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarriorMesh)
 {
 	string strFileName = "Data/warrior_Vertex.txt";
 
 	m_fTimePos = 0.0;
-	m_nObjects = 1;
+	m_nObjects = 3;
 	m_ppObjects = new CGameObject*[m_nObjects];
+
+
 
 	CWizardObject* pWizardObject1 = new CWizardObject(pd3dDevice, strFileName);
 	CWizardObject* pWizardObject2 = new CWizardObject(pd3dDevice, strFileName);
 	CWizardObject* pWizardObject3 = new CWizardObject(pd3dDevice, strFileName);
+
+
+	//CCharacterMesh *pHumanMesh = new CCharacterMesh(pd3dDevice, strFileName);
+	pWizardObject1->SetMesh(pWarriorMesh);
+	pWizardObject2->SetMesh(pWarriorMesh);
+	pWizardObject3->SetMesh(pWarriorMesh);
+
+
+
+
+
 	m_ppObjects[0] = pWizardObject1;
 	m_ppObjects[1] = pWizardObject2;
 	m_ppObjects[2] = pWizardObject3;
 
 
-
+	m_ppObjects[0]->SetPosition(D3DXVECTOR3(200, 260.0f, 200.0f));
+	m_ppObjects[1]->SetPosition(D3DXVECTOR3(200, 260.0f, 400.0f));
+	m_ppObjects[2]->SetPosition(D3DXVECTOR3(200, 260.0f, 600.0f));
 
 
 	//CGameManager* GameManager = CGameManager::GetCGameTimer();
@@ -1782,24 +1836,7 @@ CWizardShader::~CWizardShader()
 {
 }
 
-void CWizardShader::CreateShaderVariables(ID3D11Device *pd3dDevice)
-{
-	//월드 변환 행렬을 위한 상수 버퍼를 생성한다.
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = sizeof(VS_CB_RESULT_MATRIX);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	if (pd3dDevice->CreateBuffer(&bd, NULL, &m_pd3dcbResult) == S_OK)
-	{
-		std::cout << "success" << std::endl;
 
-	}
-
-
-
-}
 //void CWizardShader::ReleaseShaderVariables()
 //{
 //	if (m_pd3dcbResult)
@@ -1809,21 +1846,6 @@ void CWizardShader::CreateShaderVariables(ID3D11Device *pd3dDevice)
 //void CWizardShader::AnimateObjects(float fTimeElapsed)
 //{
 //}
-
-
-void CWizardShader::UpdateShaderVariable(ID3D11DeviceContext *pd3dDeviceContext,
-	VS_CB_RESULT_MATRIX **pvscbResultMatrix, VS_CB_RESULT_MATRIX *mapdata, int k)
-{
-	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
-	pd3dDeviceContext->Map(m_pd3dcbResult, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
-	mapdata = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
-
-
-	memcpy(mapdata->m_d3dxmtxResult, pvscbResultMatrix[k]->m_d3dxmtxResult, sizeof(VS_CB_RESULT_MATRIX));
-	pd3dDeviceContext->Unmap(m_pd3dcbResult, 0);
-	pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_RESULT_MATRIX, 1, &m_pd3dcbResult);
-}
-
 
 
 void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
@@ -1879,10 +1901,17 @@ void CWizardShader::AnimateObjects(float fTimeElapsed)
 	{
 		if (true == s->Player[i].getPlay())
 		{
+			m_ppObjects[i - 1]->SetAnimationState(s->Player[i].getState());
 			m_ppObjects[i - 1]->SetPosition(s->Player[i].getPlayerPosition());
 			m_ppObjects[i - 1]->SetDirection(s->Player[i].getPlayerDirection());
 			m_ppObjects[i - 1]->RenewWorldMatrix();
-		}	
+			//cout << "다른 플레이어 상태   " << m_ppObjects[i - 1]->GetAnimationStat() << endl;
+			//cout <<" 다른 플레이어 위치  " <<m_ppObjects[i - 1]->GetPosition().x << "   " << m_ppObjects[i - 1]->GetPosition().z << endl;
+		}
+		else
+		{
+			m_ppObjects[i - 1]->SetPosition(D3DXVECTOR3(-10.0,0.0,-10.0));
+		}
 	}
 }
 

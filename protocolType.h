@@ -1,4 +1,5 @@
 #pragma once
+#define WM_SOCKET WM_USER+1
 #define MAX_SIZE 4096
 
 ///Logic Sever///
@@ -9,6 +10,10 @@
 #define MAX_OBJECT 10
 #define SECTOR_LENGTH 10
 #define SECTOR_WIDETH 10
+#define MAP_MAX_LENGTH 4000
+#define MAP_MAX_WIDETH 4000
+#define DIVIDE_SECTOR_X 400
+#define DIVIDE_SECTOR_Z 400
 
 
 enum
@@ -24,9 +29,14 @@ enum
 	SC_ROOM_LIST,
 	SC_PLAYER_LIST,
 	SC_SECTOR_UPDATE,
+	SC_REMOVE_PLAYER,
+	SC_PUT_PLAYER,
+	SC_POSSIBLE_ATTACK,
+	SC_STATE_UPDATE,
 
 	//ClientType
 	CS_MOVE = 100,
+	CS_STOP,
 	CS_USE_SKILL_Q,
 	CS_USE_SKILL_W,
 	CS_USE_SKILL_E,

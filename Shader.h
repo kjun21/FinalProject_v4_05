@@ -119,7 +119,7 @@ public:
 	virtual ~CPlayerShader();
 
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
-	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarriorMesh);
 	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	CPlayer *GetPlayer(int nIndex = 0) { return((CPlayer *)m_ppObjects[nIndex]); }
@@ -370,11 +370,8 @@ public:
 	CWizardShader();
 	virtual ~CWizardShader();
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
-	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarriorMesh);
 	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
-	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
-	virtual void UpdateShaderVariable(ID3D11DeviceContext *pd3dDeviceContext, 
-		VS_CB_RESULT_MATRIX **pResult, VS_CB_RESULT_MATRIX *mapdata, int k);
 	//virtual void AnimateObjects(float fTimeElapsed);
 	virtual void AnimateObjects(float fTimeElapsed);
 

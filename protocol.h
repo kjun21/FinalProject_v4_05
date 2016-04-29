@@ -6,15 +6,44 @@
 #pragma pack (push, 1)
 // Game Logic Server 
 // SC_Packet
-
+struct ScPacketUpdateState
+{
+	int packetSize;
+	BYTE packetType;
+	int id;
+	PlayerState state;
+};
+struct ScpacketAttackPossible
+{
+	int packetSize;
+	BYTE packetType;
+	int id;
+	PlayerState state;
+};
+struct ScPacektPutPlayer
+{
+	int packetSize;
+	BYTE packetType;
+	int id;
+	D3DXVECTOR3 position;
+	D3DXVECTOR3 direction;
+	PlayerState state;
+};
+struct ScPacketRemoveObject
+{
+	int packetSize;
+	BYTE packetType;
+	int id;
+};
 struct ScPacketMove
 {
 	int packetSize;
 	BYTE packetType;
 	int id;
+	double time;
 	D3DXVECTOR3 direction;
 	D3DXVECTOR3 position;
-	double time;
+	PlayerState state;
 };
 struct ScPacketSector
 {
@@ -56,6 +85,17 @@ struct ScPacketAcceptPlayerList
 	D3DXVECTOR3 position;
 };
 //  CS_Packet
+
+struct CsPacketKeyUp
+{
+	int packetSize;
+	BYTE packetType;
+};
+struct CspacketAttack
+{
+	int packetSize;
+	BYTE packetType;
+};
 struct CsPacketMove
 {
 	int packetSize;
@@ -64,13 +104,7 @@ struct CsPacketMove
 	D3DXVECTOR3 direction;
 	D3DXVECTOR3 position;
 };
-struct CsPacketAttack
-{
-	int packetSize;
-	BYTE packetType;
-	int id;
-	//이때 충돌체크 여부 판별
-};
+
 struct CsPacketUseSkill
 {
 	int packetSize;
@@ -157,10 +191,6 @@ struct CsPacketSelectCharacter
 	int packetSize;
 	BYTE packetType;
 };
-
-
-
-
 //	Server->DB Server
 
 //	[SDB_Packet]

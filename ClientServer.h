@@ -47,6 +47,8 @@ public:
 	int socketInit();
 	void readPacket();
 
+	void keyUp();
+	void keyDownAttacket(DWORD key);
 	void processPacket(char* buf);
 	void sendPacket(SOCKET s, void* buf);
 	void keyDown(D3DXVECTOR3 wParam);

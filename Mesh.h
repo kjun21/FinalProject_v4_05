@@ -408,4 +408,3 @@ public:
 	CBoundingMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth);
 	virtual ~CBoundingMesh();
 };
-
