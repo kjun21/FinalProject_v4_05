@@ -396,9 +396,6 @@ protected:
 	BoneWeightData2*  m_pWeight2;
 	BoneIndexData2    *m_pBoneIndex2;
 	string strMeshName;
-protected:
-	vector<CCharacterMesh*> m_vChildList;
-	CCharacterMesh** pChildMeshs;
 };
 
 class CBoundingMesh : public CMesh
@@ -407,4 +404,22 @@ public:
 	ID3D11Buffer* m_pd3dColorBuffer;
 	CBoundingMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth);
 	virtual ~CBoundingMesh();
+};
+
+class CBoundingSphere : public CMesh
+{
+public:
+	ID3D11Buffer* m_pd3dColorBuffer;
+	CBoundingSphere(ID3D11Device *pd3dDevice, float fRadius, int nSlices, int nStacks);
+	virtual ~CBoundingSphere();
+	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext);
+};
+
+
+class CBoundingCircle : public CMesh
+{
+public:
+	ID3D11Buffer* m_pd3dColorBuffer;
+	CBoundingCircle(ID3D11Device *pd3dDevice, float fRadius, int nSlices, int nStacks);
+	virtual ~CBoundingCircle();
 };

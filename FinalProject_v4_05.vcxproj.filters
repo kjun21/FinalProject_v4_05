@@ -111,6 +111,9 @@
     <ClCompile Include="Direct3DBase.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="MonsterShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameFramework.h">
@@ -206,6 +209,9 @@
     <ClInclude Include="Direct3DBase.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="MonsterShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="DisplacementMapping.fx">
@@ -242,6 +248,9 @@
       <Filter>ShaderFile</Filter>
     </FxCompile>
     <FxCompile Include="Refraction.fx">
+      <Filter>ShaderFile</Filter>
+    </FxCompile>
+    <FxCompile Include="Monster.fx">
       <Filter>ShaderFile</Filter>
     </FxCompile>
   </ItemGroup>

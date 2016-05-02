@@ -153,7 +153,9 @@ public:
 	void RenewWorldMatrix();
 	UINT GetObjectType() { return m_nObjectType; }
 	virtual void SetAnimationState(PlayerState myPlayerState) {  }
-	virtual UINT GetAnimationStat(){ return 0; }
+	virtual void SetAnimationState(UINT myPlayerState) {}
+	virtual UINT GetAnimationState(){ return 0; }
+	virtual void RenderAnimation(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera) { }
 
 	
 private:
@@ -408,7 +410,7 @@ public:
 
 };
 
-class CWizardObject : public CGameObject
+class CAnimatedObject : public CGameObject
 {
 protected:
 	AnimationClip* m_AnimationClip;
@@ -416,24 +418,64 @@ protected:
 	ID3D11Buffer	 *m_pd3dcbAnimation;
 	D3DXMATRIX **m_ppResultMatrix;
 	VS_CB_RESULT_MATRIX *m_cbMapData;
+	UINT m_uiAnimationClipNum;
 public:
-	CWizardObject(ID3D11Device *pd3dDevice, string strFileName);
-	virtual ~CWizardObject();
-	
-	AnimationClip* CreateAnimation(AnimationClip* animationClip);
-	void LoadAnimation(AnimationClip* animationClip, UINT i);
+	CAnimatedObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~CAnimatedObject();
+
+	virtual 	void  CreateAnimation();
+	void LoadAnimation( UINT i);
 	void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
 	virtual void Animate(float fTimeElapsed);
 	AnimationClip* GetAnimationClip() { return m_AnimationClip; }
-	virtual void SetAnimationState(PlayerState myPlayerState) 
-	{ 
-		m_nAnimationState = myPlayerState; 
-	
+	virtual void SetAnimationState(PlayerState myPlayerState)
+	{
+		m_nAnimationState = myPlayerState;
+
+	}
+	virtual void SetAnimationState(UINT myPlayerState)
+	{
+		m_nAnimationState = myPlayerState;
 	}
 	virtual UINT GetAnimationState() { return  m_nAnimationState; }
+};
+
+class COtherPlayerObject : public CAnimatedObject
+{
+public:
+	COtherPlayerObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~COtherPlayerObject();
+	// 각 객체들 마다 애니메이션이 다르기 때문에 항상 자기것을 가지고 있다.
+	virtual void CreateAnimation();
+	//virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
+	//virtual void Animate(float fTimeElapsed);
 
 };
+class CMonsterObject :  public CAnimatedObject
+{
+protected:
+	VS_CB_RESULT_MATRIX* m_cbMonsterMatrice;
+	float m_fAttackRadius;
+public:
+	CMonsterObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual void CreateAnimation();
+	virtual ~CMonsterObject();
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
+	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
+	virtual UINT GetAnimationState() { return  m_nAnimationState; }
+	virtual void SetAnimationState(UINT myPlayerState)
+	{
+		m_nAnimationState = myPlayerState;
+	}
+	virtual void Animate(float fTimeElapsed);
+	void CollisionCheck(CGameObject** ppGameObject);
+	float CalculateDistance(D3DXVECTOR3 d3dxvinputPosition);
+	bool CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition);
+};
+
+
+
 
 class CWoodObject : public CGameObject
 {

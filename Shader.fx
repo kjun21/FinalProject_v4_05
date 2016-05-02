@@ -99,7 +99,7 @@ VS_OUTPUT VS(VS_INPUT input)
 
 	//float4x4 scale ={ { 0.3, 0, 0, 0 }, { 0, 0.3, 0, 0 }, { 0, 0, 0.3, 0 }, { 0, 0, 0, 1 } };
 
-	float4x4 scale = { { 7.0, 0, 0, 0 }, { 0, 7.0, 0, 0 }, { 0, 0, 7.0, 0 }, { 0, 0, 0, 1 } };
+	float4x4 scale = { { 10.0, 0, 0, 0 }, { 0, 10.0, 0, 0 }, { 0, 0, 10.0, 0 }, { 0, 0, 0, 1 } };
 
 
 	output.position = mul(output.position, scale);

@@ -68,7 +68,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	pd3dSamplerState->Release();
 
 
-	m_nShaders = 3;
+	m_nShaders = 5;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	//첫 번째로 그릴 객체는 스카이 박스이다.
@@ -116,6 +116,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	pWaterMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
 	pWaterMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 
+	
 
 
 
@@ -125,13 +126,27 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppShaders[1] = pTreeObjectShader;
 
 
+
 	CWaveShader* pWaveShader = new CWaveShader();
 	pWaveShader->CreateShader(pd3dDevice);
 	pWaveShader->BuildObjects(pd3dDevice, pWaterMaterial, p);
 	m_ppShaders[2] = pWaveShader;
 
 
-	//CWizardShader* pHuman = new CWizardShader();
+
+
+	CMonsterShader* pMonsterShader = new CMonsterShader();
+	pMonsterShader->CreateShader(pd3dDevice);
+	pMonsterShader->BuildObjects(pd3dDevice);
+	m_ppShaders[3] = pMonsterShader;
+
+	CCrushBoxShader* pCrushBoxShaser = new CCrushBoxShader();
+	pCrushBoxShaser->CreateShader(pd3dDevice);
+	pCrushBoxShaser->BuildObjects(pd3dDevice);
+	m_ppShaders[4] = pCrushBoxShaser;
+
+
+	//COtherPlayerShader* pHuman = new COtherPlayerShader();
 	//pHuman->CreateShader(pd3dDevice);
 	//pHuman->BuildObjects(pd3dDevice);
 	//m_ppShaders[3] = pHuman;
@@ -216,11 +231,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 
 	
 
-	
-	//CCrushBoxShader* pCrushBoxShaser = new CCrushBoxShader();
-	//pCrushBoxShaser->CreateShader(pd3dDevice);
-	//pCrushBoxShaser->BuildObjects(pd3dDevice);
-	//m_ppShaders[8] = pCrushBoxShaser;
+
 
 	CreateShaderVariables(pd3dDevice);
 

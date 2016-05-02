@@ -6,7 +6,7 @@ ID3D11Buffer *CShader::m_pd3dcbWorldMatrix = NULL;
 ID3D11Buffer *CIlluminatedShader::m_pd3dcbMaterial = NULL;
 
 
-ID3D11Buffer *CWizardShader::m_pd3dcbResult = NULL;
+ID3D11Buffer *COtherPlayerShader::m_pd3dcbResult = NULL;
 ID3D11Buffer *CPlayerShader::m_pd3dcbPlayerResult = NULL;
 
 CShader::CShader()
@@ -38,7 +38,14 @@ void CShader::ReleaseObjects()
 {
 	if (m_ppObjects)
 	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) delete m_ppObjects[j];
+		for (int j = 0; j < m_nObjects; j++)
+		{
+	/*		if (m_ppObjects[j])
+				m_ppObjects[j]->Release();*/
+			if (m_ppObjects[j])
+				delete m_ppObjects[j];
+		}
+			
 		delete[] m_ppObjects;
 	}
 }
@@ -406,7 +413,7 @@ void CPlayerShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarr
 	//텍스쳐 리소스를 생성한다.
 	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
 	m_pTexture = new CTexture(1, 1, 0, 0);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/StoneKing.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/MovingObject/StoneKing.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
 	m_pTexture->SetTexture(0, pd3dsrvTexture);
 	m_pTexture->SetSampler(0, pd3dSamplerState);
 	pd3dsrvTexture->Release();
@@ -430,7 +437,13 @@ void CPlayerShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarr
 	pTerrainPlayer->ChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, 0.0f);
 	pTerrainPlayer->SetMaterial(pPlayerMaterial);
 	pTerrainPlayer->SetAnimationClip(animationClip);
+
 	m_ppObjects[0] = pTerrainPlayer;
+
+
+
+	CGameManager* pGameManager = CGameManager::GetCGameManager();
+	pGameManager->m_pPlayers[0] = m_ppObjects[0];
 
 
 
@@ -471,8 +484,8 @@ AnimationClip* CPlayerShader::CreateAnimation(AnimationClip* animationClip)
 	animationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
 
 	animationClip[0].m_strFileName = "StoneKing_AttackReady.txt";
-	animationClip[1].m_strFileName = "StoneKing_Attack1.txt";
-	animationClip[2].m_strFileName = "StoneKing_Attack2.txt";
+	animationClip[1].m_strFileName = "StoneKing_Attack3-1.txt";
+	animationClip[2].m_strFileName = "StoneKing_Attack1.txt";
 	animationClip[3].m_strFileName = "StoneKing_Run.txt";
 	animationClip[4].m_strFileName = "StoneKing_Death.txt";
 
@@ -711,7 +724,7 @@ void CInstancingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3D
 			if (m_ppObjects[j]->IsVisible(pCamera))
 			{
 				D3DXMatrixTranspose(&pnSphereInstances[nSphereInstances].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
-				pnSphereInstances[nSphereInstances++].m_d3dxColor = RANDOM_COLOR;
+				//pnSphereInstances[nSphereInstances++].m_d3dxColor = RANDOM_COLOR;
 			}
 		}
 	}
@@ -719,6 +732,9 @@ void CInstancingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3D
 
 	CMesh *pSphereMesh = m_ppObjects[0]->GetMesh();
 	pSphereMesh->RenderInstanced(pd3dDeviceContext, nSphereInstances, 0);
+
+
+
 
 	int nCubeInstances = 0;
 	pd3dDeviceContext->Map(m_pd3dCubeInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
@@ -730,7 +746,7 @@ void CInstancingShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3D
 			if (m_ppObjects[j]->IsVisible(pCamera))
 			{
 				D3DXMatrixTranspose(&pCubeInstances[nCubeInstances].m_d3dxTransform, &m_ppObjects[j]->m_d3dxmtxWorld);
-				pCubeInstances[nCubeInstances++].m_d3dxColor = RANDOM_COLOR;
+				//pCubeInstances[nCubeInstances++].m_d3dxColor = RANDOM_COLOR;
 			}
 		}
 	}
@@ -1708,11 +1724,11 @@ CHumanShader::~CHumanShader()
 
 
 
-CWizardShader::CWizardShader()
+COtherPlayerShader::COtherPlayerShader()
 {
 }
 
-void  CWizardShader::CreateShader(ID3D11Device *pd3dDevice)
+void  COtherPlayerShader::CreateShader(ID3D11Device *pd3dDevice)
 {
 	D3D11_INPUT_ELEMENT_DESC d3dInputElements[] =
 	{
@@ -1737,9 +1753,10 @@ void  CWizardShader::CreateShader(ID3D11Device *pd3dDevice)
 }
 
 // 구분값.
-void   CWizardShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarriorMesh)
+void   COtherPlayerShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarriorMesh)
 {
 	string strFileName = "Data/warrior_Vertex.txt";
+	string strFileName2 = "Data/Golem_Vertex.txt";
 
 	m_fTimePos = 0.0;
 	m_nObjects = 3;
@@ -1747,9 +1764,12 @@ void   CWizardShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWa
 
 
 
-	CWizardObject* pWizardObject1 = new CWizardObject(pd3dDevice, strFileName);
-	CWizardObject* pWizardObject2 = new CWizardObject(pd3dDevice, strFileName);
-	CWizardObject* pWizardObject3 = new CWizardObject(pd3dDevice, strFileName);
+	COtherPlayerObject* pWizardObject1 = new COtherPlayerObject(pd3dDevice, strFileName);
+	COtherPlayerObject* pWizardObject2 = new COtherPlayerObject(pd3dDevice, strFileName);
+	COtherPlayerObject* pWizardObject3 = new COtherPlayerObject(pd3dDevice, strFileName);
+
+
+	//CMonsterObject* pGolem = new CMonsterObject(pd3dDevice, strFileName2);
 
 
 	//CCharacterMesh *pHumanMesh = new CCharacterMesh(pd3dDevice, strFileName);
@@ -1764,11 +1784,26 @@ void   CWizardShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWa
 	m_ppObjects[0] = pWizardObject1;
 	m_ppObjects[1] = pWizardObject2;
 	m_ppObjects[2] = pWizardObject3;
+	//m_ppObjects[3] = pGolem;
 
 
 	m_ppObjects[0]->SetPosition(D3DXVECTOR3(200, 260.0f, 200.0f));
-	m_ppObjects[1]->SetPosition(D3DXVECTOR3(200, 260.0f, 400.0f));
-	m_ppObjects[2]->SetPosition(D3DXVECTOR3(200, 260.0f, 600.0f));
+	//m_ppObjects[1]->SetPosition(D3DXVECTOR3(200, 260.0f, 400.0f));
+	//m_ppObjects[2]->SetPosition(D3DXVECTOR3(800, 260.0f, 600.0f));
+
+
+	CGameManager* pGameManager = CGameManager::GetCGameManager();
+	pGameManager->m_pPlayers[1] = m_ppObjects[0];
+	pGameManager->m_pPlayers[2] = m_ppObjects[1];
+	pGameManager->m_pPlayers[3] = m_ppObjects[2];
+	
+
+
+
+	//m_ppObjects[3]->SetPosition(D3DXVECTOR3(400, 260.0f, 800.0f));
+
+
+
 
 
 	//CGameManager* GameManager = CGameManager::GetCGameTimer();
@@ -1832,23 +1867,10 @@ void   CWizardShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWa
 
 	//CreateShaderVariables(pd3dDevice);
 }
-CWizardShader::~CWizardShader()
+COtherPlayerShader::~COtherPlayerShader()
 {
 }
-
-
-//void CWizardShader::ReleaseShaderVariables()
-//{
-//	if (m_pd3dcbResult)
-//		m_pd3dcbResult->Release();
-//}
-
-//void CWizardShader::AnimateObjects(float fTimeElapsed)
-//{
-//}
-
-
-void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
+void COtherPlayerShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
 	//if (m_pTexture)
@@ -1893,26 +1915,26 @@ void CWizardShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase
 	}
 }
 
-void CWizardShader::AnimateObjects(float fTimeElapsed)
+void COtherPlayerShader::AnimateObjects(float fTimeElapsed)
 {
 	//서버 다른 플레이어 좌표 셋팅하는 부분
-	ClientServer *s = ClientServer::getInstangce();
-	for (auto i = 1; i < 4; ++i)
-	{
-		if (true == s->Player[i].getPlay())
-		{
-			m_ppObjects[i - 1]->SetAnimationState(s->Player[i].getState());
-			m_ppObjects[i - 1]->SetPosition(s->Player[i].getPlayerPosition());
-			m_ppObjects[i - 1]->SetDirection(s->Player[i].getPlayerDirection());
-			m_ppObjects[i - 1]->RenewWorldMatrix();
-			//cout << "다른 플레이어 상태   " << m_ppObjects[i - 1]->GetAnimationStat() << endl;
-			//cout <<" 다른 플레이어 위치  " <<m_ppObjects[i - 1]->GetPosition().x << "   " << m_ppObjects[i - 1]->GetPosition().z << endl;
-		}
-		else
-		{
-			m_ppObjects[i - 1]->SetPosition(D3DXVECTOR3(-10.0,0.0,-10.0));
-		}
-	}
+	//ClientServer *s = ClientServer::getInstangce();
+	//for (auto i = 1; i < 4; ++i)
+	//{
+	//	if (true == s->Player[i].getPlay())
+	//	{
+	//		m_ppObjects[i - 1]->SetAnimationState(s->Player[i].getState());
+	//		m_ppObjects[i - 1]->SetPosition(s->Player[i].getPlayerPosition());
+	//		m_ppObjects[i - 1]->SetDirection(s->Player[i].getPlayerDirection());
+	//		m_ppObjects[i - 1]->RenewWorldMatrix();
+	//		//cout << "다른 플레이어 상태   " << m_ppObjects[i - 1]->GetAnimationStat() << endl;
+	//		//cout <<" 다른 플레이어 위치  " <<m_ppObjects[i - 1]->GetPosition().x << "   " << m_ppObjects[i - 1]->GetPosition().z << endl;
+	//	}
+	//	else
+	//	{
+	//		m_ppObjects[i - 1]->SetPosition(D3DXVECTOR3(-10.0,0.0,-10.0));
+	//	}
+	//}
 }
 
 CCrushBoxShader::CCrushBoxShader()
@@ -1922,6 +1944,20 @@ CCrushBoxShader::~CCrushBoxShader()
 {}
 
 
+void CCrushBoxShader::CreateShaderVariables(ID3D11Device *pd3dDevice)
+{
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(VS_CB_RESULT_MATRIX);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	if (pd3dDevice->CreateBuffer(&bd, NULL, &m_pd3dcbResult) == S_OK)
+	{
+		std::cout << "success" << std::endl;
+
+	}
+}
 void CCrushBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
 	//m_ppObjects[0] = pPlane;
@@ -1929,12 +1965,88 @@ void CCrushBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
 	//m_ppObjects[0]->SetPosition(200.0f, 325.0f, 450.0f);
 
 
-	m_nObjects = 1;
+	CreateShaderVariables(pd3dDevice);
+	CShader::CreateShaderVariables(pd3dDevice);
+
+	m_nObjects = 2;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-	CBoundingBoxObject *pPlane = new CBoundingBoxObject(pd3dDevice);
-	m_ppObjects[0] = pPlane;
-	m_ppObjects[0]->SetPosition(410.4f, 262.0f, 410.4f);
+	CBoundingBoxObject *pPlane1 = new CBoundingBoxObject(pd3dDevice);
+	CBoundingBoxObject *pPlane2 = new CBoundingBoxObject(pd3dDevice);
+
+	// 골렘의 공격 반경 (140
+	CBoundingCircle* pCircle1 = new CBoundingCircle(pd3dDevice, 60.0f, 20.0f, 1.0f);
+	pPlane1->SetMesh(pCircle1);
+	// 플레이어의 피격 반격
+	CBoundingCircle* pCircle2 = new CBoundingCircle(pd3dDevice, 120.0f, 20.0f, 1.0f);
+	pPlane2->SetMesh(pCircle2);
+
+	m_ppObjects[0] = pPlane1;
+	m_ppObjects[0]->SetPosition(400.0f, 300.0f, 300.0f);
+	m_ppObjects[1] = pPlane2;
+	m_ppObjects[1]->SetPosition(820.0f, 266.0f, 820.0f);
+
+
+
+	m_fTimePos = 0.0;
+
+
+
+
+
+	FILE *pFile = NULL;
+	_wfopen_s(&pFile, L"Data/GolemAttack.txt", L"rt");
+	fscanf_s(pFile, "%d \n", &m_llAniTime);
+	fscanf_s(pFile, "%d \n", &m_uiBoneIndexCount);
+
+
+	m_ppResultMatrix = new D3DXMATRIX*[m_llAniTime / 10];
+
+	for (long long i = 0; i < m_llAniTime / 10; ++i)
+	{
+		// 최종 행렬 -> 매 초마다 해당하는    (포인터 배열을 가지고 있는)
+		m_ppResultMatrix[i] = new D3DXMATRIX[m_uiBoneIndexCount];
+	}
+
+
+	for (long long i = 0; i < m_llAniTime / 10; ++i)
+	{
+		for (unsigned int j = 0; j < m_uiBoneIndexCount; ++j)
+		{
+			//cout << i << "  " << j << endl;
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&m_ppResultMatrix[i][j]._11, &m_ppResultMatrix[i][j]._12, &m_ppResultMatrix[i][j]._13, &m_ppResultMatrix[i][j]._14);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&m_ppResultMatrix[i][j]._21, &m_ppResultMatrix[i][j]._22, &m_ppResultMatrix[i][j]._23, &m_ppResultMatrix[i][j]._24);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&m_ppResultMatrix[i][j]._31, &m_ppResultMatrix[i][j]._32, &m_ppResultMatrix[i][j]._33, &m_ppResultMatrix[i][j]._34);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&m_ppResultMatrix[i][j]._41, &m_ppResultMatrix[i][j]._42, &m_ppResultMatrix[i][j]._43, &m_ppResultMatrix[i][j]._44);
+		}
+	}
+	::fclose(pFile);
+
+
+
+	// 어떻게 96개가 나오지???
+	m_pvscbResultMatrix = new VS_CB_RESULT_MATRIX*[m_llAniTime / 10];
+
+	for (int i = 0; i < m_llAniTime / 10; ++i)
+		m_pvscbResultMatrix[i] = new VS_CB_RESULT_MATRIX();
+
+	// 각 시간마다 곱해야할 뼈 행렬들(32개?)
+	for (int i = 0; i < m_llAniTime / 10; ++i)
+	{
+		for (int j = 0; j < m_uiBoneIndexCount; ++j)
+		{
+			m_pvscbResultMatrix[i]->m_d3dxmtxResult[j] = m_ppResultMatrix[i][j];
+		}
+	}
+
+
+
+
+
 
 	//FILE* fp;
 	//fopen_s(&fp, "Player_CrushData.txt", "w");
@@ -1945,6 +2057,51 @@ void CCrushBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
 	//}
 	//fclose(fp);
 
+}
+
+void CCrushBoxShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
+{
+	OnPrepareRender(pd3dDeviceContext);
+	//if (m_pTexture)
+	//	m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext);
+
+
+	CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
+	m_fTimePos += GameTimer->GetTimeElapsed();
+
+
+
+	long long NowTime = m_fTimePos * 1000;
+	if (NowTime >= m_llAniTime)
+	{
+		NowTime -= m_llAniTime;
+		m_fTimePos = 0;
+	}
+	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
+	pd3dDeviceContext->Map(m_pd3dcbResult, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+	m_cbMapData = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
+
+	for (int i = 0; i <MaxBone; i++) //왼쪽   /////// NowTime 설정 잘할것.. 아직 못 고쳤음. NowTime = 32, i = 83
+		m_cbMapData->m_d3dxmtxResult[i] = m_ppResultMatrix[NowTime / 10][i]; //[시간][본인덱스]
+	pd3dDeviceContext->Unmap(m_pd3dcbResult, 0);
+	if (m_pd3dcbResult != NULL)
+		pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_RESULT_MATRIX, 1, &m_pd3dcbResult);
+
+
+	//**********************************************************
+	//************************************************************
+
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			if (m_ppObjects[j]->IsVisible(pCamera))
+			{
+				m_ppObjects[j]->Render(pd3dDeviceContext, pCamera);
+			}
+		}
+	}
 }
 
 
@@ -1978,3 +2135,6 @@ void CCrushBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 //호수01
 // m_ppObjects[0]->SetPosition(740.0f, 190.0f, 1100.0f);
+
+//캐릭터ㅏ
+// 	m_ppObjects[0]->SetPosition(410.4f, 262.0f, 410.4f);

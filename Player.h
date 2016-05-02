@@ -38,8 +38,11 @@ public:
 	현재 플레이어의 위치에서 이 방향 벡터 만큼 이동한다.*/
 	void SetPosition(const D3DXVECTOR3& d3dxvPosition) { Move((d3dxvPosition - m_d3dxvPosition), false); }
 	
-
-
+	// 충돌 관련 함수
+public:
+	float CalculateDistance(D3DXVECTOR3 d3dxvinputPosition);
+	bool CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition);
+	void CollisionCheck();
 
 public:
 	CPlayer(int nMeshes = 1);
@@ -53,6 +56,9 @@ public:
 
 
 protected:
+	float m_fBeAttackedRadius;
+
+
 	//플레이어의 위치 벡터, x-축(Right), y-축(Up), z-축(Look) 벡터이다.
 	D3DXVECTOR3 m_d3dxvPosition;
 	D3DXVECTOR3 m_d3dxvRight;

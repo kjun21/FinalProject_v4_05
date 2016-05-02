@@ -66,7 +66,9 @@
 #define PS_SLOT_TEXTURE		0x00
 #define PS_SLOT_SAMPLER_STATE		0x00
 
-#define MaxBone 57
+//#define MaxBone 57
+
+#define MaxBone 71
 #define OBJECT_NUM 3
 
 
@@ -85,6 +87,12 @@
 
 
 
+//플레이어 피격 반경 30
+//플레이어 공격1 반경 120
+
+// 골렘 공격 반경 140, 피격 반경 60
+
+
 struct AnimationClip
 {
 	UINT m_nAnimationState;
@@ -95,11 +103,27 @@ struct AnimationClip
 	float m_fTimePos;
 	long long llNowTime;
 
+	void ReleaseObjects() {
+		for (int i = 0; i < m_llAniTime / 10; i++)
+		{
+			if (m_ppResultMatrix[i])
+				delete m_ppResultMatrix[i];
+		}
+		if (m_ppResultMatrix)
+			delete m_ppResultMatrix;
+	}
+
 };
 // 애니메이션 정보를 정점 셰이더에 전달해줄 구조체
 struct VS_CB_RESULT_MATRIX
 {
 	D3DXMATRIX m_d3dxmtxResult[200];
+};
+
+struct VS_CB_MONSTER_RESULT_MATRIX
+{
+	D3DXMATRIX m_d3dxmtxIdle[200];
+
 };
 
 

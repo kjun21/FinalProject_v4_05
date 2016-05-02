@@ -34,9 +34,9 @@ protected:
 
 	UINT m_nInstanceBufferStride;
 	UINT m_nInstanceBufferOffset;
-	CTexture* m_pTexture;
+	//CTexture* m_pTexture;
 	CTexture* m_pLeavesTexture;
-	CMaterial* m_pMaterial;
+	//CMaterial* m_pMaterial;
 
 	UINT m_uiWoodNum;
 	UINT m_uiLeavesNum;

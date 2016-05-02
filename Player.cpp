@@ -26,6 +26,7 @@ CPlayer::CPlayer(int nMeshes) : CGameObject(nMeshes)
 	m_pCameraUpdatedContext = NULL;
 	m_d3dxvDirection = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 	m_d3dxvPreDir = D3DXVECTOR3(0.0f, 0.0f, 0.99998f);
+	m_fBeAttackedRadius = 30.0f;
 	m_nObjectType = TYPE_PLAYER;
 }
 
@@ -106,8 +107,8 @@ void CPlayer::Rotate(DWORD dwDirection, DWORD dwAttack)
 		m_d3dxvPreDir = d3dxvDirection;
 	//	cout << m_d3dxvLook.x << "  " << m_d3dxvLook.y << "  " << m_d3dxvLook.z << endl;
 		//서버 키입력 받는 부분
-		ClientServer *s = ClientServer::getInstangce();
-		s->keyDown(m_d3dxvLook);
+		//ClientServer *s = ClientServer::getInstangce();
+		//s->keyDown(m_d3dxvLook);
 	
 	}
 }
@@ -145,6 +146,23 @@ float CPlayer::CalculateRotation(D3DXVECTOR3 d3dxvInputDir)
 
 	return b;
 }
+
+void CalculateDirection(D3DXVECTOR3 d3dxvDestination)
+{
+	D3DXVECTOR3 d3dxvMyPosition;
+	D3DXVECTOR3 d3dxvDirection;
+
+	D3DXVECTOR3 d3dxvNewDirection;
+
+
+	d3dxvNewDirection = d3dxvDestination - d3dxvMyPosition;
+	D3DXVec3Normalize(&d3dxvNewDirection, &d3dxvNewDirection);
+
+
+}
+
+
+
 
 void CPlayer::UpdateAnimation(DWORD dwDirection, DWORD dwAttack)
 {
@@ -281,10 +299,10 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, bool bUpdateVelocity)
 		D3DXVECTOR3 d3dxvPosition;
 
 		//서버
-		m_d3dxvPosition = s->Player[0].getPlayerPosition();
+		//m_d3dxvPosition = s->Player[0].getPlayerPosition();
 		//클라
-		/*d3dxvPosition = m_d3dxvPosition + d3dxvShift;
-		m_d3dxvPosition = d3dxvPosition;*/
+		d3dxvPosition = m_d3dxvPosition + d3dxvShift;
+		m_d3dxvPosition = d3dxvPosition;
 
 		////서버 플레이어 위치 변경에 따라 좌표 바꿔주는 부분
 		
@@ -620,7 +638,7 @@ void CTerrainPlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode
 	case THIRD_PERSON_CAMERA:
 		SetFriction(250.0f);
 		//3인칭 카메라일 때 플레이어에 y-축 방향으로 중력이 작용한다.
-		SetGravity(D3DXVECTOR3(0.0f, -0.0f, 0.0f)); // -300
+		SetGravity(D3DXVECTOR3(0.0f, -300.0f, 0.0f)); // -300
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);
@@ -686,23 +704,71 @@ void CTerrainPlayer::OnCameraUpdated(float fTimeElapsed)
 	}
 }
 
+//140 30  (골렘, 플레이어 공격 충돌 반경)
+float CPlayer::CalculateDistance(D3DXVECTOR3 d3dxvinputPosition)
+{
+	float fDistnace = ((d3dxvinputPosition.x - GetPosition().x) * (d3dxvinputPosition.x - GetPosition().x)
+		+ (d3dxvinputPosition.z - GetPosition().z) * (d3dxvinputPosition.z - GetPosition().z));
+	return fDistnace;
+}
+bool CPlayer::CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition)
+{
+	// 몬스터 - 플레이어 = 이런 벡터임
+	D3DXVECTOR3 d3dxvLookPlayer = d3dxvPlayerPosition - GetPosition();
+	D3DXVec3Normalize(&d3dxvLookPlayer, &d3dxvLookPlayer);
+
+	float fAngle = D3DXVec3Dot(&GetLookAt(), &d3dxvLookPlayer);
+	float a = (float)acos((double)fAngle);
+	float b = D3DXToDegree(a);
+	if (b <= 10.0)
+		return true;
+	else
+		return false;
+}
+
+//
+void CPlayer::CollisionCheck()
+{
+	CGameManager* pGameManager = CGameManager::GetCGameManager();
+
+	// 거리 안에 없으면 충돌 검사에서 제외된다.
+	for (int i = 0; i < pGameManager->m_uiMonstersNum; i++)
+	{
+		if (CalculateDistance(pGameManager->m_ppMonster[i]->GetPosition()) <= 28900.0)
+		{
+
+			if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1)
+			{
+				if (CalculateCollisionRange(pGameManager->m_ppMonster[i]->GetPosition()))
+				{
+					if (628 <= m_AnimationClip[2].llNowTime && m_AnimationClip[2].llNowTime <= 861)
+						cout << "어택1 성공" << endl;
+				}
+			}
+			else if (m_nAnimationState == ANIMATAION_CLIP_ATTACK2)
+			{
+				if (CalculateCollisionRange(pGameManager->m_ppMonster[i]->GetPosition()))
+				{
+					if (628 <= m_AnimationClip[2].llNowTime && m_AnimationClip[2].llNowTime <= 861)
+						cout << "어택2 성공" << endl;
+				}
+			}
+
+		}
+	}
+	
+}
+// 1160
+// 628일 때 충돌 처리.
+
+
 void CPlayer::Animate(float fTimeElapsed)
 {
-
+	CollisionCheck();
 }
+
+
+
 void CTerrainPlayer::Animate(float fTimeElapsed)
 {
-	//Scale(D3DXVECTOR3(0.3, 0.3, 0.3));
-	//여기서는 안된다 하더라.
-
-	//cout << "플레이어 호풀" << endl;
-	//cout << "누구의 좌표??" << m_d3dxvPosition.x << "   " << m_d3dxvPosition.y<< "  " << m_d3dxvPosition.z << endl;
-
-
-
-	// 이동된다.
-	//m_d3dxvPosition += D3DXVECTOR3(0.0f, 0.0f, fTimeElapsed * 100);
-
-	// 안된다.
-	//m_d3dxmtxWorld._43 += fTimeElapsed * 10;
 }

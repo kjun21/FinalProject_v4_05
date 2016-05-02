@@ -91,6 +91,7 @@
     <ClCompile Include="Direct3DBase.cpp" />
     <ClCompile Include="FixedMesh.cpp" />
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="MonsterShader.cpp" />
     <ClCompile Include="TreeObjectShader.cpp" />
     <ClCompile Include="WaveMesh.cpp" />
     <ClCompile Include="CRotatingObject.cpp" />
@@ -125,6 +126,7 @@
     <ClInclude Include="Direct3DBase.h" />
     <ClInclude Include="FixedMesh.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="MonsterShader.h" />
     <ClInclude Include="TreeObjectShader.h" />
     <ClInclude Include="WaveMesh.h" />
     <ClInclude Include="CRotatingObject.h" />
@@ -168,6 +170,10 @@
     <FxCompile Include="Light.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Monster.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="NormalMapping.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

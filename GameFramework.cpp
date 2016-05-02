@@ -371,7 +371,8 @@ void CGameFramework::BuildObjects()
 	m_pPlayer = m_pPlayerShader->GetPlayer();
 
 
-	m_pOtherPlayerShader = new CWizardShader();
+	// 특별한 셰이더
+	m_pOtherPlayerShader = new COtherPlayerShader();
 	m_pOtherPlayerShader->CreateShader(m_pDirect3D->GetDevice());;
 	m_pOtherPlayerShader->BuildObjects(m_pDirect3D->GetDevice(), pWarriorMesh);;
 
@@ -448,21 +449,21 @@ void CGameFramework::ProcessInput()
 				dwAttack = ATTACK01;
 				//서버 공격키 입력
 				ClientServer *s = ClientServer::getInstangce();
-				s->keyDownAttacket(dwAttack);		
+				//s->keyDownAttacket(dwAttack);		
 			}
 			else if (pKeyBuffer['W'] & 0xF0 && m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2)
 			{
 				dwAttack = ATTACK02;
 				//서버 공격키 입력
 				ClientServer *s = ClientServer::getInstangce();
-				s->keyDownAttacket(dwAttack);	
+				//s->keyDownAttacket(dwAttack);	
 			}
 
 			//서버
-			else if(attackCutState != s->Player[0].getState())
+		/*	else if(attackCutState != s->Player[0].getState())
 			{
 				s->keyUp();		
-			}
+			}*/
 		
 		}
 		// 키보드 입력이 없을 때
@@ -516,10 +517,10 @@ void CGameFramework::ProcessInput()
 	//m_pPlayer->Update(GameTimer->GetTimeElapsed());
 	//서버
 	//ClientServer *s = ClientServer::getInstangce();
-	m_pPlayer->Update(s->time);
+	//m_pPlayer->Update(s->time);
 
 	// 클라
-	//m_pPlayer->Update(GameTimer->GetTimeElapsed());
+	m_pPlayer->Update(GameTimer->GetTimeElapsed());
 }
 
 //  타이머에서 마지막 프레임 이후 경과된 시간을 파라메터로 전달하여 
@@ -537,10 +538,11 @@ void CGameFramework::AnimateObjects()
 	if (m_pPlayer)
 		m_pPlayer->Animate(GameTimer->GetTimeElapsed());
 
-	m_pOtherPlayerShader->AnimateObjects(GameTimer->GetTimeElapsed());
+	//클라
+	//m_pOtherPlayerShader->AnimateObjects(GameTimer->GetTimeElapsed());
 
 	//서버 플레이어 초기좌표 셋팅해주는 부분
-	m_pPlayer->SetPosition(s->Player[0].getPlayerPosition());
+	//m_pPlayer->SetPosition(s->Player[0].getPlayerPosition());
 
 
 	//if (m_pPlayer)

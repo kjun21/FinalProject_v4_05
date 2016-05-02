@@ -217,7 +217,7 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 			pWoodObject->Scale(D3DXVECTOR3(10.0, 10.0, 10.0));
 			//pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
 	
-			pWoodObject->SetPosition(900 * (z + 1), 240.0f, 1050);
+			pWoodObject->SetPosition(200 * (z + 1), 240.0f, 1050);
 			/*		
 			if (z % 2 == 0)
 				pWoodObject->SetPosition(700, 220.0f, 1050);

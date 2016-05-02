@@ -10,7 +10,7 @@ public:
 	CGameManager();
 
 	~CGameManager();
-	static CGameManager* GetCGameTimer()
+	static CGameManager* GetCGameManager()
 	{
 		if (!GameManager)
 			GameManager = new CGameManager();
@@ -19,13 +19,14 @@ public:
 
 	CGameObject** m_ppGameObject;
 
-	CGameObject* m_pPlayer;
+	CGameObject** m_pPlayers;
 	// 
 	CGameObject** m_ppMonster;
 
-	CGameObject* m_potherPlayer;
+	//CGameObject* m_potherPlayer;
 
-	UINT m_nMonsterNum;
+	UINT m_uiMonstersNum;
+	UINT m_uiPlayersNum;
 };
 typedef struct Array
 {

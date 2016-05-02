@@ -877,60 +877,135 @@ void  CHumanObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCam
 }
 
 
-CWizardObject::CWizardObject(ID3D11Device *pd3dDevice, string strFileName) : CGameObject(1)
+CAnimatedObject::CAnimatedObject(ID3D11Device *pd3dDevice, string strFileName) : CGameObject(1)
 {
 	//string strFileName = "Data/walk02Box001";
 
 	/*CCharacterMesh *pHumanMesh = new CCharacterMesh(pd3dDevice, strFileName);
 	SetMesh(pHumanMesh, 0);*/
 
-	ID3D11SamplerState *pd3dSamplerState = NULL;
-	D3D11_SAMPLER_DESC d3dSamplerDesc;
-	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	d3dSamplerDesc.MinLOD = 0;
-	d3dSamplerDesc.MaxLOD = 0;
-	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+	//ID3D11SamplerState *pd3dSamplerState = NULL;
+	//D3D11_SAMPLER_DESC d3dSamplerDesc;
+	//ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	//d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	//d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	//d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	//d3dSamplerDesc.MinLOD = 0;
+	//d3dSamplerDesc.MaxLOD = 0;
+	//pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
 
-	//텍스쳐 리소스를 생성한다.
-	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
-	m_pTexture = new CTexture(1, 1, 0, 0);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/StoneKing.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pTexture->SetTexture(0, pd3dsrvTexture);
-	m_pTexture->SetSampler(0, pd3dSamplerState);
-	pd3dsrvTexture->Release();
+	////텍스쳐 리소스를 생성한다.
+	//ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
+	//m_pTexture = new CTexture(1, 1, 0, 0);
+	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/MovingObject/StoneKing.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
+	//m_pTexture->SetTexture(0, pd3dsrvTexture);
+	//m_pTexture->SetSampler(0, pd3dSamplerState);
 
-	pd3dSamplerState->Release();
+	//pd3dsrvTexture->Release();
+	//pd3dSamplerState->Release();
 
-
-
-
-	CreateShaderVariables(pd3dDevice);
-	AnimationClip* animationClip = NULL;
-	m_AnimationClip = CreateAnimation(animationClip);
+	//CreateShaderVariables(pd3dDevice);
+	//AnimationClip* animationClip = NULL;
+	//m_uiAnimationClipNum = 5;
+	//m_AnimationClip = CreateAnimation(animationClip);
 
 
-
-	// Rotate(-90.0, 0.0, 0.0);
-	// Scale(D3DXVECTOR3(0.8, 0.8, 0.8));
 }
-CWizardObject::~CWizardObject()
+CAnimatedObject::~CAnimatedObject()
 {
+	//if (m_AnimationClip) delete m_AnimationClip;
+
 }
 
 
-void CWizardObject::Animate(float fTimeElapsed)
+void CAnimatedObject::Animate(float fTimeElapsed)
 {
 	//CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
 	//MoveStrafe(GameTimer->GetTimeElapsed() * 10.0f);
 	//MoveForward(GameTimer->GetTimeElapsed() * 10.0f); 
 }
 
-void  CWizardObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void CAnimatedObject::CreateShaderVariables(ID3D11Device *pd3dDevice)
+{
+	//월드 변환 행렬을 위한 상수 버퍼를 생성한다.
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(VS_CB_RESULT_MATRIX);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	if (pd3dDevice->CreateBuffer(&bd, NULL, &m_pd3dcbAnimation) == S_OK)
+		std::cout << "success" << std::endl;
+
+}
+void CAnimatedObject::CreateAnimation()
+{
+	//UINT uiAnimationClipNums = 5;
+	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
+	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
+	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_ATTACK1;
+	m_AnimationClip[2].m_nAnimationState = ANIMATAION_CLIP_ATTACK2;
+	m_AnimationClip[3].m_nAnimationState = ANIMATAION_CLIP_RUN;
+	m_AnimationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
+
+	m_AnimationClip[0].m_strFileName = "StoneKing_AttackReady.txt";
+	m_AnimationClip[1].m_strFileName = "StoneKing_Attack1.txt";
+	m_AnimationClip[2].m_strFileName = "StoneKing_Attack2.txt";
+	m_AnimationClip[3].m_strFileName = "StoneKing_Run.txt";
+	m_AnimationClip[4].m_strFileName = "StoneKing_Death.txt";
+
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
+	{
+		LoadAnimation( i);
+		//cout << i << "번째 로딩 성공" << endl;
+	}
+	//return animationClip;
+}
+void CAnimatedObject::LoadAnimation( UINT k)
+{
+	FILE *pFile = NULL;
+	long long llAniTime = 0;
+	string strFileName = "Data/";
+	strFileName += m_AnimationClip[k].m_strFileName;
+	//_wfopen_s(&pFile, L"Data/firstStepBox001_matrix.txt", L"rt");
+	fopen_s(&pFile, strFileName.c_str(), "rt");
+	fscanf_s(pFile, "%d \n", &llAniTime);
+	fscanf_s(pFile, "%d \n", &m_AnimationClip[k].m_uiBoneIndexCount);
+	m_AnimationClip[k].m_llAniTime = llAniTime;
+
+	m_AnimationClip[k].m_ppResultMatrix = new D3DXMATRIX*[m_AnimationClip[k].m_llAniTime / 10];
+	m_AnimationClip[k].m_fTimePos = 0.0f;
+	m_AnimationClip[k].llNowTime = 0;
+
+
+	for (long long i = 0; i < m_AnimationClip[k].m_llAniTime / 10; ++i)
+	{
+		// 최종 행렬 -> 매 초마다 해당하는    (포인터 배열을 가지고 있는)
+		m_AnimationClip[k].m_ppResultMatrix[i] = new D3DXMATRIX[m_AnimationClip[k].m_uiBoneIndexCount];
+	}
+	for (long long i = 0; i <m_AnimationClip[k].m_llAniTime / 10; ++i)
+	{
+		for (unsigned int j = 0; j <m_AnimationClip[k].m_uiBoneIndexCount; ++j)
+		{
+			//cout << i << "  " << j << endl;
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&m_AnimationClip[k].m_ppResultMatrix[i][j]._11, &m_AnimationClip[k].m_ppResultMatrix[i][j]._12, &m_AnimationClip[k].m_ppResultMatrix[i][j]._13, &m_AnimationClip[k].m_ppResultMatrix[i][j]._14);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&m_AnimationClip[k].m_ppResultMatrix[i][j]._21, &m_AnimationClip[k].m_ppResultMatrix[i][j]._22, &m_AnimationClip[k].m_ppResultMatrix[i][j]._23, &m_AnimationClip[k].m_ppResultMatrix[i][j]._24);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&m_AnimationClip[k].m_ppResultMatrix[i][j]._31, &m_AnimationClip[k].m_ppResultMatrix[i][j]._32, &m_AnimationClip[k].m_ppResultMatrix[i][j]._33, &m_AnimationClip[k].m_ppResultMatrix[i][j]._34);
+			fscanf_s(pFile, "%f %f %f %f  \n",
+				&m_AnimationClip[k].m_ppResultMatrix[i][j]._41, &m_AnimationClip[k].m_ppResultMatrix[i][j]._42, &m_AnimationClip[k].m_ppResultMatrix[i][j]._43, &m_AnimationClip[k].m_ppResultMatrix[i][j]._44);
+		}
+	}
+	::fclose(pFile);
+}
+
+
+void  CAnimatedObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
 	//CShader::UpdateShaderVariable(pd3dDeviceContext, &m_d3dxmtxWorld);
 	//서버 애니메이션 상태 업데이트
@@ -938,7 +1013,7 @@ void  CWizardObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCa
 	ClientServer *s = ClientServer::getInstangce();
 	//**********************아래거 주석할것.
 	//for (auto i = 1; i < ROOM_MAX_PLAYER;++i)
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
 	{
 		if (m_AnimationClip[i].m_nAnimationState == m_nAnimationState)
 		{
@@ -963,7 +1038,7 @@ void  CWizardObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCa
 			D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
 			pd3dDeviceContext->Map(m_pd3dcbAnimation, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
 			m_cbMapData = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
-			
+
 			for (int j = 0; j < MaxBone; j++) //왼쪽
 				m_cbMapData->m_d3dxmtxResult[j] = m_AnimationClip[i].m_ppResultMatrix[m_AnimationClip[i].llNowTime / 10][j];
 			pd3dDeviceContext->Unmap(m_pd3dcbAnimation, 0);
@@ -978,10 +1053,119 @@ void  CWizardObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCa
 	//if (m_ppMeshes && m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dDeviceContext);
 }
 
+COtherPlayerObject::COtherPlayerObject(ID3D11Device *pd3dDevice, string strFileName) : CAnimatedObject(pd3dDevice,  strFileName)
+{
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = 0;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
+	m_pTexture = new CTexture(1, 1, 0, 0);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/MovingObject/StoneKing.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pTexture->SetTexture(0, pd3dsrvTexture);
+	m_pTexture->SetSampler(0, pd3dSamplerState);
+
+	pd3dsrvTexture->Release();
+	pd3dSamplerState->Release();
+
+	CreateShaderVariables(pd3dDevice);
+	//AnimationClip* animationClip = NULL;
+	m_uiAnimationClipNum = 5;
+	 CreateAnimation();
+}
+
+COtherPlayerObject::~COtherPlayerObject()
+{
+	if (m_pd3dcbAnimation)m_pd3dcbAnimation->Release();
+
+	m_AnimationClip->ReleaseObjects();
+	if (m_AnimationClip)
+		delete m_AnimationClip;
+}
+void  COtherPlayerObject::CreateAnimation()
+{
+	//UINT uiAnimationClipNums = 5;
+	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
+	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
+	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_ATTACK1;
+	m_AnimationClip[2].m_nAnimationState = ANIMATAION_CLIP_ATTACK2;
+	m_AnimationClip[3].m_nAnimationState = ANIMATAION_CLIP_RUN;
+	m_AnimationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
+
+	m_AnimationClip[0].m_strFileName = "StoneKing_AttackReady.txt";
+	m_AnimationClip[1].m_strFileName = "StoneKing_Attack1.txt";
+	m_AnimationClip[2].m_strFileName = "StoneKing_Attack2.txt";
+	m_AnimationClip[3].m_strFileName = "StoneKing_Run.txt";
+	m_AnimationClip[4].m_strFileName = "StoneKing_Death.txt";
+
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
+	{
+		LoadAnimation( i);
+		//cout << i << "번째 로딩 성공" << endl;
+	}
+	//return animationClip;
+}
+
+CMonsterObject::CMonsterObject(ID3D11Device *pd3dDevice, string strFileName) : CAnimatedObject(pd3dDevice, strFileName)
+{
+	//string strFileName = "Data/Golem_Vertex.txt";
+
+
+	CCharacterMesh*pCCharacterMesh = new CCharacterMesh(pd3dDevice, strFileName);
+	SetMesh(pCCharacterMesh, 0);
+	//CBoundingSphere* pHumanMesh = new CBoundingSphere(pd3dDevice, 20.0f, 10.0f, 10.0f);
+	//SetMesh(pHumanMesh, 1);
+	//Scale(D3DXVECTOR3(0.01, 0.01, 0.01));
+
+	m_fAttackRadius = 140;
+	m_nAnimationState = 0;
+	CreateShaderVariables(pd3dDevice);
+	m_uiAnimationClipNum = 4;
+	CreateAnimation();
+}
 
 
 
-void CWizardObject::CreateShaderVariables(ID3D11Device *pd3dDevice)
+void  CMonsterObject::CreateAnimation()
+{
+	//UINT uiAnimationClipNums = 5;
+	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
+	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
+	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_RUN;
+	m_AnimationClip[2].m_nAnimationState = ANIMATAION_CLIP_ATTACK1;
+	m_AnimationClip[3].m_nAnimationState = 3;  // 매칭이 안맞는다.
+
+	//animationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
+
+	m_AnimationClip[0].m_strFileName = "GolemIdle.txt";
+	m_AnimationClip[1].m_strFileName = "GolemWalk_matrix.txt";
+	m_AnimationClip[2].m_strFileName = "GolemAttack.txt";
+	m_AnimationClip[3].m_strFileName = "GolemDeath.txt";
+	
+	//animationClip[4].m_strFileName = "StoneKing_Death.txt";
+
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
+	{
+		LoadAnimation( i);
+		//cout << i << "번째 로딩 성공" << endl;
+	}
+//	return animationClip;
+}
+CMonsterObject ::~CMonsterObject()
+{
+}
+
+
+
+void CMonsterObject::CreateShaderVariables(ID3D11Device *pd3dDevice)
 {
 	//월드 변환 행렬을 위한 상수 버퍼를 생성한다.
 	D3D11_BUFFER_DESC bd;
@@ -990,84 +1174,114 @@ void CWizardObject::CreateShaderVariables(ID3D11Device *pd3dDevice)
 	bd.ByteWidth = sizeof(VS_CB_RESULT_MATRIX);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	//D3D11_SUBRESOURCE_DATA d3dBufferData;
+	//ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+
+	//VS_CB_MONSTER_RESULT_MATRIX monsterMatrice;
+
+	//m_AnimationClip[0].m_ppResultMatrix;
+
+	//d3dBufferData.pSysMem = 
 
 	if (pd3dDevice->CreateBuffer(&bd, NULL, &m_pd3dcbAnimation) == S_OK)
 		std::cout << "success" << std::endl;
 
 }
-AnimationClip* CWizardObject::CreateAnimation(AnimationClip* animationClip)
+
+// 누적된 시간에 대해 애니메이션이 재생된다.
+// 즉, 현재 상태에 대해서만 시간을 누적시켜 상수버퍼에 보내고
+// 재생되지 않는 애니메이션은 시간을 누적시키지 않고, 상수 버퍼에 보낸다.
+
+//*** 해당 애니메이션이 아닌데 이걸 왜 갱신 시킴????
+
+// 1번 애니네이션(걷는)만 재생이된다
+// 하지만, 상태값들은 모두 1이 아니다.
+// 1번만 재생됬다는것은 1번만 갱신이 되었다는 뜻이다.
+
+void  CMonsterObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
-	UINT uiAnimationClipNums = 5;
-	animationClip = new AnimationClip[uiAnimationClipNums];
-	animationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
-	animationClip[1].m_nAnimationState = ANIMATAION_CLIP_ATTACK1;
-	animationClip[2].m_nAnimationState = ANIMATAION_CLIP_ATTACK2;
-	animationClip[3].m_nAnimationState = ANIMATAION_CLIP_RUN;
-	animationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
-
-	animationClip[0].m_strFileName = "StoneKing_AttackReady.txt";
-	animationClip[1].m_strFileName = "StoneKing_Attack1.txt";
-	animationClip[2].m_strFileName = "StoneKing_Attack2.txt";
-	animationClip[3].m_strFileName = "StoneKing_Run.txt";
-	animationClip[4].m_strFileName = "StoneKing_Death.txt";
-
-	for (int i = 0; i < uiAnimationClipNums; i++)
+	
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
 	{
-		LoadAnimation(animationClip, i);
-		//cout << i << "번째 로딩 성공" << endl;
-	}
-	return animationClip;
-}
-void CWizardObject::LoadAnimation(AnimationClip* animationClip, UINT k)
-{
-	FILE *pFile = NULL;
-	long long llAniTime = 0;
-	string strFileName = "Data/";
-	strFileName += animationClip[k].m_strFileName;
-	//_wfopen_s(&pFile, L"Data/firstStepBox001_matrix.txt", L"rt");
-	fopen_s(&pFile, strFileName.c_str(), "rt");
-	fscanf_s(pFile, "%d \n", &llAniTime);
-	fscanf_s(pFile, "%d \n", &animationClip[k].m_uiBoneIndexCount);
-	animationClip[k].m_llAniTime = llAniTime;
-
-	animationClip[k].m_ppResultMatrix = new D3DXMATRIX*[animationClip[k].m_llAniTime / 10];
-	animationClip[k].m_fTimePos = 0.0f;
-	animationClip[k].llNowTime = 0;
-
-
-	for (long long i = 0; i < animationClip[k].m_llAniTime / 10; ++i)
-	{
-		// 최종 행렬 -> 매 초마다 해당하는    (포인터 배열을 가지고 있는)
-		animationClip[k].m_ppResultMatrix[i] = new D3DXMATRIX[animationClip[k].m_uiBoneIndexCount];
-	}
-	for (long long i = 0; i <animationClip[k].m_llAniTime / 10; ++i)
-	{
-		for (unsigned int j = 0; j < animationClip[k].m_uiBoneIndexCount; ++j)
+		if (m_AnimationClip[i].m_nAnimationState == m_nAnimationState)
 		{
-			//cout << i << "  " << j << endl;
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&animationClip[k].m_ppResultMatrix[i][j]._11, &animationClip[k].m_ppResultMatrix[i][j]._12, &animationClip[k].m_ppResultMatrix[i][j]._13, &animationClip[k].m_ppResultMatrix[i][j]._14);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&animationClip[k].m_ppResultMatrix[i][j]._21, &animationClip[k].m_ppResultMatrix[i][j]._22, &animationClip[k].m_ppResultMatrix[i][j]._23, &animationClip[k].m_ppResultMatrix[i][j]._24);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&animationClip[k].m_ppResultMatrix[i][j]._31, &animationClip[k].m_ppResultMatrix[i][j]._32, &animationClip[k].m_ppResultMatrix[i][j]._33, &animationClip[k].m_ppResultMatrix[i][j]._34);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&animationClip[k].m_ppResultMatrix[i][j]._41, &animationClip[k].m_ppResultMatrix[i][j]._42, &animationClip[k].m_ppResultMatrix[i][j]._43, &animationClip[k].m_ppResultMatrix[i][j]._44);
+			CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
+			m_AnimationClip[i].m_fTimePos += GameTimer->GetTimeElapsed();
+			m_AnimationClip[i].llNowTime = m_AnimationClip[i].m_fTimePos * 1000;
+
+			if (m_AnimationClip[i].llNowTime >= m_AnimationClip[i].m_llAniTime)
+			{
+				m_AnimationClip[i].llNowTime -= m_AnimationClip[i].m_llAniTime;
+				m_AnimationClip[i].m_fTimePos = 0;
+
+				// 
+				/*if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1
+				|| m_nAnimationState == ANIMATAION_CLIP_ATTACK2
+				|| m_nAnimationState == ANIMATAION_CLIP_DEATH)
+				m_nAnimationState = ANIMATAION_CLIP_IDLE;*/
+			}
+			D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
+			pd3dDeviceContext->Map(m_pd3dcbAnimation, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
+			m_cbMonsterMatrice = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
+			for (int j = 0; j < MaxBone; j++) //왼쪽
+			{
+				m_cbMonsterMatrice->m_d3dxmtxResult[j] = m_AnimationClip[i].m_ppResultMatrix[m_AnimationClip[i].llNowTime / 10][j];
+				/*	m_cbMonsterMatrice->m_d3dxmtxWalk[j] =   m_AnimationClip[1].m_ppResultMatrix[m_AnimationClip[1].llNowTime / 10][j];
+				m_cbMonsterMatrice->m_d3dxmtxAttack[j] = m_AnimationClip[2].m_ppResultMatrix[m_AnimationClip[2].llNowTime / 10][j];
+				m_cbMonsterMatrice->m_d3dxmtxDeath[j] =  m_AnimationClip[3].m_ppResultMatrix[m_AnimationClip[3].llNowTime / 10][j];*/
+			}
+			pd3dDeviceContext->Unmap(m_pd3dcbAnimation, 0);
+
+			if (m_pd3dcbAnimation != NULL)
+				pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_RESULT_MATRIX, 1, &m_pd3dcbAnimation);
 		}
 	}
-	::fclose(pFile);
+	CGameObject::Render(pd3dDeviceContext, pCamera);
+	
 }
+//140 30  (골렘, 플레이어 공격 충돌 반경)
+float CMonsterObject::CalculateDistance(D3DXVECTOR3 d3dxvinputPosition)
+{
+	float fDistnace = ((d3dxvinputPosition.x - GetPosition().x) * (d3dxvinputPosition.x - GetPosition().x)
+		+ (d3dxvinputPosition.z - GetPosition().z) * (d3dxvinputPosition.z - GetPosition().z));
+	return fDistnace;
+}
+bool CMonsterObject :: CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition)
+{
+	// 몬스터 - 플레이어 = 이런 벡터임
+	D3DXVECTOR3 d3dxvLookPlayer = d3dxvPlayerPosition - GetPosition();
+	D3DXVec3Normalize(&d3dxvLookPlayer, &d3dxvLookPlayer);
+	
+	float fAngle = D3DXVec3Dot(&GetLookAt(), &d3dxvLookPlayer);
+	float a = (float)acos((double)fAngle);
+	float b = D3DXToDegree(a);
+	if (b <= 10.0)
+		return true;
+	else
+		return false;
+}
+// m_AnimationClip[2].llNowTime >=628
+void CMonsterObject::CollisionCheck(CGameObject** ppGameObject)
+{
+	
+	// 공격 모션일때 충돌 처리가 일어난다 해. 22~26프레임일때
+	if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1 
+		        && CalculateDistance(ppGameObject[0]->GetPosition()) <= 28900.0
+				&&CalculateCollisionRange(ppGameObject[0]->GetPosition()))
+	{
+		if (628 <= m_AnimationClip[2].llNowTime && m_AnimationClip[2].llNowTime <= 861)
+			cout << "아픔" << endl;
+	}
+}
+// 1160
+// 628일 때 충돌 처리.
+void CMonsterObject::Animate(float fTimeElapsed)
+{
+	CGameManager* pGameManager = CGameManager::GetCGameManager();
+	CollisionCheck(pGameManager->m_pPlayers);
+	
 
-
-
-
-
-
-
-
-
-
-
+}
 CLeavesObject::CLeavesObject(ID3D11Device *pd3dDevice, string strFileName) : CGameObject(1)
 {
 	//string strFileName = "Data/NewFantaLeaves02_Vertex.txt";
@@ -1152,12 +1366,16 @@ CBoundingBoxObject::CBoundingBoxObject(ID3D11Device *pd3dDevice) : CGameObject(1
 {
 	// 나무01 53.8551f, 73.0353f, 51.4314f
 	// 물 490.0f, 73.0353f, 500.0f
-	CBoundingMesh* pHumanMesh = new CBoundingMesh(pd3dDevice, 14.0f, 60.0f, 14.0f);
-	SetMesh(pHumanMesh, 0);
+	// 캐릭어 14.0f, 60.0f, 14.0f);
+
+	//CBoundingMesh* pHumanMesh = new CBoundingMesh(pd3dDevice, 140.0f, 14.0f, 30.0f);
+
+
+	/*CBoundingCircle* pHumanMesh = new CBoundingCircle(pd3dDevice, 140.0f, 20.0f, 1.0f);
+	SetMesh(pHumanMesh, 0);*/
 }
 
 CBoundingBoxObject::~CBoundingBoxObject()
 {
-
-
 }
+

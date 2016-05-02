@@ -262,10 +262,85 @@ float4 PSInstancedDiffusedColor(VS_INSTANCED_COLOR_OUTPUT input) : SV_Target
 {
 	return input.color;
 }
+
+
+#define MAX_MATRIX 200
+cbuffer cbBoneWorldMatrix : register(b5)
+{
+	row_major matrix gmtxBone[MAX_MATRIX];
+}
+
 VS_DIFFUSED_COLOR_OUTPUT VSDiffusedColor(VS_DIFFUSED_COLOR_INPUT input)
 {
 	VS_DIFFUSED_COLOR_OUTPUT output = (VS_DIFFUSED_COLOR_OUTPUT)0;
-	output.position = mul(float4(input.position, 1.0f), mul(mul(gmtxWorld, gmtxView), gmtxProjection));
+
+	float4 Pos = float4(input.position, 1);
+		///22 28 36
+		// 16
+
+
+		//71가지 있음
+		uint bone = 61;
+
+	uint iBone0 = bone;
+	uint iBone1 = bone;
+	uint iBone2 = bone;
+	uint iBone3 = bone;
+
+	uint iBone4 = bone;
+	uint iBone5 = bone;
+	uint iBone6 = bone;
+	uint iBone7 = bone;
+
+
+	float fWeight0 = 1.0f;
+	float fWeight1 = 0.0f;
+	float fWeight2 = 0.0f;
+	float fWeight3 = 0.0f;
+
+	float fWeight4 = 0.0f;
+	float fWeight5 = 0.0f;
+	float fWeight6 = 0.0f;
+	float fWeight7 = 0.0f;
+
+	matrix m0 = gmtxBone[iBone0];
+	matrix m1 = gmtxBone[iBone1];
+	matrix m2 = gmtxBone[iBone2];
+	matrix m3 = gmtxBone[iBone3];
+
+	matrix m4 = gmtxBone[iBone4];
+	matrix m5 = gmtxBone[iBone5];
+	matrix m6 = gmtxBone[iBone6];
+	matrix m7 = gmtxBone[iBone7];
+
+
+
+
+	//matrix m8 = gmtxBone[22];
+
+
+	if (fWeight0 > 0) output.position += fWeight0 * mul(Pos, m0);
+	if (fWeight1 > 0) output.position += fWeight1 * mul(Pos, m1);
+	if (fWeight2 > 0) output.position += fWeight2 * mul(Pos, m2);
+	if (fWeight3 > 0) output.position += fWeight3 * mul(Pos, m3);
+	if (fWeight4 > 0) output.position += fWeight4 * mul(Pos, m4);
+	if (fWeight5 > 0) output.position += fWeight5 * mul(Pos, m5);
+	if (fWeight6 > 0) output.position += fWeight6 * mul(Pos, m6);
+	if (fWeight7 > 0) output.position += fWeight7 * mul(Pos, m7);
+
+
+	output.position = float4(input.position, 1);
+
+	output.position = mul(output.position, gmtxWorld);
+	output.position = mul(output.position, gmtxView);
+	output.position = mul(output.position, gmtxProjection);
+
+
+
+
+
+
+	//output.position = mul(float4(input.position, 1.0f), mul(mul(gmtxWorld, gmtxView), gmtxProjection));
 	output.color = input.color;
 
 	return(output);

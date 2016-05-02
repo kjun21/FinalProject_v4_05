@@ -23,7 +23,7 @@ struct VS_CB_WORLD_MATRIX
 struct VS_VB_INSTANCE
 {
 	D3DXMATRIX m_d3dxTransform;
-	D3DXCOLOR m_d3dxColor;
+	//D3DXCOLOR m_d3dxColor;
 };
 
 
@@ -188,10 +188,8 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
 
 	//다음 멤버변수를 추가한다.
-private:
+protected:
 	CTexture *m_pTexture;
-
-private:
 	CMaterial *m_pMaterial;
 	UINT m_nInstanceBufferStride;
 	UINT m_nInstanceBufferOffset;
@@ -364,11 +362,11 @@ public:
 };
 
 
-class CWizardShader : public CShader
+class COtherPlayerShader : public CShader
 {
 public:
-	CWizardShader();
-	virtual ~CWizardShader();
+	COtherPlayerShader();
+	virtual ~COtherPlayerShader();
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarriorMesh);
 	virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
@@ -393,10 +391,24 @@ protected:
 	float m_fTimePos;
 };
 
+
+
+
+
 class CCrushBoxShader : public CShader
 {
 public:
 	CCrushBoxShader();
 	virtual ~CCrushBoxShader();
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
+	virtual void CreateShaderVariables(ID3D11Device * pd3dDevice);
+
+	float m_fTimePos;
+	long long m_llAniTime;
+	UINT m_uiBoneIndexCount;
+	ID3D11Buffer* m_pd3dcbResult;
+	VS_CB_RESULT_MATRIX* m_cbMapData;
+	VS_CB_RESULT_MATRIX **m_pvscbResultMatrix;
+	D3DXMATRIX**  m_ppResultMatrix;
 };

@@ -870,6 +870,7 @@ CCubeMeshTextured::~CCubeMeshTextured()
 {
 }
 
+
 CSphereMeshTextured::CSphereMeshTextured(ID3D11Device *pd3dDevice, float fRadius, int nSlices, int nStacks) : CMeshTextured(pd3dDevice)
 {
 	m_nVertices = (nSlices * nStacks) * 3 * 2;
@@ -1344,6 +1345,7 @@ CCubeMeshTexturedIlluminated::CCubeMeshTexturedIlluminated(ID3D11Device *pd3dDev
 CCubeMeshTexturedIlluminated::~CCubeMeshTexturedIlluminated()
 {
 }
+
 
 
 //LabProject13-2의 CSphereMeshTextured 클래스의 생성자에 법선 벡터를 추가한다.
@@ -2332,7 +2334,7 @@ CCharacterMesh::CCharacterMesh(ID3D11Device *pd3dDevice, string strFileName) : C
 	d3dBufferDesc.CPUAccessFlags = 0;
 	D3D11_SUBRESOURCE_DATA d3dBufferData;
 
-
+	
 	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
 	d3dBufferData.pSysMem = m_pd3dxvPositions;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dPositionBuffer);
@@ -2431,15 +2433,7 @@ CCharacterMesh::~CCharacterMesh()
 		delete[] m_pBoneIndex2;
 	}
 }
-void CCharacterMesh::CreateChileMesh(ID3D11Device *pd3dDevice)
-{
 
-	string strFileName = "Data/walk01Cylinder005";
-	int nChileNum = 1;
-	pChildMeshs = new CCharacterMesh*[nChileNum];
-	pChildMeshs[0] = new  CCharacterMesh(pd3dDevice, strFileName);
-	m_vChildList.push_back(pChildMeshs[0]);
-}
 
 void  CCharacterMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
@@ -2453,12 +2447,8 @@ void  CCharacterMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 		pd3dDeviceContext->DrawIndexed(m_nIndices, m_nStartIndex, m_nBaseVertex);
 	else
 		pd3dDeviceContext->Draw(m_nVertices, m_nStartVertex);
-
-	//for (int i = 0; i < 1; i++)
-	//	m_vChildList[i]->Render(pd3dDeviceContext);
-
-	//for (auto iter : this->m_vChildList)
-	//	iter->Render(pd3dDeviceContext);
+	// pd3dDeviceContext->Draw(600, 2400);
+	//900 2700
 
 
 	pd3dDeviceContext->RSSetState(NULL);
@@ -2467,6 +2457,7 @@ void  CCharacterMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 CBoundingMesh::CBoundingMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice)
 {
 	m_nVertices = 8;
+	//m_nVertices = 6;
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	float fx = fWidth, fy = fHeight, fz = fDepth;
@@ -2481,6 +2472,17 @@ CBoundingMesh::CBoundingMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeig
 	m_pd3dxvPositions[5] = D3DXVECTOR3(+fx, -fy, -fz);
 	m_pd3dxvPositions[6] = D3DXVECTOR3(+fx, -fy, +fz);
 	m_pd3dxvPositions[7] = D3DXVECTOR3(-fx, -fy, +fz);
+
+
+
+	/*m_pd3dxvPositions[0] = D3DXVECTOR3(+0, +0, +fz/2);
+	m_pd3dxvPositions[1] = D3DXVECTOR3(+fx, +0, +fz/2);
+	m_pd3dxvPositions[2] = D3DXVECTOR3(+0, +0, +fz);
+
+	m_pd3dxvPositions[3] = D3DXVECTOR3(+0, +0, +fz / 2);
+	m_pd3dxvPositions[4] = D3DXVECTOR3(+0, +0, -fz/2);
+	m_pd3dxvPositions[5] = D3DXVECTOR3(+0, -fy, -fz/2);*/
+
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
@@ -2552,4 +2554,169 @@ CBoundingMesh::CBoundingMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeig
 CBoundingMesh::~CBoundingMesh()
 {
 
+}
+
+CBoundingSphere::CBoundingSphere(ID3D11Device *pd3dDevice, float fRadius, int nSlices, int nStacks) : CMesh(pd3dDevice)
+{
+	m_nVertices = (nSlices * nStacks) * 3 * 2;
+	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_pd3dxvPositions = new D3DXVECTOR3[m_nVertices];
+
+	float theta_i, theta_ii, phi_j, phi_jj, fRadius_j, fRadius_jj, y_j, y_jj;
+	for (int j = 0, k = 0; j < nStacks; j++)
+	{
+		phi_j = float(D3DX_PI / nStacks) * j;
+		phi_jj = float(D3DX_PI / nStacks) * (j + 1);
+		fRadius_j = fRadius * sinf(phi_j);
+		fRadius_jj = fRadius * sinf(phi_jj);
+		y_j = fRadius * cosf(phi_j);
+		y_jj = fRadius * cosf(phi_jj);
+		for (int i = 0; i < nSlices; i++)
+		{
+			theta_i = float(2 * D3DX_PI / nSlices) * i;
+			theta_ii = float(2 * D3DX_PI / nSlices) * (i + 1);
+			m_pd3dxvPositions[k++] = D3DXVECTOR3(fRadius_j*cosf(theta_i), y_j, fRadius_j*sinf(theta_i));
+			m_pd3dxvPositions[k++] = D3DXVECTOR3(fRadius_jj*cosf(theta_i), y_jj, fRadius_jj*sinf(theta_i));
+			m_pd3dxvPositions[k++] = D3DXVECTOR3(fRadius_j*cosf(theta_ii), y_j, fRadius_j*sinf(theta_ii));
+			m_pd3dxvPositions[k++] = D3DXVECTOR3(fRadius_jj*cosf(theta_i), y_jj, fRadius_jj*sinf(theta_i));
+			m_pd3dxvPositions[k++] = D3DXVECTOR3(fRadius_jj*cosf(theta_ii), y_jj, fRadius_jj*sinf(theta_ii));
+			m_pd3dxvPositions[k++] = D3DXVECTOR3(fRadius_j*cosf(theta_ii), y_j, fRadius_j*sinf(theta_ii));
+			
+		}
+	}
+
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR3)* m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pd3dxvPositions;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dPositionBuffer);
+
+
+	//구 메쉬의 정점 버퍼(색상 버퍼)를 생성한다.
+	D3DXCOLOR *pd3dxColors = new D3DXCOLOR[m_nVertices];
+	for (int i = 0; i < m_nVertices; i++)
+		pd3dxColors[i] = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+	//pd3dxColors[i] = RANDOM_COLOR;
+
+	//정점의 두 번째 요소를 나타내는 버퍼를 생성한다.
+	d3dBufferDesc.ByteWidth = sizeof(D3DXCOLOR) * m_nVertices;
+	d3dBufferData.pSysMem = pd3dxColors;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dColorBuffer);
+	delete[] pd3dxColors;
+
+	//정점을 나타내는 두 개의 버퍼와 정보를 입력 조립기로 전달할 수 있는 형태로 구성한다.
+	ID3D11Buffer *ppd3dBuffers[2] = { m_pd3dPositionBuffer, m_pd3dColorBuffer };
+	UINT pnBufferStrides[2] = { sizeof(D3DXVECTOR3), sizeof(D3DXCOLOR) };
+	UINT pnBufferOffsets[2] = { 0, 0 };
+	AssembleToVertexBuffer(2, ppd3dBuffers, pnBufferStrides, pnBufferOffsets);
+
+
+	/*	m_bcBoundingCube.m_d3dxvMinimum = D3DXVECTOR3(-fx, -fy, -fz);
+	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(+fx, +fy, +fz)*/;
+
+
+	D3D11_RASTERIZER_DESC d3dxRasterizer;
+	ZeroMemory(&d3dxRasterizer, sizeof(D3D11_RASTERIZER_DESC));
+	d3dxRasterizer.FillMode = D3D11_FILL_WIREFRAME;
+	d3dxRasterizer.CullMode = D3D11_CULL_BACK;
+	pd3dDevice->CreateRasterizerState(&d3dxRasterizer, &m_pd3dRasterizerState);
+
+}
+
+CBoundingSphere::~CBoundingSphere()
+{
+}
+void  CBoundingSphere::Render(ID3D11DeviceContext *pd3dDeviceContext)
+{
+	//메쉬의 정점은 여러 개의 정점 버퍼로 표현된다.
+	pd3dDeviceContext->IASetVertexBuffers(m_nSlot, m_nBuffers, m_ppd3dVertexBuffers, m_pnVertexStrides, m_pnVertexOffsets);
+	pd3dDeviceContext->IASetIndexBuffer(m_pd3dIndexBuffer, m_dxgiIndexFormat, m_nIndexOffset);
+	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
+
+	if (m_pd3dIndexBuffer)
+		pd3dDeviceContext->DrawIndexed(m_nIndices, m_nStartIndex, m_nBaseVertex);
+	else
+		pd3dDeviceContext->Draw(m_nVertices, m_nStartVertex);
+
+
+	pd3dDeviceContext->RSSetState(NULL);
+}
+
+
+CBoundingCircle::CBoundingCircle(ID3D11Device *pd3dDevice, float fRadius, int nSlices, int nStacks) : CMesh(pd3dDevice)
+{
+	m_nVertices = (nSlices * nStacks) * 3 * 2;
+	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+
+
+	int nRadius = fRadius;
+	m_nVertices = 3 * 36;
+	m_pd3dxvPositions = new D3DXVECTOR3[m_nVertices];
+	float  fAngle = 10.0f;
+	for (int i = 0; fAngle <= 360.0; i+=3)
+	{
+		m_pd3dxvPositions[i] =     D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		m_pd3dxvPositions[i + 1] = D3DXVECTOR3(nRadius * cosf((float)D3DXToRadian(fAngle - 10.0f)), 0.0f, nRadius * sinf((float)D3DXToRadian(fAngle - 10.0f)));
+		m_pd3dxvPositions[i + 2] = D3DXVECTOR3(nRadius * cosf((float)D3DXToRadian(fAngle)), 0.0f,              nRadius * sinf((float)D3DXToRadian(fAngle)));
+		fAngle += 10.0f;
+		
+	}
+
+
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR3)* m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pd3dxvPositions;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dPositionBuffer);
+
+
+	//구 메쉬의 정점 버퍼(색상 버퍼)를 생성한다.
+	D3DXCOLOR *pd3dxColors = new D3DXCOLOR[m_nVertices];
+	for (int i = 0; i < m_nVertices; i++)
+		pd3dxColors[i] = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+	//pd3dxColors[i] = RANDOM_COLOR;
+
+	//정점의 두 번째 요소를 나타내는 버퍼를 생성한다.
+	d3dBufferDesc.ByteWidth = sizeof(D3DXCOLOR) * m_nVertices;
+	d3dBufferData.pSysMem = pd3dxColors;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dColorBuffer);
+	delete[] pd3dxColors;
+
+	//정점을 나타내는 두 개의 버퍼와 정보를 입력 조립기로 전달할 수 있는 형태로 구성한다.
+	ID3D11Buffer *ppd3dBuffers[2] = { m_pd3dPositionBuffer, m_pd3dColorBuffer };
+	UINT pnBufferStrides[2] = { sizeof(D3DXVECTOR3), sizeof(D3DXCOLOR) };
+	UINT pnBufferOffsets[2] = { 0, 0 };
+	AssembleToVertexBuffer(2, ppd3dBuffers, pnBufferStrides, pnBufferOffsets);
+
+
+	/*	m_bcBoundingCube.m_d3dxvMinimum = D3DXVECTOR3(-fx, -fy, -fz);
+	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(+fx, +fy, +fz)*/;
+
+
+	D3D11_RASTERIZER_DESC d3dxRasterizer;
+	ZeroMemory(&d3dxRasterizer, sizeof(D3D11_RASTERIZER_DESC));
+	d3dxRasterizer.FillMode = D3D11_FILL_WIREFRAME;
+	d3dxRasterizer.CullMode = D3D11_CULL_BACK;
+	d3dxRasterizer.FrontCounterClockwise = true;
+	pd3dDevice->CreateRasterizerState(&d3dxRasterizer, &m_pd3dRasterizerState);
+
+}
+
+CBoundingCircle::~CBoundingCircle()
+{
 }
