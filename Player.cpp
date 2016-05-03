@@ -27,6 +27,7 @@ CPlayer::CPlayer(int nMeshes) : CGameObject(nMeshes)
 	m_d3dxvDirection = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 	m_d3dxvPreDir = D3DXVECTOR3(0.0f, 0.0f, 0.99998f);
 	m_fBeAttackedRadius = 30.0f;
+	m_fAttackRadius[0] = 120.0f;
 	m_nObjectType = TYPE_PLAYER;
 }
 
@@ -720,29 +721,35 @@ bool CPlayer::CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition)
 	float fAngle = D3DXVec3Dot(&GetLookAt(), &d3dxvLookPlayer);
 	float a = (float)acos((double)fAngle);
 	float b = D3DXToDegree(a);
-	if (b <= 10.0)
+	if (b <= 40.0)
 		return true;
 	else
 		return false;
 }
-
+float CPlayer::CalculateAttackRange(float fAttackRadius, float fBeAttackedRadius)
+{
+	return (fAttackRadius + fBeAttackedRadius) *  (fAttackRadius + fBeAttackedRadius);
+}
 //
 void CPlayer::CollisionCheck()
 {
 	CGameManager* pGameManager = CGameManager::GetCGameManager();
-
+	//cout << pGameManager->m_uiMonstersNum << endl;
 	// 거리 안에 없으면 충돌 검사에서 제외된다.
-	for (int i = 0; i < pGameManager->m_uiMonstersNum; i++)
-	{
-		if (CalculateDistance(pGameManager->m_ppMonster[i]->GetPosition()) <= 28900.0)
+	for (int i = 0; i < pGameManager->m_uiMonstersNum; i++) //몬스터 배열에서 검사
+	{ //몬스터 인식 거리 배제했음.
+		if (CalculateDistance(pGameManager->m_ppMonster[i]->GetPosition()) <= 
+			CalculateAttackRange(GetAttackRadius(0), pGameManager->m_ppMonster[i]->GetBeAttackedRadius()))
 		{
-
+			//cout << "범위 안에 들어옴" << endl;
 			if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1)
 			{
 				if (CalculateCollisionRange(pGameManager->m_ppMonster[i]->GetPosition()))
 				{
-					if (628 <= m_AnimationClip[2].llNowTime && m_AnimationClip[2].llNowTime <= 861)
-						cout << "어택1 성공" << endl;
+					if (m_AnimationClip[1].m_fAttackStartTime <= m_AnimationClip[1].llNowTime &&
+						m_AnimationClip[1].llNowTime <= m_AnimationClip[1].m_fAttackEndTime)
+						pGameManager->m_ppMonster[i]->Die();
+						//cout << "어택1 성공" << endl;
 				}
 			}
 			else if (m_nAnimationState == ANIMATAION_CLIP_ATTACK2)
@@ -764,11 +771,12 @@ void CPlayer::CollisionCheck()
 
 void CPlayer::Animate(float fTimeElapsed)
 {
-	CollisionCheck();
+	
 }
 
 
 
 void CTerrainPlayer::Animate(float fTimeElapsed)
 {
+	CollisionCheck();
 }

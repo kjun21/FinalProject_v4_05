@@ -42,7 +42,10 @@ public:
 public:
 	float CalculateDistance(D3DXVECTOR3 d3dxvinputPosition);
 	bool CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition);
+	float CalculateAttackRange(float fAttackRadius, float fBeAttackedRadius);
 	void CollisionCheck();
+	float GetBeAttackedRadius() { return m_fBeAttackedRadius; }
+	float GetAttackRadius(UINT uiAttackNum) { return m_fAttackRadius[uiAttackNum]; }
 
 public:
 	CPlayer(int nMeshes = 1);
@@ -56,6 +59,7 @@ public:
 
 
 protected:
+	float m_fAttackRadius[2];
 	float m_fBeAttackedRadius;
 
 

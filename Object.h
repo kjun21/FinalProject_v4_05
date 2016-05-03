@@ -157,6 +157,10 @@ public:
 	virtual UINT GetAnimationState(){ return 0; }
 	virtual void RenderAnimation(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera) { }
 
+	virtual float GetBeAttackedRadius() { return 0.0f; }
+	virtual float GetAttackRadius() { return  0.0f; }
+	virtual void Die() {}
+
 	
 private:
 	int m_nReferences;
@@ -457,6 +461,8 @@ class CMonsterObject :  public CAnimatedObject
 protected:
 	VS_CB_RESULT_MATRIX* m_cbMonsterMatrice;
 	float m_fAttackRadius;
+	float m_fBeAttackedRadius;
+	bool m_bMonsterState;
 public:
 	CMonsterObject(ID3D11Device *pd3dDevice, string strFileName);
 	virtual void CreateAnimation();
@@ -470,10 +476,22 @@ public:
 	}
 	virtual void Animate(float fTimeElapsed);
 	void CollisionCheck(CGameObject** ppGameObject);
-	float CalculateDistance(D3DXVECTOR3 d3dxvinputPosition);
+	float CalculateDistance(D3DXVECTOR3 d3dxvinputPosition, D3DXVECTOR3 d3dxvPosition2);
 	bool CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition);
+	float CalculateAttackRange(float fAttackRadius, float fBeAttackedRadius);
+	virtual float GetBeAttackedRadius() { return m_fBeAttackedRadius; }
+	virtual float GetAttackRadius() { return m_fAttackRadius; }
+	virtual void Die() { 
+		cout << "Á×À½" << endl;
+		m_nAnimationState = 3; }
 };
-
+class CGolemObject : public CMonsterObject
+{
+public:
+	CGolemObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~CGolemObject();
+	virtual void CreateAnimation();
+};
 
 
 

@@ -4,8 +4,8 @@
 CGameManager::CGameManager()
 {
 	
-	m_uiMonstersNum = 0;
-	m_ppMonster = new CGameObject*[2];
+	m_uiMonstersNum = 5;
+	m_ppMonster = new CGameObject*[m_uiMonstersNum];
 
 	m_uiPlayersNum = 4;
 	m_pPlayers = new CGameObject*[m_uiPlayersNum];

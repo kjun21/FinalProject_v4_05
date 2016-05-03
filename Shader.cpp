@@ -489,6 +489,10 @@ AnimationClip* CPlayerShader::CreateAnimation(AnimationClip* animationClip)
 	animationClip[3].m_strFileName = "StoneKing_Run.txt";
 	animationClip[4].m_strFileName = "StoneKing_Death.txt";
 
+	animationClip[1].m_fAttackStartTime = 598;
+	animationClip[1].m_fAttackEndTime = 731;
+
+
 	for (int i = 0; i < uiAnimationClipNums; i++)
 	{
 		LoadAnimation(animationClip, i);
@@ -1994,59 +1998,6 @@ void CCrushBoxShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 
-	FILE *pFile = NULL;
-	_wfopen_s(&pFile, L"Data/GolemAttack.txt", L"rt");
-	fscanf_s(pFile, "%d \n", &m_llAniTime);
-	fscanf_s(pFile, "%d \n", &m_uiBoneIndexCount);
-
-
-	m_ppResultMatrix = new D3DXMATRIX*[m_llAniTime / 10];
-
-	for (long long i = 0; i < m_llAniTime / 10; ++i)
-	{
-		// 최종 행렬 -> 매 초마다 해당하는    (포인터 배열을 가지고 있는)
-		m_ppResultMatrix[i] = new D3DXMATRIX[m_uiBoneIndexCount];
-	}
-
-
-	for (long long i = 0; i < m_llAniTime / 10; ++i)
-	{
-		for (unsigned int j = 0; j < m_uiBoneIndexCount; ++j)
-		{
-			//cout << i << "  " << j << endl;
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&m_ppResultMatrix[i][j]._11, &m_ppResultMatrix[i][j]._12, &m_ppResultMatrix[i][j]._13, &m_ppResultMatrix[i][j]._14);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&m_ppResultMatrix[i][j]._21, &m_ppResultMatrix[i][j]._22, &m_ppResultMatrix[i][j]._23, &m_ppResultMatrix[i][j]._24);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&m_ppResultMatrix[i][j]._31, &m_ppResultMatrix[i][j]._32, &m_ppResultMatrix[i][j]._33, &m_ppResultMatrix[i][j]._34);
-			fscanf_s(pFile, "%f %f %f %f  \n",
-				&m_ppResultMatrix[i][j]._41, &m_ppResultMatrix[i][j]._42, &m_ppResultMatrix[i][j]._43, &m_ppResultMatrix[i][j]._44);
-		}
-	}
-	::fclose(pFile);
-
-
-
-	// 어떻게 96개가 나오지???
-	m_pvscbResultMatrix = new VS_CB_RESULT_MATRIX*[m_llAniTime / 10];
-
-	for (int i = 0; i < m_llAniTime / 10; ++i)
-		m_pvscbResultMatrix[i] = new VS_CB_RESULT_MATRIX();
-
-	// 각 시간마다 곱해야할 뼈 행렬들(32개?)
-	for (int i = 0; i < m_llAniTime / 10; ++i)
-	{
-		for (int j = 0; j < m_uiBoneIndexCount; ++j)
-		{
-			m_pvscbResultMatrix[i]->m_d3dxmtxResult[j] = m_ppResultMatrix[i][j];
-		}
-	}
-
-
-
-
-
 
 	//FILE* fp;
 	//fopen_s(&fp, "Player_CrushData.txt", "w");
@@ -2065,27 +2016,6 @@ void CCrushBoxShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBa
 	//if (m_pTexture)
 	//	m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext);
 
-
-	CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
-	m_fTimePos += GameTimer->GetTimeElapsed();
-
-
-
-	long long NowTime = m_fTimePos * 1000;
-	if (NowTime >= m_llAniTime)
-	{
-		NowTime -= m_llAniTime;
-		m_fTimePos = 0;
-	}
-	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
-	pd3dDeviceContext->Map(m_pd3dcbResult, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
-	m_cbMapData = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
-
-	for (int i = 0; i <MaxBone; i++) //왼쪽   /////// NowTime 설정 잘할것.. 아직 못 고쳤음. NowTime = 32, i = 83
-		m_cbMapData->m_d3dxmtxResult[i] = m_ppResultMatrix[NowTime / 10][i]; //[시간][본인덱스]
-	pd3dDeviceContext->Unmap(m_pd3dcbResult, 0);
-	if (m_pd3dcbResult != NULL)
-		pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_RESULT_MATRIX, 1, &m_pd3dcbResult);
 
 
 	//**********************************************************

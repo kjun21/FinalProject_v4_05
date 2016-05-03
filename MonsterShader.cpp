@@ -130,35 +130,53 @@ void   CMonsterShader ::BuildObjects(ID3D11Device *pd3dDevice)
 
 	int  i = 0;
 	//m_nObjects = 200;
-	m_nObjects = GOLEM_NUM - 4;
+	m_nObjects = GOLEM_NUM ;
 	m_ppObjects = new CGameObject*[m_nObjects];
-	CMonsterObject *pMonsterObject1 = new CMonsterObject(pd3dDevice, strFileName1);
-	CMonsterObject *pMonsterObject2 = new CMonsterObject(pd3dDevice, strFileName1);
-	CMonsterObject *pMonsterObject3 = new CMonsterObject(pd3dDevice, strFileName1);
-	CMonsterObject *pMonsterObject4 = new CMonsterObject(pd3dDevice, strFileName1);
-	CMonsterObject *pMonsterObject5 = new CMonsterObject(pd3dDevice, strFileName1);
+
+
+	//  Golem
+	CCharacterMesh*pGolemMesh = new CCharacterMesh(pd3dDevice, strFileName1);
+	CGolemObject *pMonsterObject1 = new CGolemObject(pd3dDevice, strFileName1);
+	CGolemObject *pMonsterObject2 = new CGolemObject(pd3dDevice, strFileName1);
+	CGolemObject *pMonsterObject3 = new CGolemObject(pd3dDevice, strFileName1);
+	CGolemObject *pMonsterObject4 = new CGolemObject(pd3dDevice, strFileName1);
+	CGolemObject *pMonsterObject5 = new CGolemObject(pd3dDevice, strFileName1);
+	pMonsterObject1->SetMesh(pGolemMesh);
+	pMonsterObject2->SetMesh(pGolemMesh);
+	pMonsterObject3->SetMesh(pGolemMesh);
+	pMonsterObject4->SetMesh(pGolemMesh);
+	pMonsterObject5->SetMesh(pGolemMesh);
 	m_ppObjects[0] = pMonsterObject1;
-	//m_ppObjects[1] = pMonsterObject2;
-	//m_ppObjects[2] = pMonsterObject3;
-	//m_ppObjects[3] = pMonsterObject4;
-	//m_ppObjects[4] = pMonsterObject5;
+	m_ppObjects[1] = pMonsterObject2;
+	m_ppObjects[2] = pMonsterObject3;
+	m_ppObjects[3] = pMonsterObject4;
+	m_ppObjects[4] = pMonsterObject5;
 
 	CGameManager* pGameManager = CGameManager::GetCGameManager();
 
 	for (int i = 0; i < m_nObjects; i++)
 	{
-		m_ppObjects[i]->SetPosition(400.0f, 266.0f, 300 * (i + 1));
-		m_ppObjects[i]->Rotate(0.0f, 45.0f, 0.0f);
+		m_ppObjects[i]->SetPosition(400.0f, 266.0f, 350 * (i + 1));
+		m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 		m_ppObjects[i]->Scale(D3DXVECTOR3(0.6, 0.6, 0.6));
 		pGameManager->m_ppMonster[i] = m_ppObjects[i];
 	}
 	
 
 
-	
+
+	FILE* fp;
+	fopen_s(&fp, "GolemData.txt", "w");
+	fprintf(fp, "%d \n", m_nObjects);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		fprintf(fp, "%d %lf %lf %lf %lf %lf %lf \n", 2, m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().y, m_ppObjects[j]->GetPosition().z,
+			m_ppObjects[j]->GetLookAt().x, m_ppObjects[j]->GetLookAt().y, m_ppObjects[j]->GetLookAt().z);
+	}
+	fclose(fp);
 
 
-	//  Golem
+
 	//for (int z = 0; z < 1; z++)
 	//{
 	//	for (int x = 0; x < GOLEM_NUM; x++)

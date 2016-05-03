@@ -102,6 +102,9 @@ struct AnimationClip
 	string m_strFileName;
 	float m_fTimePos;
 	long long llNowTime;
+	// 애니메이션마다 공격 시작~끝이 존재한다(물론 공격 애니메이션만 해당.)
+	long long m_fAttackStartTime;
+	long long m_fAttackEndTime;
 
 	void ReleaseObjects() {
 		for (int i = 0; i < m_llAniTime / 10; i++)
