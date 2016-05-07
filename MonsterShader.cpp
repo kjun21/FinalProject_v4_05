@@ -107,7 +107,7 @@ void   CMonsterShader ::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 	string strFileName1 = "Data/Golem_Vertex.txt";
-	string strFileName2 = "Data/NewFantaLeaves02_Vertex.txt";
+	string strFileName2 = "Data/Slime_Vertex.txt";
 	// Stone mesh
 	string strFileName3 = "Data/NewRockFlat01_Vertex.txt";
 	string strFileName4 = "Data/NewFlatRock02_Vertex.txt";
@@ -130,12 +130,14 @@ void   CMonsterShader ::BuildObjects(ID3D11Device *pd3dDevice)
 
 	int  i = 0;
 	//m_nObjects = 200;
-	m_nObjects = GOLEM_NUM ;
+	m_nObjects = GOLEM_NUM + SLIME_NUM;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 
 	//  Golem
 	CCharacterMesh*pGolemMesh = new CCharacterMesh(pd3dDevice, strFileName1);
+	CCharacterMesh*pSlimeMesh = new CCharacterMesh(pd3dDevice, strFileName2);
+
 	CGolemObject *pMonsterObject1 = new CGolemObject(pd3dDevice, strFileName1);
 	CGolemObject *pMonsterObject2 = new CGolemObject(pd3dDevice, strFileName1);
 	CGolemObject *pMonsterObject3 = new CGolemObject(pd3dDevice, strFileName1);
@@ -152,23 +154,38 @@ void   CMonsterShader ::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[3] = pMonsterObject4;
 	m_ppObjects[4] = pMonsterObject5;
 
+
+	CSlimeObject *pSlimeObject1 = new CSlimeObject(pd3dDevice, strFileName2);
+	pSlimeObject1->SetMesh(pSlimeMesh);
+	m_ppObjects[5] = pSlimeObject1;
+
+
+
 	CGameManager* pGameManager = CGameManager::GetCGameManager();
 
-	for (int i = 0; i < m_nObjects; i++)
+	for (int i = 0; i < GOLEM_NUM; i++)
 	{
-		m_ppObjects[i]->SetPosition(400.0f, 266.0f, 350 * (i + 1));
+		m_ppObjects[i]->SetPosition(400.0f, 266.0f, 150 * (i + 1));
 		m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 		m_ppObjects[i]->Scale(D3DXVECTOR3(0.6, 0.6, 0.6));
 		pGameManager->m_ppMonster[i] = m_ppObjects[i];
 	}
 	
 
+	for (int i = GOLEM_NUM; i < GOLEM_NUM + SLIME_NUM; i++)
+	{
+		//m_ppObjects[i]->Scale(D3DXVECTOR3(2.0f, 2.0f, 2.0f));
+		m_ppObjects[i]->SetPosition(400.0f, 266.0f, 150 * (i + 1));
+		m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
+		//m_ppObjects[i]->Scale(D3DXVECTOR3(0.6, 0.6, 0.6));
+		pGameManager->m_ppMonster[i] = m_ppObjects[i];
+	}
 
 
 	FILE* fp;
 	fopen_s(&fp, "GolemData.txt", "w");
-	fprintf(fp, "%d \n", m_nObjects);
-	for (int j = 0; j < m_nObjects; j++)
+	fprintf(fp, "%d \n", GOLEM_NUM);
+	for (int j = 0; j < GOLEM_NUM; j++)
 	{
 		fprintf(fp, "%d %lf %lf %lf %lf %lf %lf \n", 2, m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().y, m_ppObjects[j]->GetPosition().z,
 			m_ppObjects[j]->GetLookAt().x, m_ppObjects[j]->GetLookAt().y, m_ppObjects[j]->GetLookAt().z);
@@ -317,5 +334,23 @@ void CMonsterShader ::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBa
 			}
 		}
 	}
-
+}
+void CMonsterShader::AnimateObjects(float fTimeElapsed)
+{
+	//¼­¹ö
+	//ClientServer *s = ClientServer::getInstangce();
+	//for (auto i = 0; i < m_nObjects; ++i)
+	//{
+	//	m_ppObjects[i]->SetAnimationState(s->monsterList[i].state);
+	//	//m_ppObjects[i]->Scale(D3DXVECTOR3(0.6f, 0.6f, 0.6f));
+	//	m_ppObjects[i]->SetPosition(s->monsterList[i].monsterPos);
+	//	m_ppObjects[i]->SetDirection(s->monsterList[i].monsterDir);
+	//	m_ppObjects[i]->RenewWorldMatrix();
+	//	
+	//}
+	for (auto i = 5; i < m_nObjects; ++i)
+	{
+		m_ppObjects[i]->MoveForward(fTimeElapsed*10.0f);
+	}
+	CShader::AnimateObjects(fTimeElapsed);
 }

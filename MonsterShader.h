@@ -3,6 +3,7 @@
 #include "Shader.h"
 
 #define GOLEM_NUM 5
+#define SLIME_NUM 1
 
 struct State
 {
@@ -25,6 +26,7 @@ public:
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	//virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
+	virtual void AnimateObjects(float fTimeElapsed);
 	virtual ID3D11Buffer* CreateInstanceBuffer(ID3D11Device *pd3dDevice, int nObjects, UINT nBufferStride, void *pBufferData);
 protected:
 	ID3D11Buffer *m_pd3dGolemInstanceBuffer;

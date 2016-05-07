@@ -153,13 +153,21 @@ public:
 	void RenewWorldMatrix();
 	UINT GetObjectType() { return m_nObjectType; }
 	virtual void SetAnimationState(PlayerState myPlayerState) {  }
+	virtual void SetAnimationState(monsterState myPlayerState) {  }
 	virtual void SetAnimationState(UINT myPlayerState) {}
 	virtual UINT GetAnimationState(){ return 0; }
+	virtual UINT GetObjectState() { return 0; }
 	virtual void RenderAnimation(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera) { }
 
 	virtual float GetBeAttackedRadius() { return 0.0f; }
 	virtual float GetAttackRadius() { return  0.0f; }
 	virtual void Die() {}
+	virtual bool GetDamageCheck() { return 0; }
+	virtual void ISDamagedByPlayer() { }
+	virtual void ISPossibleDamageByPlayer() {}
+	//귀찮아서 임시 방편.
+	UINT m_uiLife;
+protected:
 
 	
 private:
@@ -462,7 +470,10 @@ protected:
 	VS_CB_RESULT_MATRIX* m_cbMonsterMatrice;
 	float m_fAttackRadius;
 	float m_fBeAttackedRadius;
-	bool m_bMonsterState;
+	UINT m_bMonsterState;
+	bool m_bDamageCheck;
+	UINT m_uiBoneNums;
+
 public:
 	CMonsterObject(ID3D11Device *pd3dDevice, string strFileName);
 	virtual void CreateAnimation();
@@ -470,20 +481,30 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
 	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	virtual UINT GetAnimationState() { return  m_nAnimationState; }
+	virtual UINT GetObjectState() { return m_bMonsterState; }
+	void ResetAnimationTime();
 	virtual void SetAnimationState(UINT myPlayerState)
 	{
+		ResetAnimationTime();
 		m_nAnimationState = myPlayerState;
 	}
 	virtual void Animate(float fTimeElapsed);
-	void CollisionCheck(CGameObject** ppGameObject);
+	//충돌 관련 함수
+	void CollisionCheck();
 	float CalculateDistance(D3DXVECTOR3 d3dxvinputPosition, D3DXVECTOR3 d3dxvPosition2);
 	bool CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition);
 	float CalculateAttackRange(float fAttackRadius, float fBeAttackedRadius);
 	virtual float GetBeAttackedRadius() { return m_fBeAttackedRadius; }
 	virtual float GetAttackRadius() { return m_fAttackRadius; }
+	virtual bool GetDamageCheck() { return m_bDamageCheck; }
+	virtual void ISDamagedByPlayer() { cout << "몬스터, 피해를 입음" << endl;  m_bDamageCheck = true; }
+	virtual void ISPossibleDamageByPlayer() { cout << "몬스터, 다시 피해를 입을수 있음" << endl; m_bDamageCheck = false; }
+	
 	virtual void Die() { 
 		cout << "죽음" << endl;
-		m_nAnimationState = 3; }
+		m_nAnimationState = ANIMATAION_CLIP_MONSTER_DEATH;
+		m_bMonsterState = MONSTER_STATE_DYING;
+	}
 };
 class CGolemObject : public CMonsterObject
 {
@@ -491,8 +512,17 @@ public:
 	CGolemObject(ID3D11Device *pd3dDevice, string strFileName);
 	virtual ~CGolemObject();
 	virtual void CreateAnimation();
+	virtual void SetAnimationState(monsterState myPlayerState) { m_nAnimationState = myPlayerState; }
 };
 
+class CSlimeObject : public CMonsterObject
+{
+public:
+	CSlimeObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~CSlimeObject();
+	virtual void CreateAnimation();
+	virtual void SetAnimationState(monsterState myPlayerState) { m_nAnimationState = myPlayerState; }
+};
 
 
 class CWoodObject : public CGameObject
@@ -514,4 +544,12 @@ class CBoundingBoxObject : public CGameObject
 public:
 	CBoundingBoxObject(ID3D11Device *pd3dDevice);
 	virtual ~CBoundingBoxObject();
+};
+
+
+class CHpObject : public CGameObject
+{
+public: 
+	CHpObject(ID3D11Device *pd3dDevice);
+	virtual ~CHpObject();
 };

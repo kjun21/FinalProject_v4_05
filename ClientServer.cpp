@@ -253,6 +253,40 @@ void ClientServer::processPacket(char* ptr)
 		}
 		break;
 	}
+	case SC_MONSTER_UPDATE:
+	{
+		ScPacketMonsterList *mon = reinterpret_cast<ScPacketMonsterList*>(ptr);
+		ZeroMemory(&monsterList, sizeof(monsterList));
+		memcpy_s(&monsterList, sizeof(monsterList), &mon->monster, sizeof(mon->monster));
+		break;
+	}
+	case SC_MONSTER_POS:
+	{
+		ScPacketMonsterPos *monMove = reinterpret_cast<ScPacketMonsterPos*>(ptr);
+		for (int i = 0; i < 100; ++i)
+		{
+			if (monMove->monsterID == i)
+			{
+				monsterList[i].monsterPos = monMove->position;
+				monsterList[i].monsterDir = monMove->direction;
+				break;
+			}
+		}
+		break;
+	}
+	case SC_MONSTER_STATE_UPDATE:
+	{
+		ScPacketMonsterState *monState = reinterpret_cast<ScPacketMonsterState*>(ptr);
+		for (int i = 0; i < 100; ++i)
+		{
+			if (monState->monsterID == i)
+			{
+				monsterList[i].state = monState->monsterState;
+				break;
+			}
+		}
+		break;
+	}
 	}
 }
 

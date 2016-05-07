@@ -367,7 +367,6 @@ void CGameFramework::BuildObjects()
 */
 	m_pPlayerShader->CreateShader(m_pDirect3D->GetDevice());
 	m_pPlayerShader->BuildObjects(m_pDirect3D->GetDevice(), pWarriorMesh);
-
 	m_pPlayer = m_pPlayerShader->GetPlayer();
 
 
@@ -402,6 +401,7 @@ void CGameFramework::BuildObjects()
 	
 	m_pCamera->GenerateViewMatrix();
 
+	m_pCamera->GenerateOrthoMatrix(1200, 800);
 
 	//m_pCamera->DSCreateShaderVariables(m_pd3dDevice);
 
@@ -516,7 +516,7 @@ void CGameFramework::ProcessInput()
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 	//m_pPlayer->Update(GameTimer->GetTimeElapsed());
 	//서버
-	//ClientServer *s = ClientServer::getInstangce();
+//	ClientServer *s = ClientServer::getInstangce();
 	//m_pPlayer->Update(s->time);
 
 	// 클라
@@ -538,8 +538,8 @@ void CGameFramework::AnimateObjects()
 	if (m_pPlayer)
 		m_pPlayer->Animate(GameTimer->GetTimeElapsed());
 
-	//클라
-	//m_pOtherPlayerShader->AnimateObjects(GameTimer->GetTimeElapsed());
+	//서버
+	m_pOtherPlayerShader->AnimateObjects(GameTimer->GetTimeElapsed());
 
 	//서버 플레이어 초기좌표 셋팅해주는 부분
 	//m_pPlayer->SetPosition(s->Player[0].getPlayerPosition());

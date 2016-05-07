@@ -131,6 +131,8 @@ void CGameObject::RenewWorldMatrix()
 	D3DXVECTOR3 d3dxvUp = D3DXVECTOR3(m_d3dxmtxWorld._21, m_d3dxmtxWorld._22, m_d3dxmtxWorld._23);
 	D3DXVECTOR3 d3dxvLook = D3DXVECTOR3(m_d3dxmtxWorld._31, m_d3dxmtxWorld._32, m_d3dxmtxWorld._33);
 
+	d3dxvUp = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+
 	D3DXVec3Normalize(&d3dxvLook, &d3dxvLook);
 	//카메라의 z-축과 y-축에 수직인 벡터를 x-축으로 설정한다.
 	D3DXVec3Cross(&d3dxvRight, &d3dxvUp, &d3dxvLook);
@@ -1094,6 +1096,7 @@ void  COtherPlayerObject::CreateAnimation()
 {
 	//UINT uiAnimationClipNums = 5;
 	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
+	//m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
 	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
 	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_ATTACK1;
 	m_AnimationClip[2].m_nAnimationState = ANIMATAION_CLIP_ATTACK2;
@@ -1207,12 +1210,17 @@ void CMonsterObject::CreateShaderVariables(ID3D11Device *pd3dDevice)
 
 void  CMonsterObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
-	if (m_bMonsterState == true)
+	
+	if (m_bMonsterState != MONSTER_STATE_DIE)
 	{
 		for (int i = 0; i < m_uiAnimationClipNum; i++)
 		{
-			if (m_AnimationClip[i].m_nAnimationState == m_nAnimationState)
+			if (m_AnimationClip[i].m_nAnimationState == m_nAnimationState || m_nAnimationState== 303)
 			{
+				if (m_nAnimationState == 303)
+					m_nAnimationState = ANIMATAION_CLIP_MONSTER_RUN;
+
+				
 				CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
 				m_AnimationClip[i].m_fTimePos += GameTimer->GetTimeElapsed();
 				m_AnimationClip[i].llNowTime = m_AnimationClip[i].m_fTimePos * 1000;
@@ -1221,8 +1229,8 @@ void  CMonsterObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pC
 				{
 					m_AnimationClip[i].llNowTime -= m_AnimationClip[i].m_llAniTime;
 					m_AnimationClip[i].m_fTimePos = 0;
-					if (m_nAnimationState == 3)
-						m_bMonsterState = false;
+					if (m_nAnimationState == ANIMATAION_CLIP_MONSTER_DEATH)
+						m_bMonsterState = MONSTER_STATE_DIE;
 					// 
 					/*if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1
 					|| m_nAnimationState == ANIMATAION_CLIP_ATTACK2
@@ -1232,7 +1240,7 @@ void  CMonsterObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pC
 				D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
 				pd3dDeviceContext->Map(m_pd3dcbAnimation, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
 				m_cbMonsterMatrice = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
-				for (int j = 0; j < MaxBone; j++) //왼쪽
+				for (int j = 0; j < GOLEM_MAX_BONE; j++) //왼쪽
 				{
 					m_cbMonsterMatrice->m_d3dxmtxResult[j] = m_AnimationClip[i].m_ppResultMatrix[m_AnimationClip[i].llNowTime / 10][j];
 					/*	m_cbMonsterMatrice->m_d3dxmtxWalk[j] =   m_AnimationClip[1].m_ppResultMatrix[m_AnimationClip[1].llNowTime / 10][j];
@@ -1253,8 +1261,8 @@ void  CMonsterObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pC
 		pd3dDeviceContext->Map(m_pd3dcbAnimation, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
 		m_cbMonsterMatrice = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
 
-		for (int j = 0; j < MaxBone; j++) //왼쪽
-			m_cbMonsterMatrice->m_d3dxmtxResult[j] = m_AnimationClip[3].m_ppResultMatrix[165][j];
+		for (int j = 0; j < GOLEM_MAX_BONE; j++) //왼쪽
+			m_cbMonsterMatrice->m_d3dxmtxResult[j] = m_AnimationClip[3].m_ppResultMatrix[164][j];
 		pd3dDeviceContext->Unmap(m_pd3dcbAnimation, 0);
 
 
@@ -1278,29 +1286,35 @@ float CMonsterObject::CalculateAttackRange(float fAttackRadius, float fBeAttacke
 bool CMonsterObject :: CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition)
 {
 	// 몬스터 - 플레이어 = 이런 벡터임
+	//부채꼴
+	// 플레이어 위치 - 몬스터 위치 = 상대적인 벡터 방향               
 	D3DXVECTOR3 d3dxvLookPlayer = d3dxvPlayerPosition - GetPosition();
 	D3DXVec3Normalize(&d3dxvLookPlayer, &d3dxvLookPlayer);
 	
 	float fAngle = D3DXVec3Dot(&GetLookAt(), &d3dxvLookPlayer);
 	float a = (float)acos((double)fAngle);
 	float b = D3DXToDegree(a);
+	// 10은 공격 각도 범위
 	if (b <= 10.0)
 		return true;
 	else
 		return false;
 }
 // m_AnimationClip[2].llNowTime >=628
-void CMonsterObject::CollisionCheck(CGameObject** ppGameObject)
+void CMonsterObject::CollisionCheck()
 {
 	// 28900.0
 	// 공격 모션일때 충돌 처리가 일어난다 해. 22~26프레임일때
 	// 플레이어를 공격했을 때.
-	if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1
-		&& CalculateDistance(ppGameObject[0]->GetPosition(), GetPosition()) <= CalculateAttackRange(GetAttackRadius(),ppGameObject[0]->GetBeAttackedRadius())
-				&&CalculateCollisionRange(ppGameObject[0]->GetPosition()))
+
+	CGameManager* pGameManager = CGameManager::GetCGameManager();
+	if (m_nAnimationState == ANIMATAION_CLIP_MONSTER_ATTACK
+		&& CalculateDistance(pGameManager->m_pPlayers[0]->GetPosition(), GetPosition()) <= CalculateAttackRange(GetAttackRadius(), pGameManager->m_pPlayers[0]->GetBeAttackedRadius())
+		&& CalculateCollisionRange(pGameManager->m_pPlayers[0]->GetPosition()))
 	{
-		if (m_AnimationClip[2].m_fAttackStartTime <= m_AnimationClip[2].llNowTime && 
-			m_AnimationClip[2].llNowTime <= m_AnimationClip[2].m_fAttackEndTime)
+
+		if (m_AnimationClip[1].m_fAttackStartTime <= m_AnimationClip[1].llNowTime && 
+			m_AnimationClip[1].llNowTime <= m_AnimationClip[1].m_fAttackEndTime)
 			cout << "아픔" << endl;
 	}
 	//if (628 <= m_AnimationClip[2].llNowTime && m_AnimationClip[2].llNowTime <= 861)
@@ -1309,8 +1323,9 @@ void CMonsterObject::CollisionCheck(CGameObject** ppGameObject)
 // 628일 때 충돌 처리.
 void CMonsterObject::Animate(float fTimeElapsed)
 {
+
 	CGameManager* pGameManager = CGameManager::GetCGameManager();
-	CollisionCheck(pGameManager->m_pPlayers);
+	CollisionCheck();
 }
 
 
@@ -1320,48 +1335,94 @@ CGolemObject::CGolemObject(ID3D11Device *pd3dDevice, string strFileName) :CMonst
 {
 	m_fAttackRadius = 140.0f;
 	m_fBeAttackedRadius = 60.0f;
-	m_nAnimationState = 2;
+	m_nAnimationState = ANIMATAION_CLIP_MONSTER_ATTACK;
 	CreateShaderVariables(pd3dDevice);
 	m_uiAnimationClipNum = 4;
-	m_bMonsterState = true;
+	m_bMonsterState = MONSTER_STATE_LIVING;
 	CreateAnimation();
+	m_uiLife = 3;
 }
-
-
-
 void  CGolemObject::CreateAnimation()
 {
 	//UINT uiAnimationClipNums = 5;
 	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
-	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
-	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_RUN;
-	m_AnimationClip[2].m_nAnimationState = ANIMATAION_CLIP_ATTACK1;
-	m_AnimationClip[3].m_nAnimationState = 3;  // 매칭이 안맞는다.
+	//m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
+	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_MONSTER_IDLE; //Idle
+	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_MONSTER_ATTACK; //attack
+	m_AnimationClip[2].m_nAnimationState = ANIMATAION_CLIP_MONSTER_RUN;  // run
+	// 가상의 상태 303
+	m_AnimationClip[3].m_nAnimationState = ANIMATAION_CLIP_MONSTER_DEATH;  // 매칭이 안맞는다.
 
 	//animationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
 
 	m_AnimationClip[0].m_strFileName = "GolemIdle.txt";
-	m_AnimationClip[1].m_strFileName = "GolemWalk_matrix.txt";
-	m_AnimationClip[2].m_strFileName = "GolemAttack.txt";
+	m_AnimationClip[1].m_strFileName = "GolemAttack.txt";
+	m_AnimationClip[2].m_strFileName = "GolemWalk_matrix.txt";
 	m_AnimationClip[3].m_strFileName = "GolemDeath.txt";
 
-
-	m_AnimationClip[2].m_fAttackStartTime = 628;
-	m_AnimationClip[2].m_fAttackEndTime = 861;
+	m_AnimationClip[1].m_fAttackStartTime = 628;
+	m_AnimationClip[1].m_fAttackEndTime = 861;
 
 	//animationClip[4].m_strFileName = "StoneKing_Death.txt";
 
 	for (int i = 0; i < m_uiAnimationClipNum; i++)
-	{
 		LoadAnimation(i);
-		//cout << i << "번째 로딩 성공" << endl;
-	}
-	//	return animationClip;
+	
+	
 }
 CGolemObject ::~CGolemObject()
 {
 
 }
+
+CSlimeObject::CSlimeObject(ID3D11Device *pd3dDevice, string strFileName) :CMonsterObject(pd3dDevice, strFileName)
+{
+	m_fAttackRadius = 140.0f;
+	m_fBeAttackedRadius = 60.0f;
+	m_nAnimationState = ANIMATAION_CLIP_MONSTER_RUN;
+	CreateShaderVariables(pd3dDevice);
+	m_uiAnimationClipNum = 4;
+	m_bMonsterState = MONSTER_STATE_LIVING;
+	CreateAnimation();
+	m_uiLife = 1;
+}
+void  CSlimeObject::CreateAnimation()
+{
+	//UINT uiAnimationClipNums = 5;
+	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
+	//m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_IDLE;
+	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_MONSTER_IDLE; //Idle
+	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_MONSTER_ATTACK; //attack
+	m_AnimationClip[2].m_nAnimationState = ANIMATAION_CLIP_MONSTER_RUN;  // run
+	// 가상의 상태 303
+	m_AnimationClip[3].m_nAnimationState = ANIMATAION_CLIP_MONSTER_DEATH;  // 매칭이 안맞는다.
+
+	//animationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
+
+	m_AnimationClip[0].m_strFileName = "Slime_Idle.txt";
+	m_AnimationClip[1].m_strFileName = "Slime_Attack.txt";
+	m_AnimationClip[2].m_strFileName = "Slime_Run.txt";
+	m_AnimationClip[3].m_strFileName = "Slime_Death.txt";
+
+	//공격 애니메이션
+	m_AnimationClip[1].m_fAttackStartTime = 628;
+	m_AnimationClip[1].m_fAttackEndTime = 861;
+
+	//animationClip[4].m_strFileName = "StoneKing_Death.txt";
+
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
+		LoadAnimation(i);
+
+
+}
+CSlimeObject ::~CSlimeObject()
+{
+
+}
+
+
+
+
 
 
 
@@ -1429,3 +1490,11 @@ CBoundingBoxObject::~CBoundingBoxObject()
 {
 }
 
+CHpObject::CHpObject(ID3D11Device *pd3dDevice) : CGameObject(1)
+{
+	
+}
+
+CHpObject::~CHpObject()
+{
+}

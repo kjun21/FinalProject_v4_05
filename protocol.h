@@ -60,15 +60,26 @@ struct ScPacketObject
 	sectorPosition position;
 	Object objects[100];
 };
-struct ScPacketMonster
+struct ScPacketMonsterList
 {
 	int packetSize;
 	BYTE packetType;
-	int id;
-	OrcArchor archorArr[MAX_MONSTER];
-	OrcWarrior warriorArr[MAX_MONSTER];
-	OrcMaster masterArr[MAX_MONSTER];
-	OrcKing king;
+	MonsterPacket monster[100];
+};
+struct ScPacketMonsterPos
+{
+	int packetSize;
+	BYTE packetType;
+	int monsterID;
+	D3DXVECTOR3 direction;
+	D3DXVECTOR3 position;
+};
+struct ScPacketMonsterState
+{
+	int packetSize;
+	BYTE packetType;
+	int monsterID;
+	int monsterState;
 };
 struct ScPacketMonsterRoaming
 {

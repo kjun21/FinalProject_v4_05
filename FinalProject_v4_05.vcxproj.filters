@@ -114,6 +114,9 @@
     <ClCompile Include="MonsterShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="UiShader.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameFramework.h">
@@ -211,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="MonsterShader.h">
       <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="UiShader.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -13,6 +13,21 @@ enum PlayerState
 	attackCutState,
 	attackThrustState
 };
+
+enum monsterState
+{
+	waitPosState = 300,
+	attackTargetState,
+	chaseTargetState,
+	returnPos,
+};
+struct MonsterPacket
+{
+	int type;
+	int state;
+	D3DXVECTOR3 monsterPos;
+	D3DXVECTOR3 monsterDir;
+};
 enum EOperationType
 {
 	Sendtype = 1,

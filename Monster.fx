@@ -105,7 +105,7 @@ VS_OUTPUT VS(VS_INPUT input)
 	//output.position = float4(input.position, 1);
 
 
-	//float4x4 scale ={ { 0.3, 0, 0, 0 }, { 0, 0.3, 0, 0 }, { 0, 0, 0.3, 0 }, { 0, 0, 0, 1 } };
+	//float4x4 scale ={ { 0.6, 0, 0, 0 }, { 0, 0.6, 0, 0 }, { 0, 0, 0.6, 0 }, { 0, 0, 0, 1 } };
 
 	//float4x4 scale = { { 14.0, 0, 0, 0 }, { 0, 14.0, 0, 0 }, { 0, 0, 14.0, 0 }, { 0, 0, 0, 1 } };
 

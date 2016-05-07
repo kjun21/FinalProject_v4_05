@@ -423,3 +423,11 @@ public:
 	CBoundingCircle(ID3D11Device *pd3dDevice, float fRadius, int nSlices, int nStacks);
 	virtual ~CBoundingCircle();
 };
+
+class CUIMesh :public CMeshTextured
+{
+public:
+	CUIMesh(ID3D11Device *pd3dDevice, float width, float height);
+	virtual ~CUIMesh();
+
+};

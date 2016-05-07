@@ -2716,7 +2716,73 @@ CBoundingCircle::CBoundingCircle(ID3D11Device *pd3dDevice, float fRadius, int nS
 	pd3dDevice->CreateRasterizerState(&d3dxRasterizer, &m_pd3dRasterizerState);
 
 }
-
 CBoundingCircle::~CBoundingCircle()
 {
+}
+
+CUIMesh::CUIMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight) :CMeshTextured(pd3dDevice)
+{
+	m_nVertices = 4;
+	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	float fx = fWidth * 0.5, fy = fHeight*0.5f;
+	D3DXVECTOR2 pd3dxvTexCoords[4];
+	m_pd3dxvPositions = new D3DXVECTOR3[m_nVertices];
+
+	m_pd3dxvPositions[0] = D3DXVECTOR3(-fx, +fy, 0);
+	m_pd3dxvPositions[1] = D3DXVECTOR3(+fx, +fy, 0);
+	m_pd3dxvPositions[2] = D3DXVECTOR3(-fx, -fy, 0);
+	m_pd3dxvPositions[3] = D3DXVECTOR3(+fx, -fy, 0);
+
+	pd3dxvTexCoords[0] = D3DXVECTOR2(0.0f, 0.0f);
+	pd3dxvTexCoords[1] = D3DXVECTOR2(1.0f, 0.0f);
+	pd3dxvTexCoords[2] = D3DXVECTOR2(0.0f, 1.0f);
+	pd3dxvTexCoords[3] = D3DXVECTOR2(1.0f, 1.0f);
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR3)* m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pd3dxvPositions;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dPositionBuffer);
+
+	m_nIndices = 6;
+	m_pnIndices = new UINT[m_nIndices];
+
+	m_pnIndices[0] = 0; m_pnIndices[1] = 1; m_pnIndices[2] = 2;
+	m_pnIndices[3] = 1; m_pnIndices[4] = 3; m_pnIndices[5] = 2;
+
+
+
+
+	d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR2)* m_nVertices;
+	d3dBufferData.pSysMem = pd3dxvTexCoords;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dTexCoordBuffer);
+
+
+	//정점은 위치 벡터, 법선 벡터, 텍스쳐 좌표를 갖는다.
+	ID3D11Buffer *pd3dBuffers[2] = { m_pd3dPositionBuffer, m_pd3dTexCoordBuffer };
+	UINT pnBufferStrides[2] = { sizeof(D3DXVECTOR3), sizeof(D3DXVECTOR2) };
+	UINT pnBufferOffsets[2] = { 0,  0 };
+	AssembleToVertexBuffer(2, pd3dBuffers, pnBufferStrides, pnBufferOffsets);
+
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(UINT)* m_nIndices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pnIndices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dIndexBuffer);
+
+	m_bcBoundingCube.m_d3dxvMinimum = D3DXVECTOR3(0, -fy, -1);
+	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(+fx, +fy, +1);
+}
+CUIMesh::~CUIMesh()
+{
+
 }

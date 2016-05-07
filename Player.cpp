@@ -26,8 +26,11 @@ CPlayer::CPlayer(int nMeshes) : CGameObject(nMeshes)
 	m_pCameraUpdatedContext = NULL;
 	m_d3dxvDirection = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 	m_d3dxvPreDir = D3DXVECTOR3(0.0f, 0.0f, 0.99998f);
+
 	m_fBeAttackedRadius = 30.0f;
 	m_fAttackRadius[0] = 120.0f;
+	m_uiLife = 5;
+	m_bDamageCheck = false;
 	m_nObjectType = TYPE_PLAYER;
 }
 
@@ -106,10 +109,10 @@ void CPlayer::Rotate(DWORD dwDirection, DWORD dwAttack)
 
 		}
 		m_d3dxvPreDir = d3dxvDirection;
-	//	cout << m_d3dxvLook.x << "  " << m_d3dxvLook.y << "  " << m_d3dxvLook.z << endl;
+	
 		//서버 키입력 받는 부분
-		//ClientServer *s = ClientServer::getInstangce();
-		//s->keyDown(m_d3dxvLook);
+		/*ClientServer *s = ClientServer::getInstangce();
+		s->keyDown(m_d3dxvLook);*/
 	
 	}
 }
@@ -192,6 +195,7 @@ void CPlayer::UpdateAnimation(DWORD dwDirection, DWORD dwAttack)
 	else if (dwAttack == ATTACK02 || m_nAnimationState == ANIMATAION_CLIP_ATTACK2)
 	{
 		//m_nAnimationState = ANIMATAION_CLIP_IDLE;
+		cout << "이거 홏풀" << endl;
 		m_nAnimationState = ANIMATAION_CLIP_ATTACK2;
 	}
 }
@@ -564,8 +568,8 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 
 				// 공격 애니메이션이 끝났으면 공격 모션 상태로 자동으로 바뀐다.
 				if (m_nAnimationState == ANIMATAION_CLIP_ATTACK1
-					|| m_nAnimationState == ANIMATAION_CLIP_ATTACK2
-					|| m_nAnimationState == ANIMATAION_CLIP_DEATH)
+					|| m_nAnimationState == ANIMATAION_CLIP_ATTACK2)
+					//|| m_nAnimationState == ANIMATAION_CLIP_DEATH)
 					m_nAnimationState = ANIMATAION_CLIP_IDLE;
 			}
 
@@ -627,6 +631,7 @@ void CTerrainPlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode
 	case SPACESHIP_CAMERA:
 		SetFriction(125.0f);
 		//스페이스 쉽 카메라일 때 플레이어에 중력이 작용하지 않는다.
+
 		SetGravity(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
@@ -643,8 +648,8 @@ void CTerrainPlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);
-		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(D3DXVECTOR3(0.0f, 450.0f, -300.0f)); // 원래 마지막  20 -50   // 250.0f, -150.0f
+		m_pCamera->SetTimeLag(0.25f); //550
+		m_pCamera->SetOffset(D3DXVECTOR3(0.0f, 550.0f, -300.0f)); // 원래 마지막  20 -50   // 250.0f, -150.0f
 		m_pCamera->GenerateProjectionMatrix(1.01f, 50000.0f, ASPECT_RATIO, 60.0f);
 
 		m_pCamera->DSCreateShaderVariables(pd3dDevice);
@@ -746,10 +751,21 @@ void CPlayer::CollisionCheck()
 			{
 				if (CalculateCollisionRange(pGameManager->m_ppMonster[i]->GetPosition()))
 				{
+					//실제 여기서 피해를 입는다.
 					if (m_AnimationClip[1].m_fAttackStartTime <= m_AnimationClip[1].llNowTime &&
-						m_AnimationClip[1].llNowTime <= m_AnimationClip[1].m_fAttackEndTime)
-						pGameManager->m_ppMonster[i]->Die();
+						m_AnimationClip[1].llNowTime <= m_AnimationClip[1].m_fAttackEndTime
+						&& pGameManager->m_ppMonster[i]->GetDamageCheck() == false)
+					{
+						pGameManager->m_ppMonster[i]->ISDamagedByPlayer();
+						pGameManager->m_ppMonster[i]->m_uiLife -= 1;
+						if (pGameManager->m_ppMonster[i]->m_uiLife <= 0)
+							pGameManager->m_ppMonster[i]->Die();
+					}
+						//
 						//cout << "어택1 성공" << endl;
+						// 한번만 호출하게 할 수 없을까요?
+					//공격에 성공한들.. 일단 한대만 맞게좀..
+					// 그니깐 한 프레임 당 몬스터 타격은 각 몬스터당 1회씩만 허용한다.
 				}
 			}
 			else if (m_nAnimationState == ANIMATAION_CLIP_ATTACK2)
@@ -761,6 +777,12 @@ void CPlayer::CollisionCheck()
 				}
 			}
 
+		}
+
+		if (pGameManager->m_ppMonster[i]->GetDamageCheck())
+		{
+			if (m_nAnimationState == ANIMATAION_CLIP_IDLE || m_nAnimationState == ANIMATAION_CLIP_RUN)
+				pGameManager->m_ppMonster[i]->ISPossibleDamageByPlayer();
 		}
 	}
 	

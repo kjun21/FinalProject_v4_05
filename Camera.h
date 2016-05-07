@@ -34,13 +34,17 @@ public:
 	void DSCreateShaderVariables(ID3D11Device *pd3dDevice);
 	void DSClearShaderVariables(ID3D11DeviceContext *pd3dDeviceContext);
 	void CreateReflectionMatrix(float fWaterHeight);
+
+	void GenerateOrthoMatrix(int nWndClientWidth, int m_nWndClientHeigh);
 	void UpdateReflectionMatrixShaderVariables(ID3D11DeviceContext *pd3dDeviceContext);
+	void UpdateOrthoMartirxShaderVariables(ID3D11DeviceContext *pd3dDeviceContext);
 	D3DXMATRIX GetReflectionViewMatrix() { return m_d3dxmtxReflectionView; }
 protected:
 	//카메라 변환 행렬과 투영 변환 행렬을 나타내는 멤버 변수를 선언한다.
 	D3DXMATRIX m_d3dxmtxView;
 	D3DXMATRIX m_d3dxmtxReflectionView;
 	D3DXMATRIX m_d3dxmtxProjection;
+	D3DXMATRIX m_d3dxmtxOrtho;
 
 	//뷰-포트를 나타내는 멤버 변수를 선언한다.
 	D3D11_VIEWPORT m_d3dViewport;

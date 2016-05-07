@@ -38,9 +38,12 @@ private:
 private:
 	ID3D11Texture2D *m_pd3dDepthStencilBuffer;
 	ID3D11DepthStencilView *m_pd3dDepthStencilView;
+
 private:
 	ID3D11Buffer *m_pd3dcbColor;
 public:
+
+
 	bool CreateRenderTargetDepthStencilView();
 	bool CreateRenderTargetDepthStencilView(int nWndClientWidth, int nWndClientHeight);
 	void OnDestroy();

@@ -19,6 +19,8 @@ class CPlayer : public CGameObject
 protected:
 	// 플레이어 클래스는 카메라를 가지고 있다.
 	CCamera *m_pCamera;
+	bool  m_bPlayerState;
+	bool m_bDamageCheck;
 public:
 	//플레이어를 이동하는 함수이다.
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
@@ -46,7 +48,15 @@ public:
 	void CollisionCheck();
 	float GetBeAttackedRadius() { return m_fBeAttackedRadius; }
 	float GetAttackRadius(UINT uiAttackNum) { return m_fAttackRadius[uiAttackNum]; }
+	virtual bool GetDamageCheck() { return m_bDamageCheck; }
+	virtual void ISDamagedByPlayer() { cout << "플레이어, 피해를 입음!! "<< endl;  m_bDamageCheck = true; }
+	virtual void ISPossibleDamageByPlayer() { cout << "플레이어, 다시 피해를 입을수 있음" << endl; m_bDamageCheck = false; }
 
+	virtual void Die() {
+		cout << "플레이어 죽음" << endl;
+		m_nAnimationState = ANIMATAION_CLIP_DEATH;
+		//m_bPlayerState = MONSTER_STATE_DYING;
+	}
 public:
 	CPlayer(int nMeshes = 1);
 	virtual ~CPlayer();

@@ -10,6 +10,7 @@
 #include "TreeObjectShader.h"
 #include "WaveShader.h"
 #include "MonsterShader.h"
+#include "UiShader.h"
 #include "CRotatingObject.h"
 #include "CubeMesh.h"
 #include "Direct3DBase.h"

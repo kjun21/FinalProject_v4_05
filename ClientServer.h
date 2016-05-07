@@ -32,6 +32,7 @@ public:
 	Sector sector[SECTOR_WIDETH][SECTOR_LENGTH];
 	ServerPlayer Player[ROOM_MAX_PLAYER];
 	Object objectList[100];
+	MonsterPacket monsterList[100];
 	//LPCTSTR IpszClass = "Test Client";
 	//--------------------------------------------
 	void setSocketHWND(HWND s);
