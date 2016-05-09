@@ -4,11 +4,14 @@
 CGameManager::CGameManager()
 {
 	
-	m_uiMonstersNum = 5;
+	m_uiMonstersNum = 10;
 	m_ppMonster = new CGameObject*[m_uiMonstersNum];
 
 	m_uiPlayersNum = 4;
 	m_pPlayers = new CGameObject*[m_uiPlayersNum];
+
+	m_uiStaticObjectNums = 50;
+	m_ppStaticObject = new CGameObject*[m_uiStaticObjectNums];
 }
 
 

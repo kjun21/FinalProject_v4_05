@@ -66,5 +66,5 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 		break;
 	}
 	//카메라 정보를 시간에 따라 갱신한다.
-	Update(fTimeElapsed);
+	Update(fTimeElapsed, 0);
 }

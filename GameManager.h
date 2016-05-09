@@ -22,11 +22,13 @@ public:
 	CGameObject** m_pPlayers;
 	// 
 	CGameObject** m_ppMonster;
+	CGameObject** m_ppStaticObject;
 
 	//CGameObject* m_potherPlayer;
 
 	UINT m_uiMonstersNum;
 	UINT m_uiPlayersNum;
+	UINT m_uiStaticObjectNums;
 };
 typedef struct Array
 {

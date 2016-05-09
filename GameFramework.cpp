@@ -384,8 +384,11 @@ void CGameFramework::BuildObjects()
 	중력이 작용하도록 플레이어를 설정하였으므로 플레이어는 점차적으로 하강하게 된다.*/
 	CHeightMapTerrain *pTerrain = m_pScene->GetTerrain();
 
-	m_pPlayer->SetPosition(D3DXVECTOR3   // pTerrain->GetPeakHeight() + 1000.0f
-		(pTerrain->GetWidth()* 0.1, 300.0f, pTerrain->GetLength()* 0.1));
+	//m_pPlayer->SetPosition(D3DXVECTOR3   // pTerrain->GetPeakHeight() + 1000.0f
+	//	(pTerrain->GetWidth()* 0.1, 266.0f, pTerrain->GetLength()* 0.1));
+	// 서버
+	//ClientServer *s = ClientServer::getInstangce();
+	//m_pPlayer->SetPosition(s->Player[0].getPlayerPosition());
 
 	//m_pPlayer->Scale(D3DXVECTOR3(0.3f, 0.3f, 0.3f));
 
@@ -394,7 +397,7 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetPlayerUpdatedContext(pTerrain);
 	//카메라의 위치가 변경될 때 지형의 정보에 따라 카메라의 위치를 변경할 수 있도록 설정한다.
 	m_pPlayer->SetCameraUpdatedContext(pTerrain);
-
+	m_pPlayer->CreateBoundingBox(14.0f, 14.0f);
 	m_pCamera = m_pPlayer->GetCamera();
 	//m_pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	m_pCamera->SetViewport(m_pDirect3D->GetDeviceContext(), 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -429,11 +432,12 @@ void CGameFramework::ProcessInput()
 	if (m_pScene) bProcessedByScene = m_pScene->ProcessInput();
 
 	CGameTimer* GameTimer = CGameTimer::GetCGameTimer();
+	DWORD dwDirection = 0;
+	DWORD dwAttack = 0;
 	if (!bProcessedByScene)
 	{
 		static UCHAR pKeyBuffer[256];
-		DWORD dwDirection = 0;
-		DWORD dwAttack = 0;
+		
 		/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
 		if (GetKeyboardState(pKeyBuffer))
 		{
@@ -448,27 +452,24 @@ void CGameFramework::ProcessInput()
 			{
 				dwAttack = ATTACK01;
 				//서버 공격키 입력
-				ClientServer *s = ClientServer::getInstangce();
-				//s->keyDownAttacket(dwAttack);		
+				/*ClientServer *s = ClientServer::getInstangce();
+				s->keyDownAttacket(dwAttack);	*/	
 			}
 			else if (pKeyBuffer['W'] & 0xF0 && m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2)
 			{
 				dwAttack = ATTACK02;
 				//서버 공격키 입력
-				ClientServer *s = ClientServer::getInstangce();
+				//ClientServer *s = ClientServer::getInstangce();
 				//s->keyDownAttacket(dwAttack);	
 			}
 
 			//서버
-		/*	else if(attackCutState != s->Player[0].getState())
+			/*else if(attackCutState != s->Player[0].getState())
 			{
 				s->keyUp();		
 			}*/
 		
 		}
-		// 키보드 입력이 없을 때
-	
-		//cout << " 이동 공격" << dwDirection << "   " << dwAttack << endl;
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
@@ -505,7 +506,7 @@ void CGameFramework::ProcessInput()
 				&& m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2))
 			{
 				m_pPlayer->Rotate(dwDirection, dwAttack);
-				m_pPlayer->Move(dwDirection, 1000.0f * GameTimer->GetTimeElapsed(), true);
+				m_pPlayer->Move(dwDirection, 300.0f * GameTimer->GetTimeElapsed(), true);
 				// 180.
 			}
 		}
@@ -520,7 +521,7 @@ void CGameFramework::ProcessInput()
 	//m_pPlayer->Update(s->time);
 
 	// 클라
-	m_pPlayer->Update(GameTimer->GetTimeElapsed());
+	m_pPlayer->Update(GameTimer->GetTimeElapsed(), dwDirection);
 }
 
 //  타이머에서 마지막 프레임 이후 경과된 시간을 파라메터로 전달하여 

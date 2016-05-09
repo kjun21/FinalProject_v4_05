@@ -102,6 +102,11 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 	string strFileName6 = "Data/NewRockTall01_Vertex.txt";
 
 	string strFileName7 = "Data/NewRockTall02_Vertex.txt";
+
+
+
+
+
 	// 최소 x : -53.8551 z: -51.4314
 	// 최대 x : 53.8551   z:  -51.4314
 	CFixedMesh* pWoodMesh = new CFixedMesh(pd3dDevice, strFileName1);
@@ -124,41 +129,60 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 	CLeavesObject *pLeavesObject = NULL;
 
 
+	CGameManager* pGameManager = CGameManager::GetCGameManager();
 
-
-	//  Wood
-	for (int z = 0; z < 9; z++)
+	FILE* fp;
+	//Wood
+	fopen_s(&fp, "Data/ObjectPosition/WoodData.txt", "rt");
+	for (int k = 0; k < TREE_NUM / 2; k++)
 	{
-		for (int x = 0; x < 4; x++)
-		{
-			pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
-			pWoodObject->SetMesh(pWoodMesh);
-			pWoodObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
-			if (x == 0) //가장 처음
-				pWoodObject->SetPosition(x * 600 + 200, 325.0f, (z * 400) + 450);
-			else
-				pWoodObject->SetPosition(x * 600 + 650, 325.0f, (z * 400) + 350);
-			m_ppObjects[i++] = pWoodObject;
-		}
+		pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
+		pWoodObject->CreateBoundingBox(53.855099, 51.431400);
+		pWoodObject->SetMesh(pWoodMesh);
+		pWoodObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
+		float fPosition[3];
+		fscanf_s(fp, "%f %f %f  \n", &fPosition[0], &fPosition[1], &fPosition[2]);
+		pWoodObject->SetPosition(fPosition[0], fPosition[1], fPosition[2]);
+		m_ppObjects[i] = pWoodObject;
+		pGameManager->m_ppStaticObject[i] = m_ppObjects[i++];
+
 	}
+	fclose(fp);
+
+
+
+	fopen_s(&fp, "tree0.txt", "w");
+	fprintf(fp, "%d \n", TREE_NUM / 2);
+	for (int j = 0; j < TREE_NUM / 2; j++)
+	{
+		fprintf(fp, "%lf %lf %lf %lf %lf \n", m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().y, m_ppObjects[j]->GetPosition().z, 53.8551f, 51.4314f);
+	}
+	fclose(fp);
+
+
+
+
 	m_pd3dWoodInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TREE_NUM / 2, m_nInstanceBufferStride, NULL);
 	pWoodMesh->AssembleToVertexBuffer(1, &m_pd3dWoodInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
 
 	// Leaves
-	for (int z = 0; z < 9; z++)
+	//FILE* fp;
+	fopen_s(&fp, "Data/ObjectPosition/LeavesData.txt", "rt");
+
+
+	for (int k = 0; k < TREE_NUM / 2; k++)
 	{
-		for (int x = 0; x < 4; x++)
-		{
-			pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
-			pLeavesObject->SetMesh(pLeavesMesh);
-			pLeavesObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
-			if (x==0) //가장 처름
-				pLeavesObject->SetPosition(x * 600 + 200, 425.0f + 0, 10.0f + (z * 400) + 450);
-			else
-				pLeavesObject->SetPosition(x * 600 + 650, 425.0f + 0, 10.0f + (z * 400) + 350);
-			m_ppObjects[i++] = pLeavesObject;
-		}
+		pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
+		pLeavesObject->SetMesh(pLeavesMesh);
+		pLeavesObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
+		float fPosition[3];
+		fscanf_s(fp, "%f %f %f  \n", &fPosition[0], &fPosition[1], &fPosition[2]);
+		pLeavesObject->SetPosition(fPosition[0], 390.0f, fPosition[2] + 10.0f);
+		m_ppObjects[i++] = pLeavesObject;
 	}
+	fclose(fp);
+
+
 	m_pd3dLeavesInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TREE_NUM / 2, m_nInstanceBufferStride, NULL);
 	pLeavesMesh->AssembleToVertexBuffer(1, &m_pd3dLeavesInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
 
@@ -204,35 +228,45 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 			m_ppObjects[i++] = pWoodObject;
 		}
 	}
+
+
+
+
 	m_pd3dFlatStone03InstanceBuffer = CreateInstanceBuffer(pd3dDevice, FLAT_ROCK03_NUM, m_nInstanceBufferStride, NULL);
 	pFlatRockMesh03->AssembleToVertexBuffer(1, &m_pd3dFlatStone03InstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
 
 
-	for (int x = 0; x < 1; x++)
+	//for (int x = 0; x < 1; x++)
+	//{
+	//	for (int z = 0; z <TALL_STONE01_NUM; z++)
+	//	{
+	//		pWoodObject = new  CWoodObject(pd3dDevice, strFileName7);
+	//		pWoodObject->SetMesh(pCliff01Mesh);
+	//		pWoodObject->Scale(D3DXVECTOR3(10.0, 10.0, 10.0));
+	//		//pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
+	//
+	//		pWoodObject->SetPosition(200 * (z + 1), 240.0f, 1050);
+	//		
+	//		m_ppObjects[i++] = pWoodObject;
+	//	}
+	//}
+
+
+	//FlatRock03
+	fopen_s(&fp, "Data/ObjectPosition/FlatRock03Data.txt", "rt");
+	for (int k = 0; k < TALL_STONE01_NUM; k++)
 	{
-		for (int z = 0; z <TALL_STONE01_NUM; z++)
-		{
-			pWoodObject = new  CWoodObject(pd3dDevice, strFileName7);
-			pWoodObject->SetMesh(pCliff01Mesh);
-			pWoodObject->Scale(D3DXVECTOR3(10.0, 10.0, 10.0));
-			//pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
-	
-			pWoodObject->SetPosition(200 * (z + 1), 240.0f, 1050);
-			/*		
-			if (z % 2 == 0)
-				pWoodObject->SetPosition(700, 220.0f, 1050);
-			else
-			{
-				pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), 180.0);
-				pWoodObject->SetPosition(701, 220.0f, 972);
-			}*/
-
-
-
-
-			m_ppObjects[i++] = pWoodObject;
-		}
+		pWoodObject = new   CWoodObject(pd3dDevice, strFileName2);
+		pWoodObject->SetMesh(pCliff01Mesh);
+		pWoodObject->Scale(D3DXVECTOR3(20.0, 20.0, 20.0));
+		float fAngle = rand() % 60;
+		pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
+		float fPosition[3];
+		fscanf_s(fp, "%f %f %f  \n", &fPosition[0], &fPosition[1], &fPosition[2]);
+		pWoodObject->SetPosition(fPosition[0], fPosition[1], fPosition[2]);
+		m_ppObjects[i++] = pWoodObject;
 	}
+	fclose(fp);
 	m_pd3dCliff01InstanceBuffer = CreateInstanceBuffer(pd3dDevice, TALL_STONE01_NUM, m_nInstanceBufferStride, NULL);
 	pCliff01Mesh->AssembleToVertexBuffer(1, &m_pd3dCliff01InstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
 

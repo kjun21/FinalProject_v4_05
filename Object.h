@@ -165,11 +165,17 @@ public:
 	virtual bool GetDamageCheck() { return 0; }
 	virtual void ISDamagedByPlayer() { }
 	virtual void ISPossibleDamageByPlayer() {}
+
 	//귀찮아서 임시 방편.
 	UINT m_uiLife;
 protected:
+	//충돌 관련 변수들
+	D3DXVECTOR3 m_d3dxvMinimum;
+	D3DXVECTOR3 m_d3dxvMaximum;
+public:
+	D3DXVECTOR3  GetMinimum() { return  m_d3dxvMinimum + GetPosition(); }
+	D3DXVECTOR3  GetMaximum() { return m_d3dxvMaximum + GetPosition(); }
 
-	
 private:
 	int m_nReferences;
 protected:
@@ -482,10 +488,10 @@ public:
 	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	virtual UINT GetAnimationState() { return  m_nAnimationState; }
 	virtual UINT GetObjectState() { return m_bMonsterState; }
-	void ResetAnimationTime();
+	//void ResetAnimationTime();
 	virtual void SetAnimationState(UINT myPlayerState)
 	{
-		ResetAnimationTime();
+		//ResetAnimationTime();
 		m_nAnimationState = myPlayerState;
 	}
 	virtual void Animate(float fTimeElapsed);
@@ -529,6 +535,7 @@ class CWoodObject : public CGameObject
 {
 public:
 	CWoodObject(ID3D11Device *pd3dDevice, string strFileName);
+	void CreateBoundingBox(float fX, float fY);
 	virtual ~CWoodObject();
 
 };

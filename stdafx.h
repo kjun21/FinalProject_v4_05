@@ -100,7 +100,8 @@
 #define PLAYERS_NUMS 4
 #define MONSTERS_NUMS 5
 
-
+#define GOLEM_NUM 10
+#define SLIME_NUM 1
 
 
 //플레이어 피격 반경 30

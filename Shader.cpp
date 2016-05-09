@@ -836,9 +836,9 @@ void CTerrainShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 
-	pTerrainMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	pTerrainMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.4, 0.4f, 0.4f, 1.0f);
 	pTerrainMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	pTerrainMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.0f, 0.0f, 0.0f, 64.0f);
+	pTerrainMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 64.0f);
 	pTerrainMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
 
 
@@ -1922,23 +1922,23 @@ void COtherPlayerShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3
 void COtherPlayerShader::AnimateObjects(float fTimeElapsed)
 {
 	//서버 다른 플레이어 좌표 셋팅하는 부분
-	ClientServer *s = ClientServer::getInstangce();
-	for (auto i = 1; i < 4; ++i)
-	{
-		if (true == s->Player[i].getPlay())
-		{
-			m_ppObjects[i - 1]->SetAnimationState(s->Player[i].getState());
-			m_ppObjects[i - 1]->SetPosition(s->Player[i].getPlayerPosition());
-			m_ppObjects[i - 1]->SetDirection(s->Player[i].getPlayerDirection());
-			m_ppObjects[i - 1]->RenewWorldMatrix();
-			//cout << "다른 플레이어 상태   " << m_ppObjects[i - 1]->GetAnimationStat() << endl;
-			//cout <<" 다른 플레이어 위치  " <<m_ppObjects[i - 1]->GetPosition().x << "   " << m_ppObjects[i - 1]->GetPosition().z << endl;
-		}
-		else
-		{
-			m_ppObjects[i - 1]->SetPosition(D3DXVECTOR3(-10.0,0.0,-10.0));
-		}
-	}
+	//ClientServer *s = ClientServer::getInstangce();
+	//for (auto i = 1; i < 4; ++i)
+	//{
+	//	if (true == s->Player[i].getPlay())
+	//	{
+	//		m_ppObjects[i - 1]->SetAnimationState(s->Player[i].getState());
+	//		m_ppObjects[i - 1]->SetPosition(s->Player[i].getPlayerPosition());
+	//		m_ppObjects[i - 1]->SetDirection(s->Player[i].getPlayerDirection());
+	//		m_ppObjects[i - 1]->RenewWorldMatrix();
+	//		//cout << "다른 플레이어 상태   " << m_ppObjects[i - 1]->GetAnimationStat() << endl;
+	//		//cout <<" 다른 플레이어 위치  " <<m_ppObjects[i - 1]->GetPosition().x << "   " << m_ppObjects[i - 1]->GetPosition().z << endl;
+	//	}
+	//	else
+	//	{
+	//		m_ppObjects[i - 1]->SetPosition(D3DXVECTOR3(-10.0,0.0,-10.0));
+	//	}
+	//}
 }
 
 CCrushBoxShader::CCrushBoxShader()

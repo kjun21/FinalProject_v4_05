@@ -68,7 +68,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	pd3dSamplerState->Release();
 
 
-	m_nShaders = 5  + 1;
+	m_nShaders = 4 + 1;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	//첫 번째로 그릴 객체는 스카이 박스이다.
@@ -135,21 +135,21 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 
-	CMonsterShader* pMonsterShader = new CMonsterShader();
-	pMonsterShader->CreateShader(pd3dDevice);
-	pMonsterShader->BuildObjects(pd3dDevice);
-	m_ppShaders[3] = pMonsterShader;
-
 	CCrushBoxShader* pCrushBoxShaser = new CCrushBoxShader();
 	pCrushBoxShaser->CreateShader(pd3dDevice);
 	pCrushBoxShaser->BuildObjects(pd3dDevice);
-	m_ppShaders[4] = pCrushBoxShaser;
+	m_ppShaders[3] = pCrushBoxShaser;
+
+	CMonsterShader* pMonsterShader = new CMonsterShader();
+	pMonsterShader->CreateShader(pd3dDevice);
+	pMonsterShader->BuildObjects(pd3dDevice);
+	m_ppShaders[4] = pMonsterShader;
 
 
-	CUiShader* pUiShader = new CUiShader();
+	/*CUiShader* pUiShader = new CUiShader();
 	pUiShader->CreateShader(pd3dDevice);
 	pUiShader->BuildObjects(pd3dDevice);
-	m_ppShaders[5] = pUiShader;
+	m_ppShaders[5] = pUiShader;*/
 
 
 

@@ -23,6 +23,7 @@ enum monsterState
 };
 struct MonsterPacket
 {
+	int id;
 	int type;
 	int state;
 	D3DXVECTOR3 monsterPos;

@@ -129,6 +129,7 @@ VS_OUTPUT VS(VS_INPUT input)
 float4 PS( VS_OUTPUT input ) : SV_Target
 {
 	float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord);
+	//float4 cColor = float4(0.3f, 0.3f,1.0f, 1.0f);
       //return input.color;
 	  return cColor;
 }

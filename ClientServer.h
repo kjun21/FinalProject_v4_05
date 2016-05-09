@@ -28,6 +28,7 @@ class ClientServer
 	int count;
 	int myId;
 public:
+	bool flag;
 	double time;
 	Sector sector[SECTOR_WIDETH][SECTOR_LENGTH];
 	ServerPlayer Player[ROOM_MAX_PLAYER];
@@ -52,7 +53,7 @@ public:
 	void keyDownAttacket(DWORD key);
 	void processPacket(char* buf);
 	void sendPacket(SOCKET s, void* buf);
-	void keyDown(D3DXVECTOR3 wParam);
+	void keyDown(D3DXVECTOR3 dir, D3DXVECTOR3 pos);
 	int getMyId();
 	~ClientServer();
 };

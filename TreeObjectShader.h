@@ -1,9 +1,9 @@
 #pragma once
 #include "stdafx.h"
 #include "Shader.h"
+#include "GameManager.h"
 
-
-#define TREE_NUM 72
+#define TREE_NUM 100
 
 #define FLAT_ROCK01_NUM 10
 

@@ -2,8 +2,7 @@
 #include "stdafx.h"
 #include "Shader.h"
 
-#define GOLEM_NUM 5
-#define SLIME_NUM 1
+
 
 struct State
 {

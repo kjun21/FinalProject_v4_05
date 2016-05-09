@@ -24,13 +24,13 @@ protected:
 public:
 	//플레이어를 이동하는 함수이다.
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
-	void Move(const D3DXVECTOR3& d3dxvShift, bool bVelocity = false);
+	void Move(const D3DXVECTOR3& d3dxvShift, DWORD dwDirection,  bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	//플레이어를 회전하는 함수이다.
 	void Rotate(float x, float y, float z);
 	void Rotate(DWORD dwDirection, DWORD dwAttack);
 	//플레이어의 위치와 회전 정보를 경과 시간에 따라 갱신하는 함수이다.
-	void Update(float fTimeElapsed);
+	void Update(float fTimeElapsed, DWORD dwDirection);
 	//플레이어의 위치가 바뀔 때마다 호출되는 함수와 그 함수에서 사용하는 정보를 설정하는 함수이다.
 	virtual void OnPlayerUpdated(float fTimeElapsed);
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
@@ -42,6 +42,10 @@ public:
 	
 	// 충돌 관련 함수
 public:
+
+	void CreateBoundingBox(float fX, float fY);
+	bool CollideAABB(D3DXVECTOR3 d3dxvPosition);
+
 	float CalculateDistance(D3DXVECTOR3 d3dxvinputPosition);
 	bool CalculateCollisionRange(D3DXVECTOR3 d3dxvPlayerPosition);
 	float CalculateAttackRange(float fAttackRadius, float fBeAttackedRadius);

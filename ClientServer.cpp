@@ -3,6 +3,7 @@
 
 ClientServer::ClientServer()
 {
+	flag = false;
 	size = 0;
 	//inPacketSize = new int;
 	inPacketSize = &size;
@@ -75,12 +76,13 @@ int ClientServer::socketInit()
 	cout << "Login Request" << endl;
 	return 1;
 }
-void ClientServer::keyDown(D3DXVECTOR3 wParam)
+void ClientServer::keyDown(D3DXVECTOR3 dir,D3DXVECTOR3 pos)
 {
 	CsPacketMove myPacket;
 	myPacket.packetSize = sizeof(CsPacketMove);
 	myPacket.packetType = CS_MOVE;
-	myPacket.direction = wParam;
+	myPacket.position = pos;
+	myPacket.direction = dir;
 	sendPacket(sock, &myPacket);
 }
 void ClientServer::readPacket()
@@ -188,8 +190,11 @@ void ClientServer::processPacket(char* ptr)
 
 	case SC_MOVE_ERROR_CHECK:
 	{
-		cout << "이동 동기화 체크" << endl;
+		//cout << "이동 동기화 체크" << endl;
 		ScPacketMove *check = reinterpret_cast<ScPacketMove*>(ptr);
+		Player[0].setPlayerPosition(check->position);
+		Player[0].setPlayerDirection(check->direction);
+		flag = true;
 		break;
 	}
 	case SC_SECTOR_UPDATE:
@@ -265,7 +270,7 @@ void ClientServer::processPacket(char* ptr)
 		ScPacketMonsterPos *monMove = reinterpret_cast<ScPacketMonsterPos*>(ptr);
 		for (int i = 0; i < 100; ++i)
 		{
-			if (monMove->monsterID == i)
+			if (monMove->monsterID == monsterList[i].id)
 			{
 				monsterList[i].monsterPos = monMove->position;
 				monsterList[i].monsterDir = monMove->direction;
@@ -279,9 +284,23 @@ void ClientServer::processPacket(char* ptr)
 		ScPacketMonsterState *monState = reinterpret_cast<ScPacketMonsterState*>(ptr);
 		for (int i = 0; i < 100; ++i)
 		{
-			if (monState->monsterID == i)
+			if (monState->monsterID == monsterList[i].id)
 			{
 				monsterList[i].state = monState->monsterState;
+				break;
+			}
+		}
+		break;
+	}
+	case SC_MONSTER_RESET:
+	{
+		ScPacketResetMonster *reset=reinterpret_cast<ScPacketResetMonster*>(ptr);
+		for (auto i = 0; i < 100; ++i)
+		{
+			if (monsterList[i].id == reset->monsterID)
+			{
+				monsterList[i].state = waitPosState;
+				monsterList[i].monsterPos = reset->returnPos;
 				break;
 			}
 		}
@@ -315,6 +334,7 @@ void ClientServer::sendPacket(SOCKET s, void* buf)
 		cout << "WSASend() x Error" << endl;
 		cout << WSAGetLastError() << endl;
 	}
+	delete Send_Operation;
 	//cout << "client data send" << endl;
 }
 int ClientServer::getMyId()

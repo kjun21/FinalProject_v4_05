@@ -74,6 +74,13 @@ struct ScPacketMonsterPos
 	D3DXVECTOR3 direction;
 	D3DXVECTOR3 position;
 };
+struct ScPacketResetMonster
+{
+	int packetSize;
+	BYTE packetType;
+	int monsterID;
+	D3DXVECTOR3 returnPos;
+};
 struct ScPacketMonsterState
 {
 	int packetSize;

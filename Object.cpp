@@ -1104,8 +1104,8 @@ void  COtherPlayerObject::CreateAnimation()
 	m_AnimationClip[4].m_nAnimationState = ANIMATAION_CLIP_DEATH;
 
 	m_AnimationClip[0].m_strFileName = "StoneKing_AttackReady.txt";
-	m_AnimationClip[1].m_strFileName = "StoneKing_Attack1.txt";
-	m_AnimationClip[2].m_strFileName = "StoneKing_Attack2.txt";
+	m_AnimationClip[1].m_strFileName = "StoneKing_Attack3-1.txt";
+	m_AnimationClip[2].m_strFileName = "StoneKing_Attack1.txt";
 	m_AnimationClip[3].m_strFileName = "StoneKing_Run.txt";
 	m_AnimationClip[4].m_strFileName = "StoneKing_Death.txt";
 
@@ -1264,7 +1264,6 @@ void  CMonsterObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pC
 		for (int j = 0; j < GOLEM_MAX_BONE; j++) //왼쪽
 			m_cbMonsterMatrice->m_d3dxmtxResult[j] = m_AnimationClip[3].m_ppResultMatrix[164][j];
 		pd3dDeviceContext->Unmap(m_pd3dcbAnimation, 0);
-
 
 
 		if (m_pd3dcbAnimation != NULL)
@@ -1435,37 +1434,15 @@ CLeavesObject::~CLeavesObject()
 }
 
 
-
+void CWoodObject::CreateBoundingBox(float fX, float fZ)
+{
+	m_d3dxvMinimum.x = -fX;
+	m_d3dxvMinimum.z = -fZ;
+	m_d3dxvMaximum.x = +fX;
+	m_d3dxvMaximum.x = +fZ;
+}
 CWoodObject::CWoodObject(ID3D11Device *pd3dDevice, string strFileName) : CGameObject(1)
 {
-	//string strFileName = "Data/NewTree02_Vertex.txt";
-
-	//ID3D11SamplerState *pd3dSamplerState = NULL;
-	//D3D11_SAMPLER_DESC d3dSamplerDesc;
-	//ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	//d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	//d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	//d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	//d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	//d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	//d3dSamplerDesc.MinLOD = 0;
-	//d3dSamplerDesc.MaxLOD = 0;
-	//pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
-
-	////텍스쳐 리소스를 생성한다.
-	//ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
-	//m_pTexture = new CTexture(1, 1, 0, 0);
-	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Tree 3-4 Diffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	//m_pTexture->SetTexture(0, pd3dsrvTexture);
-	//m_pTexture->SetSampler(0, pd3dSamplerState);
-	//pd3dsrvTexture->Release();
-
-	//pd3dSamplerState->Release();
-
-
-	//CFixedMesh *pFixedMesh = new CFixedMesh(pd3dDevice, strFileName);
-	//SetMesh(pFixedMesh, 0);
-	//Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
 
 
 }
