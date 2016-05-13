@@ -196,8 +196,10 @@ void   CMonsterShader ::BuildObjects(ID3D11Device *pd3dDevice)
 		pGolemObject->SetMesh(pGolemMesh);
 		float fPosition[3];
 		fscanf_s(fp, "%f %f %f  \n", &fPosition[0], &fPosition[1], &fPosition[2]);
+		pGolemObject->Scale(D3DXVECTOR3(0.6f, 0.6f, 0.6f));
 		pGolemObject->SetPosition(fPosition[0], fPosition[1], fPosition[2]);
 		m_ppObjects[i] = pGolemObject;
+		//m_ppObjects[i]->Scale(D3DXVECTOR3(0.6f, 0.6f, 0.6f));
 		pGameManager->m_ppMonster[i] = m_ppObjects[i];
 		i++;
 	}
@@ -211,126 +213,10 @@ void   CMonsterShader ::BuildObjects(ID3D11Device *pd3dDevice)
 	fprintf(fp, "%d \n", GOLEM_NUM);
 	for (int j = 0; j < GOLEM_NUM; j++)
 	{
-		fprintf(fp, "%d %lf %lf %lf %lf %lf %lf \n", 200, m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().y, m_ppObjects[j]->GetPosition().z,
+		fprintf(fp, "%d %lf %lf %lf %lf %lf %lf \n", 2, m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().y, m_ppObjects[j]->GetPosition().z,
 			m_ppObjects[j]->GetLookAt().x, m_ppObjects[j]->GetLookAt().y, m_ppObjects[j]->GetLookAt().z);
 	}
 	fclose(fp);
-
-
-
-	//for (int z = 0; z < 1; z++)
-	//{
-	//	for (int x = 0; x < GOLEM_NUM; x++)
-	//	{
-	//		pMonsterObject = new  CMonsterObject(pd3dDevice, strFileName1);
-	//		pMonsterObject->SetMesh(pGolemMesh);
-	//		pMonsterObject->Rotate(0, 180.0f, 0);
-	//	//	pMonsterObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
-	//		pMonsterObject->SetPosition(x * 600 + 650, 325.0f, (z * 300) + 350);
-
-	//		pMonsterObject->SetAnimationState(x%4);
-	//		m_ppObjects[i++] = pMonsterObject;
-	//	
-	//	}
-	//}
-
-
-
-	// Leaves
-	//for (int z = 0; z < 9; z++)
-	//{
-	//	for (int x = 0; x < 4; x++)
-	//	{
-	//		pLeavesObject = new  CLeavesObject(pd3dDevice, strFileName2);
-	//		pLeavesObject->SetMesh(pLeavesMesh);
-	//		pLeavesObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
-	//		if (x == 0) //가장 처름
-	//			pLeavesObject->SetPosition(x * 600 + 200, 425.0f + 0, 10.0f + (z * 400) + 450);
-	//		else
-	//			pLeavesObject->SetPosition(x * 600 + 650, 425.0f + 0, 10.0f + (z * 400) + 350);
-	//		m_ppObjects[i++] = pLeavesObject;
-	//	}
-	//}
-	//m_pd3dLeavesInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TREE_NUM / 2, m_nInstanceBufferStride, NULL);
-	//pLeavesMesh->AssembleToVertexBuffer(1, &m_pd3dLeavesInstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
-
-
-	
-	//// Create FlatStone02
-	//for (int x = 0; x < 1; x++)
-	//{
-	//	for (int z = 0; z < FLAT_ROCK02_NUM; z++)
-	//	{
-	//		pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
-	//		pWoodObject->SetMesh(pFlatRockMesh02);
-	//		float fAngle = rand() % 60;
-	//		pWoodObject->Scale(D3DXVECTOR3(5.0, 5.0, 5.0));
-	//		pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
-	//		if (z >= 8)
-	//			pWoodObject->SetPosition(1050 + 900, 270.0f, 1483 + (130)* (z - 8));
-	//		else
-	//			pWoodObject->SetPosition(670, 270.0f, 1483 + (130)*z);
-	//		m_ppObjects[i++] = pWoodObject;
-	//	}
-	//}
-	//m_pd3dFlatStone02InstanceBuffer = CreateInstanceBuffer(pd3dDevice, FLAT_ROCK02_NUM, m_nInstanceBufferStride, NULL);
-	//pFlatRockMesh02->AssembleToVertexBuffer(1, &m_pd3dFlatStone02InstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
-
-
-
-
-
-	////Create FlatStone03
-	//for (int x = 0; x < 1; x++)
-	//{
-	//	for (int z = 0; z <FLAT_ROCK03_NUM; z++)
-	//	{
-	//		pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
-	//		pWoodObject->SetMesh(pFlatRockMesh03);
-	//		float fAngle = rand() % 60;
-	//		pWoodObject->Scale(D3DXVECTOR3(5.0, 5.0, 5.0));
-	//		pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
-	//		if (z >= 8)
-	//			pWoodObject->SetPosition(1050 + 900, 270.0f, 1483 + (130)*(z - 8) + 55);
-	//		else
-	//			pWoodObject->SetPosition(670, 270.0f, 1483 + (130)*z + 55);
-	//		m_ppObjects[i++] = pWoodObject;
-	//	}
-	//}
-	//m_pd3dFlatStone03InstanceBuffer = CreateInstanceBuffer(pd3dDevice, FLAT_ROCK03_NUM, m_nInstanceBufferStride, NULL);
-	//pFlatRockMesh03->AssembleToVertexBuffer(1, &m_pd3dFlatStone03InstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
-
-
-
-
-	//for (int x = 0; x < 1; x++)
-	//{
-	//	for (int z = 0; z <TALL_STONE01_NUM; z++)
-	//	{
-	//		pWoodObject = new  CWoodObject(pd3dDevice, strFileName7);
-	//		pWoodObject->SetMesh(pCliff01Mesh);
-	//		pWoodObject->Scale(D3DXVECTOR3(10.0, 10.0, 10.0));
-	//		//pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), (float)D3DXToDegree(fAngle));
-
-	//		pWoodObject->SetPosition(900 * (z + 1), 240.0f, 1050);
-	//		/*
-	//		if (z % 2 == 0)
-	//		pWoodObject->SetPosition(700, 220.0f, 1050);
-	//		else
-	//		{
-	//		pWoodObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), 180.0);
-	//		pWoodObject->SetPosition(701, 220.0f, 972);
-	//		}*/
-
-
-
-
-	//		m_ppObjects[i++] = pWoodObject;
-	//	}
-	//}
-	//m_pd3dCliff01InstanceBuffer = CreateInstanceBuffer(pd3dDevice, TALL_STONE01_NUM, m_nInstanceBufferStride, NULL);
-	//pCliff01Mesh->AssembleToVertexBuffer(1, &m_pd3dCliff01InstanceBuffer, &m_nInstanceBufferStride, &m_nInstanceBufferOffset);
-
 }
 
 
@@ -366,10 +252,11 @@ void CMonsterShader::AnimateObjects(float fTimeElapsed)
 	for (auto i = 0; i < m_nObjects; ++i)
 	{
 		m_ppObjects[i]->SetAnimationState(s->monsterList[i].state);
-		//m_ppObjects[i]->Scale(D3DXVECTOR3(0.6f, 0.6f, 0.6f));
+	
 		m_ppObjects[i]->SetPosition(s->monsterList[i].monsterPos);
 		m_ppObjects[i]->SetDirection(s->monsterList[i].monsterDir);
 		m_ppObjects[i]->RenewWorldMatrix();
+		m_ppObjects[i]->Scale(D3DXVECTOR3(0.6f, 0.6f, 0.6f));
 		//std::cout << i<<" "<<m_ppObjects[i]->GetPosition().x << " "<< m_ppObjects[i]->GetPosition().z << std::endl;
 	}
 	////for (auto i = 5; i < m_nObjects; ++i)
@@ -377,4 +264,87 @@ void CMonsterShader::AnimateObjects(float fTimeElapsed)
 	////	m_ppObjects[i]->moveforward(fTimeElapsed*10.0f);
 	////}
 	CShader::AnimateObjects(fTimeElapsed);
+}
+
+
+CFakeMonsterShader::CFakeMonsterShader()
+{
+
+}
+CFakeMonsterShader  ::~CFakeMonsterShader()
+{
+}
+
+void CFakeMonsterShader::BuildObjects(ID3D11Device *pd3dDevice)
+{
+	m_nObjects = 4;
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+
+	string strFileName1 = "Data/Gob_Vertex.txt";
+	string strFileName2 = "Data/Greenman_Vertex.txt";
+	string strFileName3 = "Data/Greenman_Vertex.txt";
+
+	//  Golem
+	CCharacterMesh* pGoblinMesh = new CCharacterMesh(pd3dDevice, strFileName1);
+	CCharacterMesh* pGreenmanMesh = new CCharacterMesh(pd3dDevice, strFileName2);
+
+
+	CGoblinObject* pGoblinObject1 = new CGoblinObject(pd3dDevice, strFileName1);
+	CGoblinObject* pGoblinObject2 = new CGoblinObject(pd3dDevice, strFileName1);
+	CGreenManObject* pGreenManObject1 = new CGreenManObject(pd3dDevice, strFileName2);
+	CGreenManObject* pGreenManObject2 = new CGreenManObject(pd3dDevice, strFileName2);
+	pGoblinObject1->SetMesh(pGoblinMesh);
+	pGoblinObject1->SetAnimationState(ANIMATAION_CLIP_MONSTER_IDLE);
+	pGoblinObject2->SetMesh(pGoblinMesh);
+	pGoblinObject2->SetAnimationState(ANIMATAION_CLIP_MONSTER_ATTACK);
+	pGreenManObject1->SetMesh(pGreenmanMesh);
+	pGreenManObject1->SetAnimationState(ANIMATAION_CLIP_MONSTER_RUN);
+	pGreenManObject2->SetMesh(pGreenmanMesh);
+	pGreenManObject2->SetAnimationState(ANIMATAION_CLIP_MONSTER_ATTACK);
+
+	m_ppObjects[0] = pGoblinObject1;
+	m_ppObjects[1] = pGoblinObject2;
+	m_ppObjects[2] = pGreenManObject1;
+	m_ppObjects[3] = pGreenManObject2;
+
+	m_ppObjects[0]->SetPosition(100.0f, 266.0f, 300.0f);
+	m_ppObjects[1]->SetPosition(100.0f, 266.0f, 300.0f);
+
+	m_ppObjects[2]->SetPosition(200.0f, 266.0f, 300.0f);
+	m_ppObjects[3]->SetPosition(200.0f, 266.0f, 500.0f);
+
+	for (int i = 0; i < m_nObjects; i++)
+		m_ppObjects[i]->Scale(D3DXVECTOR3(3.0f, 3.0f, 3.0f));
+
+}
+
+void  CFakeMonsterShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
+{
+	OnPrepareRender(pd3dDeviceContext);
+	if (m_pMaterial)
+		CIlluminatedShader::UpdateShaderVariable(pd3dDeviceContext, &m_pMaterial->m_Material);
+
+	// golem Texture
+	if (m_pTexture)
+	{
+		m_pTexture->UpdateSamplerShaderVariable(pd3dDeviceContext, 0, 0);
+		m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
+	}
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			if (m_ppObjects[j]->IsVisible(pCamera))
+			{
+				m_ppObjects[j]->Render(pd3dDeviceContext, pCamera);
+			}
+		}
+	}
+}
+
+void  CFakeMonsterShader::AnimateObjects(float fTimeElapsed)
+{
+
 }

@@ -103,7 +103,13 @@ struct ScPacketAcceptPlayerList
 	D3DXVECTOR3 position;
 };
 //  CS_Packet
-
+struct CsPacketRequest
+{
+	int packetSize;
+	BYTE packetType;
+	D3DXVECTOR3 position;
+	D3DXVECTOR3 direction;
+};
 struct CsPacketKeyUp
 {
 	int packetSize;

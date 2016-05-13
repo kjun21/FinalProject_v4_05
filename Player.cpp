@@ -291,9 +291,8 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, DWORD dwDirection, bool bUpdat
 
 	if (bUpdateVelocity)
 	{
-		m_d3dxvVelocity = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		//m_d3dxvVelocity = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		m_d3dxvVelocity += d3dxvShift;
-
 	}
 	//*********************************
 	// 실제 더해주는곳
@@ -301,39 +300,36 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, DWORD dwDirection, bool bUpdat
 	{
 
 		//플레이어를 현재 위치 벡터에서 d3dxvShift 벡터 만큼 이동한다.
-
-		
 		D3DXVECTOR3 d3dxvPosition;
 		D3DXVECTOR3 d3dxvPrePosition = m_d3dxvPosition;
-		d3dxvPosition = m_d3dxvPosition + d3dxvShift;
-
-		m_d3dxvPosition = d3dxvPosition;
-		
-		if (CollideAABB(m_d3dxvPosition))
-			m_d3dxvPosition = d3dxvPrePosition;
-		else
-			m_pCamera->Move(d3dxvShift);
-
-		
-
-
-		//CollideAABB();
-		//D3DXVECTOR3 d3dxvPosition;
-		//d3dxvPosition = m_d3dxvPosition + d3dxvShift;
-		//m_d3dxvPosition = d3dxvPosition;
-		
-		//추가된 서버
-		//if (true == s->flag)
-		//{
-		//	m_d3dxvPosition = s->Player[0].getPlayerPosition();
-		//	s->flag = false;
-		//}
-		////클라
-		//else
-		//{
-		//	d3dxvPosition = m_d3dxvPosition + d3dxvShift;
+		//	d3dxvposition = m_d3dxvPosition + d3dxvShift;
 		//	m_d3dxvPosition = d3dxvPosition;
-		//}
+
+
+		//추가된 서버
+		if (true == s->flag)
+		{
+			m_d3dxvPosition = s->Player[0].getPlayerPosition();
+			cout << m_d3dxvPosition.x << " , " << m_d3dxvPosition.z << endl;
+			s->flag = false;
+		}
+		//클라
+		else
+		{
+			//m_d3dxvPosition = d3dxvPosition;
+
+			d3dxvPosition = m_d3dxvPosition + d3dxvShift;
+			m_d3dxvPosition = d3dxvPosition;
+
+	
+
+			if (CollideAABB(m_d3dxvPosition))
+				m_d3dxvPosition = d3dxvPrePosition;
+			else
+				m_pCamera->Move(d3dxvShift);
+		}
+		// m_pCamera->Move(d3dxvShift);
+
 
 
 		//서버에게 방향을 보냄
@@ -345,12 +341,30 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, DWORD dwDirection, bool bUpdat
 		else
 			cout << " d안움직임" << endl;*/
 		
-		//추가된 서버
-		/*if(dwDirection)
-			s->keyDown(m_d3dxvLook, m_d3dxvPosition);*/
 		//s->keyDown(m_d3dxvLook, m_d3dxvPosition);
 		//플레이어의 위치가 변경되었으므로 카메라의 위치도 d3dxvShift 벡터 만큼 이동한다.
 	
+		//추가된 서버 키가 한번 다운됬으면 안보낸다.
+		if (dwDirection!=s->dirFlag)
+		{
+			s->dirFlag = dwDirection;
+			std::cout << "keydown" << std::endl;
+			s->keyDown(m_d3dxvLook, m_d3dxvPosition);
+			s->keyDownFlag = true;
+			s->keyUpFlag = 0;
+			std::cout << m_d3dxvPosition.x<<","<< m_d3dxvPosition.z << std::endl;
+		}
+		else if(dwDirection==0)
+		{
+			if (!(s->keyDownFlag == 0))
+			{
+				std::cout << "keyup" << std::endl;
+				s->dirKeyUp(m_d3dxvLook, m_d3dxvPosition);
+				s->keyDownFlag = false;
+				s->keyUpFlag++;
+				std::cout << m_d3dxvPosition.x << "," << m_d3dxvPosition.z << std::endl;
+			}
+		}
 	}
 }
 
@@ -433,21 +447,21 @@ void CPlayer::Rotate(float x, float y, float z)
 
 void CPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 {
-	///*플레이어의 속도 벡터를 중력 벡터와 더한다. 중력 벡터에 fTimeElapsed를 곱하는 것은 중력을 시간에 비례하도록 적용한다는 의미이다.*/
-	//m_d3dxvVelocity += m_d3dxvGravity * fTimeElapsed;
-	///*플레이어의 속도 벡터의 XZ-성분의 크기를 구한다. 이것이 XZ-평면의 최대 속력보다 크면 속도 벡터의 x와 z-방향 성분을 조정한다.*/
-	//float fLength = sqrtf(m_d3dxvVelocity.x * m_d3dxvVelocity.x + m_d3dxvVelocity.z * m_d3dxvVelocity.z);
-	//float fMaxVelocityXZ = m_fMaxVelocityXZ * fTimeElapsed;
-	//if (fLength > fMaxVelocityXZ)
-	//{
-	//	m_d3dxvVelocity.x *= (fMaxVelocityXZ / fLength);
-	//	m_d3dxvVelocity.z *= (fMaxVelocityXZ / fLength);
-	//}
-	///*플레이어의 속도 벡터의 Y-성분의 크기를 구한다. 이것이 Y 축 방향의 최대 속력보다 크면 속도 벡터의 y-방향 성분을 조정한다.*/
-	//fLength = sqrtf(m_d3dxvVelocity.y * m_d3dxvVelocity.y);
-	//float fMaxVelocityY = m_fMaxVelocityY * fTimeElapsed;
-	//if (fLength > fMaxVelocityY)
-	//	m_d3dxvVelocity.y *= (fMaxVelocityY / fLength);
+	/*플레이어의 속도 벡터를 중력 벡터와 더한다. 중력 벡터에 fTimeElapsed를 곱하는 것은 중력을 시간에 비례하도록 적용한다는 의미이다.*/
+	m_d3dxvVelocity += m_d3dxvGravity * fTimeElapsed;
+	/*플레이어의 속도 벡터의 XZ-성분의 크기를 구한다. 이것이 XZ-평면의 최대 속력보다 크면 속도 벡터의 x와 z-방향 성분을 조정한다.*/
+	float fLength = sqrtf(m_d3dxvVelocity.x * m_d3dxvVelocity.x + m_d3dxvVelocity.z * m_d3dxvVelocity.z);
+	float fMaxVelocityXZ = m_fMaxVelocityXZ * fTimeElapsed;
+	if (fLength > fMaxVelocityXZ)
+	{
+		m_d3dxvVelocity.x *= (fMaxVelocityXZ / fLength);
+		m_d3dxvVelocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	/*플레이어의 속도 벡터의 Y-성분의 크기를 구한다. 이것이 Y 축 방향의 최대 속력보다 크면 속도 벡터의 y-방향 성분을 조정한다.*/
+	fLength = sqrtf(m_d3dxvVelocity.y * m_d3dxvVelocity.y);
+	float fMaxVelocityY = m_fMaxVelocityY * fTimeElapsed;
+	if (fLength > fMaxVelocityY)
+		m_d3dxvVelocity.y *= (fMaxVelocityY / fLength);
 
 	//****************************************************
 	//****************************************************
@@ -455,8 +469,8 @@ void CPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 	//플레이어를 속도 벡터 만큼 실제로 이동한다(카메라도 이동될 것이다). 
 	// 실제 업데이트가 되는 곳이다..
 
-	if (!dwDirection)
-		m_d3dxvVelocity = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	//if (!dwDirection)
+	//	m_d3dxvVelocity = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
 	Move(m_d3dxvVelocity, dwDirection, false);
 
@@ -490,12 +504,21 @@ void CPlayer::Update(float fTimeElapsed, DWORD dwDirection)
 	m_pCamera->RegenerateViewMatrix();
 
 	/*플레이어의 속도 벡터가 마찰력 때문에 감속이 되어야 한다면 감속 벡터를 생성한다. 속도 벡터의 반대 방향 벡터를 구하고 단위 벡터로 만든다. 마찰 계수를 시간에 비례하도록 하여 마찰력을 구한다. 단위 벡터에 마찰력을 곱하여 감속 벡터를 구한다. 속도 벡터에 감속 벡터를 더하여 속도 벡터를 줄인다. 마찰력이 속력보다 크면 속력은 0이 될 것이다.*/
-	//D3DXVECTOR3 d3dxvDeceleration = -m_d3dxvVelocity;
-	//D3DXVec3Normalize(&d3dxvDeceleration, &d3dxvDeceleration);
-	//fLength = D3DXVec3Length(&m_d3dxvVelocity);
-	//float fDeceleration = (m_fFriction * fTimeElapsed);
-	//if (fDeceleration > fLength) fDeceleration = fLength;
-	//m_d3dxvVelocity += d3dxvDeceleration * fDeceleration;
+	D3DXVECTOR3 d3dxvDeceleration = -m_d3dxvVelocity;
+	D3DXVec3Normalize(&d3dxvDeceleration, &d3dxvDeceleration);
+	fLength = D3DXVec3Length(&m_d3dxvVelocity);
+	float fDeceleration = (m_fFriction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+	m_d3dxvVelocity += d3dxvDeceleration * fDeceleration;
+	//서버시간(1초당 한번 보내는 부분)
+	ClientServer *s = ClientServer::getInstangce();
+	if (s->currentTime<= clock())
+	{
+		std::cout << "update" << std::endl;
+		s->currentTime = clock() + 500;
+		s->infoRequest(m_d3dxvLook, m_d3dxvPosition);
+		std::cout << m_d3dxvPosition.x << "," << m_d3dxvPosition.z << std::endl;
+	}
 }
 
 CCamera*  CPlayer::OnChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, DWORD nCurrentCameraMode)
@@ -583,7 +606,7 @@ void CPlayer::OnPrepareRender()
 	m_d3dxmtxWorld._41 = m_d3dxvPosition.x;
 	m_d3dxmtxWorld._42 = m_d3dxvPosition.y;
 	m_d3dxmtxWorld._43 = m_d3dxvPosition.z;
-	//cout << "현재 위치" << m_d3dxvPosition.x << "  " << m_d3dxvPosition.y << "  " << m_d3dxvPosition.z << endl;
+	cout << "현재 위치" << m_d3dxvPosition.x << "  " << m_d3dxvPosition.y << "  " << m_d3dxvPosition.z << endl;
 
 	
 
@@ -688,7 +711,7 @@ void CTerrainPlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode
 		//3인칭 카메라일 때 플레이어에 y-축 방향으로 중력이 작용한다.
 		SetGravity(D3DXVECTOR3(0.0f, -0.0f, 0.0f)); // -300
 		SetMaxVelocityXZ(1000.0f);
-		SetMaxVelocityY(-0.0f);
+		SetMaxVelocityY(5000.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f); //550
 		m_pCamera->SetOffset(D3DXVECTOR3(0.0f, 550.0f, -300.0f)); // 원래 마지막  20 -50   // 250.0f, -150.0f
@@ -832,6 +855,9 @@ void CPlayer::CollisionCheck()
 // 1160
 // 628일 때 충돌 처리.
 
+
+
+
 bool CPlayer::CollideAABB(D3DXVECTOR3 d3dxvPosition)
 {
 	bool bResult = false;
@@ -846,7 +872,6 @@ bool CPlayer::CollideAABB(D3DXVECTOR3 d3dxvPosition)
 				bResult = true;
 		}
 	}
-
 	return bResult;
 }
 void CPlayer::CreateBoundingBox(float fX, float fZ)
@@ -866,7 +891,6 @@ void CPlayer::Animate(float fTimeElapsed)
 
 void CTerrainPlayer::Animate(float fTimeElapsed)
 {
-	
 	/*CGameManager* pGameManager = CGameManager::GetCGameManager();
 	if (pGameManager->m_ppMonster[0] != NULL)
 		CollisionCheck();*/

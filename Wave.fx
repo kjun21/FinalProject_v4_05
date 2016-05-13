@@ -60,7 +60,7 @@ Texture2D gtxtReflection : register(t4);
 
 
 TextureCube gtxtCubeMapSkyBox : register(t7);
-SamplerState gssSkyBox : register(s0);
+SamplerState gssSkyBox : register(s7);
 
 
 //===================================================
@@ -254,7 +254,7 @@ DS_OUTPUT DS(HS_CONSTANT_OUTPUT input, float3 uv : SV_DomainLocation,
 
 	// Project to homogeneous clip space.
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	
+	output.texCoord = 10.0f * output.texCoord;
 	//matrix reflectProjectWorld;
 	//matrix viewProjectWorld;
 	//// Create the reflection projection world matrix.
@@ -296,6 +296,7 @@ float4 PS(DS_OUTPUT input) : SV_Target
 		//평균을 낸다.
 		float3 bumpedNormalW = normalize(normalW1 + normalW2);
 		float4 cIllumination = Lighting(input.positionW, bumpedNormalW);
+		float4 TextureColor= gtxtTexture.Sample(gSamplerState, input.texCoord);
 		//float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord) * cIllumination;
 
 		// 스카이 박스 반사 벡타
@@ -309,38 +310,39 @@ float4 PS(DS_OUTPUT input) : SV_Target
 
 
 
-	//float2 reflectTexCoord;
-	//float2 refractTexCoord;
-	//float4 reflectionColor;
-	//float4 	refractionColor;
-	//float reflectRefractScale = 0.3;
-	////bumpedNormalW = (bumpedNormalW.xyz * 2.0f) - 1.0f;
+		//float2 reflectTexCoord;
+		//float2 refractTexCoord;
+		//float4 reflectionColor;
+		//float4 	refractionColor;
+		//float reflectRefractScale = 0.3;
+		////bumpedNormalW = (bumpedNormalW.xyz * 2.0f) - 1.0f;
 
-	//// -1~ +1 범위에 텍스쳐 좌표안에서 반사와 굴절 좌표 둘다 바꾼다.
-	//// Calculate the projected reflection texture coordinates.
-	//reflectTexCoord.x = input.reflectionPosition.x / input.reflectionPosition.w / 2.0f + 0.5f;
-	//reflectTexCoord.y = -input.reflectionPosition.y / input.reflectionPosition.w / 2.0f + 0.5f;
+		//// -1~ +1 범위에 텍스쳐 좌표안에서 반사와 굴절 좌표 둘다 바꾼다.
+		//// Calculate the projected reflection texture coordinates.
+		//reflectTexCoord.x = input.reflectionPosition.x / input.reflectionPosition.w / 2.0f + 0.5f;
+		//reflectTexCoord.y = -input.reflectionPosition.y / input.reflectionPosition.w / 2.0f + 0.5f;
 
-	//// Calculate the projected refraction texture coordinates.
-	//refractTexCoord.x = input.refractionPosition.x / input.refractionPosition.w / 2.0f + 0.5f;
-	//refractTexCoord.y = -input.refractionPosition.y / input.refractionPosition.w / 2.0f + 0.5f;
+		//// Calculate the projected refraction texture coordinates.
+		//refractTexCoord.x = input.refractionPosition.x / input.refractionPosition.w / 2.0f + 0.5f;
+		//refractTexCoord.y = -input.refractionPosition.y / input.refractionPosition.w / 2.0f + 0.5f;
 
-	//reflectTexCoord = reflectTexCoord + (bumpedNormalW.xy * reflectRefractScale);
-	//refractTexCoord = refractTexCoord + (bumpedNormalW.xy * reflectRefractScale);
+		//reflectTexCoord = reflectTexCoord + (bumpedNormalW.xy * reflectRefractScale);
+		//refractTexCoord = refractTexCoord + (bumpedNormalW.xy * reflectRefractScale);
 
-	//// 다음, 업데이트된 텍스쳐 샘플링 좌표들을 기초로한 반사와 굴절 픽셀을 추출한다.
-	//// Sample the texture pixels from the textures using the updated texture coordinates.
-	//reflectionColor = gtxtReflection.Sample(gssNormal1, reflectTexCoord);
-	//refractionColor = gtxtRefraction.Sample(gssNormal1, refractTexCoord);
-	//float4 CreatedColor = lerp(reflectionColor, refractionColor, 0.6f);
+		//// 다음, 업데이트된 텍스쳐 샘플링 좌표들을 기초로한 반사와 굴절 픽셀을 추출한다.
+		//// Sample the texture pixels from the textures using the updated texture coordinates.
+		//reflectionColor = gtxtReflection.Sample(gssNormal1, reflectTexCoord);
+		//refractionColor = gtxtRefraction.Sample(gssNormal1, refractTexCoord);
+		//float4 CreatedColor = lerp(reflectionColor, refractionColor, 0.6f);
 
 
 
-	///float4 cColor = cIllumination + refractionColor;
-	float4 cColor = cIllumination + (reflectMaterial* cReflectionColor) ;
+		///float4 cColor = cIllumination + refractionColor;
+		float4 cColor = cIllumination + (reflectMaterial* cReflectionColor);
+		cColor = cColor * TextureColor;
 		//float4 cColor =   cIllumination;
 		//cColor = cColor * cIllumination;
-		cColor.a = 0.60;
+		cColor.a = 0.40;
 	return(cColor);
 }
 
@@ -394,4 +396,38 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_Target
 {
 	float4 cColor = gtxtCubeMapSkyBox.Sample(gssSkyBox, input.position);
 	return cColor;
+}
+
+
+
+//텍스쳐를 사용하는 경우 정점 쉐이더의 입력을 위한 구조체이다.
+struct VS_TEXTURED_COLOR_INPUT
+{
+	float3 position : POSITION;
+	//float2 texCoord : TEXCOORD0;
+};
+
+//텍스쳐를 사용하는 경우 정점 쉐이더의 출력을 위한 구조체이다.
+struct VS_TEXTURED_COLOR_OUTPUT
+{
+	float4 position : SV_POSITION;
+	//float2 texCoord : TEXCOORD0;
+};
+
+
+VS_TEXTURED_COLOR_OUTPUT VSTexturedColor(VS_TEXTURED_COLOR_INPUT input)
+{
+	VS_TEXTURED_COLOR_OUTPUT output = (VS_TEXTURED_COLOR_OUTPUT)0;
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	//output.texCoord = input.texCoord;
+
+	return(output);
+}
+
+//각 픽셀에 대하여 텍스쳐 샘플링을 하기 위한 픽셀 쉐이더 함수이다.
+float4 PSTexturedColor(VS_TEXTURED_COLOR_OUTPUT input) : SV_Target
+{
+	//float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord);
+	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	return(cColor);
 }

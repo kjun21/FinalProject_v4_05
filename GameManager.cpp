@@ -10,6 +10,7 @@ CGameManager::CGameManager()
 	m_uiPlayersNum = 4;
 	m_pPlayers = new CGameObject*[m_uiPlayersNum];
 
+
 	m_uiStaticObjectNums = 50;
 	m_ppStaticObject = new CGameObject*[m_uiStaticObjectNums];
 }

@@ -65,7 +65,7 @@ void CMesh::RenderInstanced(ID3D11DeviceContext *pd3dDeviceContext, int nInstanc
 	pd3dDeviceContext->IASetVertexBuffers(m_nSlot, m_nBuffers, m_ppd3dVertexBuffers, m_pnVertexStrides, m_pnVertexOffsets);
 	pd3dDeviceContext->IASetIndexBuffer(m_pd3dIndexBuffer, m_dxgiIndexFormat, m_nIndexOffset);
 	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
-	pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
+	//pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
 
 	//객체들의 인스턴스들을 렌더링한다. 
 	if (m_pd3dIndexBuffer)
@@ -1097,7 +1097,7 @@ CSkyBoxMesh::CSkyBoxMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, 
 
 	//********************************
 
-	m_pSkyboxTexture = new CTexture(1, 1, 7, 0);
+	m_pSkyboxTexture = new CTexture(1, 1, 7, 7);
 	m_pSkyboxTexture->SetSampler(0, pd3dSamplerState);
 	pd3dSamplerState->Release();
 	m_pSkyboxTexture->AddRef();
@@ -2786,3 +2786,97 @@ CUIMesh::~CUIMesh()
 {
 
 }
+
+
+CAlphaBlendingMirrorMeshTextured::CAlphaBlendingMirrorMeshTextured(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth)
+	: CMeshTextured(pd3dDevice)
+{
+
+	m_nVertices = 6;
+	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+
+	float fx = fWidth*0.5f, fy = fHeight*0.5f, fz = fDepth*0.5f;
+
+	m_pd3dxvPositions = new D3DXVECTOR3[m_nVertices];
+	//생략된 부분은 LabProject13-2의 CCubeMeshTextured 클래스의 생성자 부분과 동일하다.
+	D3DXVECTOR2 pd3dxvTexCoords[6];
+	int i = 0;
+
+	//직육면체의 각 면(삼각형 2개)에 하나의 텍스쳐 이미지 전체가 맵핑되도록 텍스쳐 좌표를 설정한다.
+	//
+	m_pd3dxvPositions[i] = D3DXVECTOR3(-fx, 0.0f, +fz);
+	pd3dxvTexCoords[i++] = D3DXVECTOR2(0.0f, 0.0f);
+
+	m_pd3dxvPositions[i] = D3DXVECTOR3(+fx, 0.0f, +fz);
+	pd3dxvTexCoords[i++] = D3DXVECTOR2(1.0f, 0.0f);
+
+	m_pd3dxvPositions[i] = D3DXVECTOR3(+fx, 0.0f, -fz);
+	pd3dxvTexCoords[i++] = D3DXVECTOR2(1.0f, 1.0f);
+
+	m_pd3dxvPositions[i] = D3DXVECTOR3(-fx, 0.0f, +fz);
+	pd3dxvTexCoords[i++] = D3DXVECTOR2(0.0f, 0.0f);
+
+	m_pd3dxvPositions[i] = D3DXVECTOR3(+fx, 0.0f, -fz);
+	pd3dxvTexCoords[i++] = D3DXVECTOR2(1.0f, 1.0f);
+
+	m_pd3dxvPositions[i] = D3DXVECTOR3(-fx, 0.0f, -fz);
+	pd3dxvTexCoords[i++] = D3DXVECTOR2(0.0f, 1.0f);
+
+	//================================
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR3) * m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pd3dxvPositions;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dPositionBuffer);
+
+
+
+	//d3dBufferDesc.ByteWidth = sizeof(D3DXVECTOR2) * m_nVertices;
+	//d3dBufferData.pSysMem = pd3dxvTexCoords;
+	//pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dTexCoordBuffer);
+
+
+	//D3D11_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
+	//ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+
+	//정점은 위치 벡터, 법선 벡터, 텍스쳐 좌표를 갖는다.
+	ID3D11Buffer *pd3dBuffers[1] = { m_pd3dPositionBuffer };
+	UINT pnBufferStrides[1] = { sizeof(D3DXVECTOR3) };
+	UINT pnBufferOffsets[1] = { 0 };
+	AssembleToVertexBuffer(1, pd3dBuffers, pnBufferStrides, pnBufferOffsets);
+
+
+	//ID3D11Buffer *pd3dBuffers[2] = { m_pd3dPositionBuffer, m_pd3dTexCoordBuffer };
+	//UINT pnBufferStrides[2] = { sizeof(D3DXVECTOR3), sizeof(D3DXVECTOR2) };
+	//UINT pnBufferOffsets[2] = { 0, 0 };
+	//AssembleToVertexBuffer(2, pd3dBuffers, pnBufferStrides, pnBufferOffsets);
+
+	/*m_bcBoundingCube.m_d3dxvMinimum = D3DXVECTOR3(-fx, -fy, -fz);
+	m_bcBoundingCube.m_d3dxvMaximum = D3DXVECTOR3(+fx, +fy, +fz);*/
+
+
+}
+
+
+CAlphaBlendingMirrorMeshTextured::~CAlphaBlendingMirrorMeshTextured()
+{
+}
+
+//void   CAlphaBlendingMirrorMeshTextured::Render(ID3D11DeviceContext *pd3dDeviceContext)
+//{
+//
+//	//pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
+//	pd3dDeviceContext->IASetVertexBuffers(m_nSlot, m_nBuffers, m_ppd3dVertexBuffers, m_pnVertexStrides, m_pnVertexOffsets);
+//	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+//
+//
+//	pd3dDeviceContext->Draw(m_nVertices, 0);
+//
+//}

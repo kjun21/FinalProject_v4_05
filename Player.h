@@ -41,8 +41,9 @@ public:
 	void SetPosition(const D3DXVECTOR3& d3dxvPosition) { Move((d3dxvPosition - m_d3dxvPosition), false); }
 	
 	// 충돌 관련 함수
-public:
 
+public:
+	// 
 	void CreateBoundingBox(float fX, float fY);
 	bool CollideAABB(D3DXVECTOR3 d3dxvPosition);
 

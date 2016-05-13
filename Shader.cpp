@@ -1795,6 +1795,10 @@ void   COtherPlayerShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh
 	m_ppObjects[1]->SetPosition(D3DXVECTOR3(200, 260.0f, 400.0f));
 	m_ppObjects[2]->SetPosition(D3DXVECTOR3(800, 260.0f, 600.0f));
 
+	m_ppObjects[0]->CreateBoundingBox(14.0f, 14.0f);
+	m_ppObjects[1]->CreateBoundingBox(14.0f, 14.0f);
+	m_ppObjects[2]->CreateBoundingBox(14.0f, 14.0f);
+
 
 	CGameManager* pGameManager = CGameManager::GetCGameManager();
 	pGameManager->m_pPlayers[1] = m_ppObjects[0];
@@ -1922,23 +1926,42 @@ void COtherPlayerShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3
 void COtherPlayerShader::AnimateObjects(float fTimeElapsed)
 {
 	//서버 다른 플레이어 좌표 셋팅하는 부분
-	//ClientServer *s = ClientServer::getInstangce();
-	//for (auto i = 1; i < 4; ++i)
-	//{
-	//	if (true == s->Player[i].getPlay())
-	//	{
-	//		m_ppObjects[i - 1]->SetAnimationState(s->Player[i].getState());
-	//		m_ppObjects[i - 1]->SetPosition(s->Player[i].getPlayerPosition());
-	//		m_ppObjects[i - 1]->SetDirection(s->Player[i].getPlayerDirection());
-	//		m_ppObjects[i - 1]->RenewWorldMatrix();
-	//		//cout << "다른 플레이어 상태   " << m_ppObjects[i - 1]->GetAnimationStat() << endl;
-	//		//cout <<" 다른 플레이어 위치  " <<m_ppObjects[i - 1]->GetPosition().x << "   " << m_ppObjects[i - 1]->GetPosition().z << endl;
-	//	}
-	//	else
-	//	{
-	//		m_ppObjects[i - 1]->SetPosition(D3DXVECTOR3(-10.0,0.0,-10.0));
-	//	}
-	//}
+	CGameTimer *time = CGameTimer::GetCGameTimer();
+	ClientServer *s = ClientServer::getInstangce();
+	CGameManager* pGameManager = CGameManager::GetCGameManager();
+
+	for (auto i = 1; i < 4; ++i)
+	{
+		if (true == s->Player[i].getPlay())
+		{
+			m_ppObjects[i - 1]->SetAnimationState(s->Player[i].getState());
+			m_ppObjects[i - 1]->SetDirection(s->Player[i].getPlayerDirection());
+			if (1 == s->Player[i].getState())
+			{
+				D3DXVECTOR3 pos = m_ppObjects[i - 1]->GetPosition() + (PLAYER_SPEED* m_ppObjects[i - 1]->GetLookAt() *time->GetTimeElapsed());
+				m_ppObjects[i - 1]->SetPosition(pos);
+
+				if (m_ppObjects[i - 1]->CollideAABB(pos))
+					m_ppObjects[i - 1]->SetPosition(m_ppObjects[i - 1]->GetPrePosition());
+
+
+				//cout << "다른 플레이어 상태   " << m_ppObjects[i - 1]->GetAnimationState() << endl;
+				//cout << " 다른 플레이어 위치  " << m_ppObjects[i - 1]->GetPosition().x << "   " << m_ppObjects[i - 1]->GetPosition().z << endl;
+			}
+			else
+			{
+				//cout << "다른 플레이어 상태   " << s->Player[i].getState() << endl;
+				m_ppObjects[i - 1]->SetPosition(s->Player[i].getPlayerPosition());
+			}
+			m_ppObjects[i - 1]->RenewWorldMatrix();
+			//cout << "다른 플레이어 상태   " << m_ppObjects[i - 1]->GetAnimationState() << endl;
+			//cout <<" 다른 플레이어 위치  " <<m_ppObjects[i - 1]->GetPosition().x << "   " << m_ppObjects[i - 1]->GetPosition().z << endl;
+		}
+		else
+		{
+			m_ppObjects[i - 1]->SetPosition(D3DXVECTOR3(-300.0,0.0,-300.0));
+		}
+	}
 }
 
 CCrushBoxShader::CCrushBoxShader()

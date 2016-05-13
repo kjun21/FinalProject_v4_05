@@ -98,10 +98,16 @@ void CGameObject::SetPosition(float x, float y, float z)
 
 void CGameObject::SetPosition(D3DXVECTOR3 d3dxvPosition)
 {
+	m_d3dxvPrePosition = D3DXVECTOR3(m_d3dxmtxWorld._41, m_d3dxmtxWorld._42, m_d3dxmtxWorld._43);
+
 	m_d3dxmtxWorld._41 = d3dxvPosition.x;
 	m_d3dxmtxWorld._42 = d3dxvPosition.y;
 	m_d3dxmtxWorld._43 = d3dxvPosition.z;
+
 }
+
+
+	
 
 
 void CGameObject::SetRight(D3DXVECTOR3 d3dxvRight)
@@ -623,8 +629,8 @@ CWaveObject::CWaveObject(ID3D11Device *pd3dDevice) : CGameObject(1)
 	CreateBlendingState(pd3dDevice);
 	m_pMaterial = new CMaterial();
 
-	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.4f, 0.4f, 0.7f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
-	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.1f, 0.1f, 0.4f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
 	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 }
@@ -646,7 +652,7 @@ void CWaveObject::CreateTextures(ID3D11Device *pd3dDevice)
 	//텍스쳐 리소스를 생성한다.
 	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
 	m_pStonesTexture = new CTexture(1, 1, 0, 0);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/water2.jpg"), NULL, NULL, &pd3dsrvTexture, NULL);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/Water/water2.jpg"), NULL, NULL, &pd3dsrvTexture, NULL);
 	m_pStonesTexture->SetTexture(0, pd3dsrvTexture);
 	m_pStonesTexture->SetSampler(0, pd3dSamplerState);
 	pd3dsrvTexture->Release();
@@ -1116,6 +1122,27 @@ void  COtherPlayerObject::CreateAnimation()
 	}
 	//return animationClip;
 }
+bool  COtherPlayerObject::CollideAABB(D3DXVECTOR3 d3dxvPosition)
+{
+	bool bResult = false;
+	CGameManager* pGameManager = CGameManager::GetCGameManager();
+	for (int i = 0; i < pGameManager->m_uiStaticObjectNums; i++)
+	{
+		if ((m_d3dxvMaximum.x + d3dxvPosition.x> pGameManager->m_ppStaticObject[i]->GetMinimum().x) &&
+			(m_d3dxvMinimum.x + d3dxvPosition.x < pGameManager->m_ppStaticObject[i]->GetMaximum().x))
+		{
+			if ((m_d3dxvMaximum.z + d3dxvPosition.z > pGameManager->m_ppStaticObject[i]->GetMinimum().z) &&
+				(m_d3dxvMinimum.z + d3dxvPosition.z < pGameManager->m_ppStaticObject[i]->GetMaximum().z))
+				bResult = true;
+		}
+	}
+	return bResult;
+}
+
+void  COtherPlayerObject::Animate(float fTimeElapsed)
+{
+
+}
 
 CMonsterObject::CMonsterObject(ID3D11Device *pd3dDevice, string strFileName) : CAnimatedObject(pd3dDevice, strFileName)
 {
@@ -1240,7 +1267,7 @@ void  CMonsterObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pC
 				D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
 				pd3dDeviceContext->Map(m_pd3dcbAnimation, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3dMappedResource);
 				m_cbMonsterMatrice = (VS_CB_RESULT_MATRIX *)d3dMappedResource.pData;
-				for (int j = 0; j < GOLEM_MAX_BONE; j++) //왼쪽
+				for (int j = 0; j < m_uiBoneNums; j++) //왼쪽
 				{
 					m_cbMonsterMatrice->m_d3dxmtxResult[j] = m_AnimationClip[i].m_ppResultMatrix[m_AnimationClip[i].llNowTime / 10][j];
 					/*	m_cbMonsterMatrice->m_d3dxmtxWalk[j] =   m_AnimationClip[1].m_ppResultMatrix[m_AnimationClip[1].llNowTime / 10][j];
@@ -1340,6 +1367,7 @@ CGolemObject::CGolemObject(ID3D11Device *pd3dDevice, string strFileName) :CMonst
 	m_bMonsterState = MONSTER_STATE_LIVING;
 	CreateAnimation();
 	m_uiLife = 3;
+	m_uiBoneNums = 71;
 }
 void  CGolemObject::CreateAnimation()
 {
@@ -1373,6 +1401,10 @@ CGolemObject ::~CGolemObject()
 {
 
 }
+void CGolemObject::Animate(float fTimeElapsed)
+{
+	
+}
 
 CSlimeObject::CSlimeObject(ID3D11Device *pd3dDevice, string strFileName) :CMonsterObject(pd3dDevice, strFileName)
 {
@@ -1384,6 +1416,7 @@ CSlimeObject::CSlimeObject(ID3D11Device *pd3dDevice, string strFileName) :CMonst
 	m_bMonsterState = MONSTER_STATE_LIVING;
 	CreateAnimation();
 	m_uiLife = 1;
+	m_uiBoneNums = 4;
 }
 void  CSlimeObject::CreateAnimation()
 {
@@ -1420,6 +1453,57 @@ CSlimeObject ::~CSlimeObject()
 }
 
 
+CGoblinObject::CGoblinObject(ID3D11Device *pd3dDevice, string strFileName) :CMonsterObject(pd3dDevice, strFileName)
+{
+	CreateShaderVariables(pd3dDevice);
+	m_uiAnimationClipNum = 2;
+	m_bMonsterState = MONSTER_STATE_LIVING;
+	CreateAnimation();
+	m_uiBoneNums = 60;
+}
+void  CGoblinObject::CreateAnimation()
+{
+
+	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
+	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_MONSTER_IDLE;
+	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_MONSTER_ATTACK; //attack
+	m_AnimationClip[0].m_strFileName = "Gob_Idle.txt";
+	m_AnimationClip[1].m_strFileName = "Gob_Attack.txt";
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
+		LoadAnimation(i);
+}
+CGoblinObject::~CGoblinObject()
+{
+
+}
+
+CGreenManObject::CGreenManObject(ID3D11Device *pd3dDevice, string strFileName) :CMonsterObject(pd3dDevice, strFileName)
+{
+	CreateShaderVariables(pd3dDevice);
+	m_uiAnimationClipNum = 2;
+	m_bMonsterState = MONSTER_STATE_LIVING;
+	CreateAnimation();
+	m_uiBoneNums = 28;
+}
+void  CGreenManObject::CreateAnimation()
+{
+
+	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
+	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_MONSTER_RUN;
+	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_MONSTER_ATTACK; //attack
+	m_AnimationClip[0].m_strFileName = "Greenman_Walk.txt";
+	m_AnimationClip[1].m_strFileName = "Greenman_Attack.txt";
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
+		LoadAnimation(i);
+}
+CGreenManObject ::~CGreenManObject()
+{
+
+}
+
+
+
+
 
 
 
@@ -1434,17 +1518,18 @@ CLeavesObject::~CLeavesObject()
 }
 
 
-void CWoodObject::CreateBoundingBox(float fX, float fZ)
+
+CWoodObject::CWoodObject(ID3D11Device *pd3dDevice, string strFileName) : CGameObject(1)
+{
+
+}
+
+void CGameObject::CreateBoundingBox(float fX, float fZ)
 {
 	m_d3dxvMinimum.x = -fX;
 	m_d3dxvMinimum.z = -fZ;
 	m_d3dxvMaximum.x = +fX;
 	m_d3dxvMaximum.x = +fZ;
-}
-CWoodObject::CWoodObject(ID3D11Device *pd3dDevice, string strFileName) : CGameObject(1)
-{
-
-
 }
 CWoodObject ::~CWoodObject()
 {
@@ -1474,4 +1559,28 @@ CHpObject::CHpObject(ID3D11Device *pd3dDevice) : CGameObject(1)
 
 CHpObject::~CHpObject()
 {
+}
+
+
+CAlphaBlendingMirrorObject::CAlphaBlendingMirrorObject(ID3D11Device *pd3dDevice) : CGameObject(1)
+{
+	//CAlphaBlendingMirrorMeshTextured* pMirrorMesh = new CAlphaBlendingMirrorMeshTextured(pd3dDevice, 550.0f, 160.0f, 100.0f);
+
+	CAlphaBlendingMirrorMeshTextured* pMirrorMesh = new CAlphaBlendingMirrorMeshTextured(pd3dDevice, 1300.0f, 50.0f, 1080.0f);
+	SetMesh(pMirrorMesh, 0);
+}
+CAlphaBlendingMirrorObject::~CAlphaBlendingMirrorObject()
+{
+}
+
+
+//거울은 스텐실 버퍼에 그린다.
+void CAlphaBlendingMirrorObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+{
+	CShader::UpdateShaderVariable(pd3dDeviceContext, &m_d3dxmtxWorld);
+	if (m_ppMeshes)
+	{
+		m_ppMeshes[0]->Render(pd3dDeviceContext);
+	}
+
 }

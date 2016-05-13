@@ -68,7 +68,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	pd3dSamplerState->Release();
 
 
-	m_nShaders = 4 + 1;
+	m_nShaders = 9;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	//첫 번째로 그릴 객체는 스카이 박스이다.
@@ -126,24 +126,51 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppShaders[1] = pTreeObjectShader;
 
 
-
-	CWaveShader* pWaveShader = new CWaveShader();
-	pWaveShader->CreateShader(pd3dDevice);
-	pWaveShader->BuildObjects(pd3dDevice, pWaterMaterial, p);
-	m_ppShaders[2] = pWaveShader;
-
-
-
-
 	CCrushBoxShader* pCrushBoxShaser = new CCrushBoxShader();
 	pCrushBoxShaser->CreateShader(pd3dDevice);
 	pCrushBoxShaser->BuildObjects(pd3dDevice);
-	m_ppShaders[3] = pCrushBoxShaser;
+	m_ppShaders[2] = pCrushBoxShaser;
+
 
 	CMonsterShader* pMonsterShader = new CMonsterShader();
 	pMonsterShader->CreateShader(pd3dDevice);
 	pMonsterShader->BuildObjects(pd3dDevice);
-	m_ppShaders[4] = pMonsterShader;
+	m_ppShaders[3] = pMonsterShader;
+
+	CFakeMonsterShader* pCFakeMonsterShader = new CFakeMonsterShader();
+	pCFakeMonsterShader->CreateShader(pd3dDevice);
+	pCFakeMonsterShader->BuildObjects(pd3dDevice);
+	m_ppShaders[4] = pCFakeMonsterShader;
+
+
+
+	// 실상
+	CRealityShader* pRealityShader = new CRealityShader();
+	pRealityShader->CreateShader(pd3dDevice);
+	pRealityShader->BuildObjects(pd3dDevice);
+	m_ppShaders[5] = pRealityShader;
+
+	//스텐실에 거울을 그린다.
+	CAlphaBlendingMirrorShader* pMirrorShader = new CAlphaBlendingMirrorShader();
+	pMirrorShader->CreateShader(pd3dDevice);
+	pMirrorShader->BuildObjects(pd3dDevice);
+	m_ppShaders[6] = pMirrorShader;
+
+	// 허상 객체
+	CReflectionShader* pReflectionShader = new 	CReflectionShader();
+	pReflectionShader->CreateShader(pd3dDevice);
+	pReflectionShader->BuildObjects(pd3dDevice);
+	m_ppShaders[7] = pReflectionShader;
+
+
+
+
+	CWaveShader* pWaveShader = new CWaveShader();
+	pWaveShader->CreateShader(pd3dDevice);
+	pWaveShader->BuildObjects(pd3dDevice, pWaterMaterial, NULL);
+	m_ppShaders[8] = pWaveShader;
+
+
 
 
 	/*CUiShader* pUiShader = new CUiShader();
@@ -222,10 +249,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	//pGrassShader->BuildObjects(pd3dDevice);
 	//m_ppShaders[6] = pGrassShader;
 
-	//CReflectionShader* pReflectionShader = new CReflectionShader();
-	//pReflectionShader->CreateShader(pd3dDevice);
-	//pReflectionShader->BuildObjects(pd3dDevice);
-	//m_ppShaders[7] = pReflectionShader;
+
 
 
 

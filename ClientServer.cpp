@@ -3,6 +3,9 @@
 
 ClientServer::ClientServer()
 {
+	currentTime = clock() + 1000;
+	keyDownFlag = false;
+	keyUpFlag = 1;
 	flag = false;
 	size = 0;
 	//inPacketSize = new int;
@@ -76,15 +79,7 @@ int ClientServer::socketInit()
 	cout << "Login Request" << endl;
 	return 1;
 }
-void ClientServer::keyDown(D3DXVECTOR3 dir,D3DXVECTOR3 pos)
-{
-	CsPacketMove myPacket;
-	myPacket.packetSize = sizeof(CsPacketMove);
-	myPacket.packetType = CS_MOVE;
-	myPacket.position = pos;
-	myPacket.direction = dir;
-	sendPacket(sock, &myPacket);
-}
+
 void ClientServer::readPacket()
 {
 	DWORD iobyte, ioflag = 0;
@@ -190,10 +185,11 @@ void ClientServer::processPacket(char* ptr)
 
 	case SC_MOVE_ERROR_CHECK:
 	{
-		//cout << "이동 동기화 체크" << endl;
+		cout << "이동 동기화 체크" << endl;
 		ScPacketMove *check = reinterpret_cast<ScPacketMove*>(ptr);
 		Player[0].setPlayerPosition(check->position);
 		Player[0].setPlayerDirection(check->direction);
+		Player[0].setState(check->state);
 		flag = true;
 		break;
 	}
@@ -349,6 +345,15 @@ void ClientServer::keyUp()
 	upPacket.packetType = CS_STOP;
 	sendPacket(sock, &upPacket);
 }
+void ClientServer::keyDown(D3DXVECTOR3 dir, D3DXVECTOR3 pos)
+{
+	CsPacketMove myPacket;
+	myPacket.packetSize = sizeof(CsPacketMove);
+	myPacket.packetType = CS_KEY_DOWN;
+	myPacket.position = pos;
+	myPacket.direction = dir;
+	sendPacket(sock, &myPacket);
+}
 void ClientServer::keyDownAttacket(DWORD key)
 {
 	CspacketAttack attack;
@@ -362,4 +367,22 @@ void ClientServer::keyDownAttacket(DWORD key)
 		attack.packetType = CS_USE_SKILL_W;
 	}
 	sendPacket(sock, &attack);
+}
+void ClientServer::dirKeyUp(D3DXVECTOR3 dir, D3DXVECTOR3 pos)
+{
+	CsPacketMove myPacket;
+	myPacket.packetSize = sizeof(CsPacketMove);
+	myPacket.packetType = CS_KEY_UP;
+	myPacket.position = pos;
+	myPacket.direction = dir;
+	sendPacket(sock, &myPacket);
+}
+void ClientServer::infoRequest(D3DXVECTOR3 dir, D3DXVECTOR3 pos)
+{
+	CsPacketRequest request;
+	request.packetSize = sizeof(CsPacketRequest);
+	request.packetType = CS_INFO_REQUSET;
+	request.direction = dir;
+	request.position = pos;
+	sendPacket(sock, &request);
 }

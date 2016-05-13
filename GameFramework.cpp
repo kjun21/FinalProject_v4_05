@@ -343,8 +343,6 @@ void CGameFramework::BuildObjects()
 	CShader::CreateShaderVariables(m_pDirect3D->GetDevice());
 	CIlluminatedShader::CreateShaderVariables(m_pDirect3D->GetDevice());
 
-
-
 	m_pSkyBoxShader = new CSkyBoxShader();
 	//m_pSkyBoxShader->CreateShader(m_pd3dDevice);
 	//m_pSkyBoxShader->BuildObjects(m_pd3dDevice);
@@ -353,9 +351,6 @@ void CGameFramework::BuildObjects()
 
 	string strFileName = "Data/warrior_Vertex.txt";
 	CCharacterMesh *pWarriorMesh = new CCharacterMesh(m_pDirect3D->GetDevice(), strFileName);
-
-
-
 
 	m_pScene = new CScene();
 //	m_pScene->BuildObjects(m_pd3dDevice);
@@ -367,28 +362,28 @@ void CGameFramework::BuildObjects()
 */
 	m_pPlayerShader->CreateShader(m_pDirect3D->GetDevice());
 	m_pPlayerShader->BuildObjects(m_pDirect3D->GetDevice(), pWarriorMesh);
+	
 	m_pPlayer = m_pPlayerShader->GetPlayer();
-
-
+	m_pPlayer->CreateBoundingBox(14.0f, 14.0f);
 	// 특별한 셰이더
 	m_pOtherPlayerShader = new COtherPlayerShader();
 	m_pOtherPlayerShader->CreateShader(m_pDirect3D->GetDevice());;
 	m_pOtherPlayerShader->BuildObjects(m_pDirect3D->GetDevice(), pWarriorMesh);;
 
-
-
-
-
-
 	/*지형의 xz-평면의 가운데에 플레이어가 위치하도록 한다. 플레이어의 y-좌표가 지형의 높이 보다 크고
 	중력이 작용하도록 플레이어를 설정하였으므로 플레이어는 점차적으로 하강하게 된다.*/
 	CHeightMapTerrain *pTerrain = m_pScene->GetTerrain();
 
-	//m_pPlayer->SetPosition(D3DXVECTOR3   // pTerrain->GetPeakHeight() + 1000.0f
-	//	(pTerrain->GetWidth()* 0.1, 266.0f, pTerrain->GetLength()* 0.1));
 	// 서버
-	//ClientServer *s = ClientServer::getInstangce();
-	//m_pPlayer->SetPosition(s->Player[0].getPlayerPosition());
+	ClientServer *s = ClientServer::getInstangce();
+	m_pPlayer->SetPosition(s->Player[0].getPlayerPosition());
+
+
+	m_pPlayer->SetPosition(D3DXVECTOR3   // pTerrain->GetPeakHeight() + 1000.0f
+		(100.0f, 266.0f, 100.f));
+
+
+
 
 	//m_pPlayer->Scale(D3DXVECTOR3(0.3f, 0.3f, 0.3f));
 
@@ -397,7 +392,7 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetPlayerUpdatedContext(pTerrain);
 	//카메라의 위치가 변경될 때 지형의 정보에 따라 카메라의 위치를 변경할 수 있도록 설정한다.
 	m_pPlayer->SetCameraUpdatedContext(pTerrain);
-	m_pPlayer->CreateBoundingBox(14.0f, 14.0f);
+
 	m_pCamera = m_pPlayer->GetCamera();
 	//m_pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	m_pCamera->SetViewport(m_pDirect3D->GetDeviceContext(), 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -452,8 +447,8 @@ void CGameFramework::ProcessInput()
 			{
 				dwAttack = ATTACK01;
 				//서버 공격키 입력
-				/*ClientServer *s = ClientServer::getInstangce();
-				s->keyDownAttacket(dwAttack);	*/	
+				ClientServer *s = ClientServer::getInstangce();
+				s->keyDownAttacket(dwAttack);		
 			}
 			else if (pKeyBuffer['W'] & 0xF0 && m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2)
 			{
@@ -464,10 +459,10 @@ void CGameFramework::ProcessInput()
 			}
 
 			//서버
-			/*else if(attackCutState != s->Player[0].getState())
-			{
-				s->keyUp();		
-			}*/
+			//else if(attackCutState != s->Player[0].getState())
+			//{
+			//	s->keyUp();		
+			//}
 		
 		}
 
@@ -506,7 +501,7 @@ void CGameFramework::ProcessInput()
 				&& m_pPlayer->GetAnimationState() != ANIMATAION_CLIP_ATTACK2))
 			{
 				m_pPlayer->Rotate(dwDirection, dwAttack);
-				m_pPlayer->Move(dwDirection, 300.0f * GameTimer->GetTimeElapsed(), true);
+				m_pPlayer->Move(dwDirection, PLAYER_SPEED * GameTimer->GetTimeElapsed(), true);
 				// 180.
 			}
 		}

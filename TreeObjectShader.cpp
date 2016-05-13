@@ -137,29 +137,17 @@ void   CTreeObjectShader::BuildObjects(ID3D11Device *pd3dDevice)
 	for (int k = 0; k < TREE_NUM / 2; k++)
 	{
 		pWoodObject = new  CWoodObject(pd3dDevice, strFileName1);
-		pWoodObject->CreateBoundingBox(53.855099, 51.431400);
 		pWoodObject->SetMesh(pWoodMesh);
+		pWoodObject->CreateBoundingBox(53.855099, 51.431400);
 		pWoodObject->Scale(D3DXVECTOR3(0.03, 0.03, 0.03));
 		float fPosition[3];
 		fscanf_s(fp, "%f %f %f  \n", &fPosition[0], &fPosition[1], &fPosition[2]);
 		pWoodObject->SetPosition(fPosition[0], fPosition[1], fPosition[2]);
 		m_ppObjects[i] = pWoodObject;
-		pGameManager->m_ppStaticObject[i] = m_ppObjects[i++];
-
+		pGameManager->m_ppStaticObject[i] = m_ppObjects[i];
+		i++;
 	}
 	fclose(fp);
-
-
-
-	fopen_s(&fp, "tree0.txt", "w");
-	fprintf(fp, "%d \n", TREE_NUM / 2);
-	for (int j = 0; j < TREE_NUM / 2; j++)
-	{
-		fprintf(fp, "%lf %lf %lf %lf %lf \n", m_ppObjects[j]->GetPosition().x, m_ppObjects[j]->GetPosition().y, m_ppObjects[j]->GetPosition().z, 53.8551f, 51.4314f);
-	}
-	fclose(fp);
-
-
 
 
 	m_pd3dWoodInstanceBuffer = CreateInstanceBuffer(pd3dDevice, TREE_NUM / 2, m_nInstanceBufferStride, NULL);

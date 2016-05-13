@@ -431,3 +431,13 @@ public:
 	virtual ~CUIMesh();
 
 };
+
+
+class CAlphaBlendingMirrorMeshTextured : public CMeshTextured
+{
+public:
+	CAlphaBlendingMirrorMeshTextured(ID3D11Device *pd3dDevice,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CAlphaBlendingMirrorMeshTextured();
+	//virtual  void Render(ID3D11DeviceContext *pd3dDeviceContext);
+};

@@ -165,17 +165,23 @@ public:
 	virtual bool GetDamageCheck() { return 0; }
 	virtual void ISDamagedByPlayer() { }
 	virtual void ISPossibleDamageByPlayer() {}
-
+	virtual bool  CollideAABB(D3DXVECTOR3 d3dxvPosition) { return false; }
+	void CreateBoundingBox(float fX, float fY);
+	
 	//귀찮아서 임시 방편.
 	UINT m_uiLife;
 protected:
 	//충돌 관련 변수들
 	D3DXVECTOR3 m_d3dxvMinimum;
 	D3DXVECTOR3 m_d3dxvMaximum;
+	D3DXVECTOR3 m_d3dxvPrePosition;
 public:
 	D3DXVECTOR3  GetMinimum() { return  m_d3dxvMinimum + GetPosition(); }
 	D3DXVECTOR3  GetMaximum() { return m_d3dxvMaximum + GetPosition(); }
+	D3DXVECTOR3 GetPrePosition() { return m_d3dxvPrePosition; }
+protected:
 
+	
 private:
 	int m_nReferences;
 protected:
@@ -467,7 +473,8 @@ public:
 	// 각 객체들 마다 애니메이션이 다르기 때문에 항상 자기것을 가지고 있다.
 	virtual void CreateAnimation();
 	//virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
-	//virtual void Animate(float fTimeElapsed);
+	virtual void Animate(float fTimeElapsed);
+	bool CollideAABB(D3DXVECTOR3 d3dxvPosition);
 
 };
 class CMonsterObject :  public CAnimatedObject
@@ -518,8 +525,29 @@ public:
 	CGolemObject(ID3D11Device *pd3dDevice, string strFileName);
 	virtual ~CGolemObject();
 	virtual void CreateAnimation();
+
 	virtual void SetAnimationState(monsterState myPlayerState) { m_nAnimationState = myPlayerState; }
+	virtual void Animate(float fTimeElapsed);
 };
+
+// 허상 몬스터
+///////
+class CGoblinObject : public CMonsterObject
+{
+public:
+	CGoblinObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~CGoblinObject();
+	virtual void CreateAnimation();
+};
+
+class CGreenManObject : public CMonsterObject
+{
+public:
+	CGreenManObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~CGreenManObject();
+	virtual void CreateAnimation();
+};
+
 
 class CSlimeObject : public CMonsterObject
 {
@@ -535,7 +563,7 @@ class CWoodObject : public CGameObject
 {
 public:
 	CWoodObject(ID3D11Device *pd3dDevice, string strFileName);
-	void CreateBoundingBox(float fX, float fY);
+
 	virtual ~CWoodObject();
 
 };
@@ -559,4 +587,14 @@ class CHpObject : public CGameObject
 public: 
 	CHpObject(ID3D11Device *pd3dDevice);
 	virtual ~CHpObject();
+};
+
+
+class CAlphaBlendingMirrorObject : public CGameObject
+{
+public:
+	CAlphaBlendingMirrorObject(ID3D11Device *pd3dDevice);
+	virtual ~CAlphaBlendingMirrorObject();
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext,
+		CCamera *pCamera);
 };

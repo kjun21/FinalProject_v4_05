@@ -33,3 +33,15 @@ protected:
 	UINT m_nInstanceBufferOffset;
 	float fTime;
 };
+
+class CFakeMonsterShader : public CMonsterShader
+{
+public:
+	CFakeMonsterShader();
+	virtual ~CFakeMonsterShader();
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	//virtual void CreateShader(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera);
+	virtual void AnimateObjects(float fTimeElapsed);
+
+};
