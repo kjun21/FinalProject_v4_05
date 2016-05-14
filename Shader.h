@@ -377,18 +377,15 @@ public:
 	static ID3D11Buffer	 *m_pd3dcbResult;
 protected:
 	CTexture* m_pTexture;
-
-
 	D3DXMATRIX **m_ppResultMatrix;
 	VS_CB_RESULT_MATRIX **m_pvscbResultMatrix;
 
 	//맵에서 버텍스 포인터를 얻어온단다.
 	VS_CB_RESULT_MATRIX *m_cbMapData;
-
-
 	UINT m_uiBoneIndexCount;
 	long long m_llAniTime;
 	float m_fTimePos;
+	CMaterial *m_pMaterial;
 };
 
 

@@ -1417,6 +1417,12 @@ CSlimeObject::CSlimeObject(ID3D11Device *pd3dDevice, string strFileName) :CMonst
 	CreateAnimation();
 	m_uiLife = 1;
 	m_uiBoneNums = 4;
+
+	m_pMaterial = new CMaterial();
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 }
 void  CSlimeObject::CreateAnimation()
 {
@@ -1460,7 +1466,14 @@ CGoblinObject::CGoblinObject(ID3D11Device *pd3dDevice, string strFileName) :CMon
 	m_bMonsterState = MONSTER_STATE_LIVING;
 	CreateAnimation();
 	m_uiBoneNums = 60;
+
+	//m_pMaterial = new CMaterial();
+	//m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	//m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
+	//m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	//m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 }
+
 void  CGoblinObject::CreateAnimation()
 {
 
@@ -1484,6 +1497,12 @@ CGreenManObject::CGreenManObject(ID3D11Device *pd3dDevice, string strFileName) :
 	m_bMonsterState = MONSTER_STATE_LIVING;
 	CreateAnimation();
 	m_uiBoneNums = 28;
+
+	m_pMaterial = new CMaterial();
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 }
 void  CGreenManObject::CreateAnimation()
 {
@@ -1503,6 +1522,35 @@ CGreenManObject ::~CGreenManObject()
 
 
 
+CFairyObject::CFairyObject(ID3D11Device *pd3dDevice, string strFileName) :CMonsterObject(pd3dDevice, strFileName)
+{
+	CreateShaderVariables(pd3dDevice);
+	m_uiAnimationClipNum = 2;
+	m_bMonsterState = MONSTER_STATE_LIVING;
+	CreateAnimation();
+	m_uiBoneNums = 36;
+
+	m_pMaterial = new CMaterial();
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
+}
+void  CFairyObject::CreateAnimation()
+{
+
+	m_AnimationClip = new AnimationClip[m_uiAnimationClipNum];
+	m_AnimationClip[0].m_nAnimationState = ANIMATAION_CLIP_MONSTER_RUN;
+	m_AnimationClip[1].m_nAnimationState = ANIMATAION_CLIP_MONSTER_ATTACK; //attack
+	m_AnimationClip[0].m_strFileName = "F_Walk.txt";
+	m_AnimationClip[1].m_strFileName = "F_Attack.txt";
+	for (int i = 0; i < m_uiAnimationClipNum; i++)
+		LoadAnimation(i);
+}
+CFairyObject::~CFairyObject()
+{
+
+}
 
 
 

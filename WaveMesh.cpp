@@ -124,15 +124,35 @@ CWaveMesh::CWaveMesh(ID3D11Device *pd3dDevice, UINT m, UINT n,
 
 	
 
-	/*D3D11_RASTERIZER_DESC d3dxRasterizer;
+	D3D11_RASTERIZER_DESC d3dxRasterizer;
 	ZeroMemory(&d3dxRasterizer, sizeof(D3D11_RASTERIZER_DESC));
 	d3dxRasterizer.FillMode = D3D11_FILL_WIREFRAME;
 	d3dxRasterizer.CullMode = D3D11_CULL_BACK;
-	pd3dDevice->CreateRasterizerState(&d3dxRasterizer, &m_pd3dRasterizerState);*/
+	pd3dDevice->CreateRasterizerState(&d3dxRasterizer, &m_pd3dRasterizerState);
 }
 
 CWaveMesh::~CWaveMesh()
 {
 }
+void CWaveMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
+{
+	//메쉬의 정점은 여러 개의 정점 버퍼로 표현된다.
+	pd3dDeviceContext->IASetVertexBuffers(m_nSlot, m_nBuffers, m_ppd3dVertexBuffers, m_pnVertexStrides, m_pnVertexOffsets);
+	pd3dDeviceContext->IASetIndexBuffer(m_pd3dIndexBuffer, m_dxgiIndexFormat, m_nIndexOffset);
+	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+
+	if (GetAsyncKeyState('2') & 0x8000)
+		pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
+
+	if (m_pd3dIndexBuffer)
+		pd3dDeviceContext->DrawIndexed(m_nIndices, m_nStartIndex, m_nBaseVertex);
+	else
+		pd3dDeviceContext->Draw(m_nVertices, m_nStartVertex);
+	pd3dDeviceContext->RSSetState(NULL);
+}
+
+
+
 
 

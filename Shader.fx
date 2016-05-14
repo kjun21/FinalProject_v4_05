@@ -1,5 +1,6 @@
 
 #define MAX_MATRIX 57
+#include "Light.fx"
 cbuffer cbViewProjectionMatrix : register(b0)
 {
 	matrix gmtxView : packoffset(c0);
@@ -39,13 +40,15 @@ struct VS_OUTPUT
 { 
 	float4 position : SV_POSITION ;
 	float2 texCoord : TEXCOORD;
+	float3 normalW : NORMAL;
+	float3 positionW : POSITION;
 };
 
 
 VS_OUTPUT VS(VS_INPUT input) 
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
-	
+	input.normal = normalize(input.normal);
 	float4 Pos = float4(input.position,1);
 
     uint iBone0 = input.Bones1.r;
@@ -101,12 +104,13 @@ VS_OUTPUT VS(VS_INPUT input)
 
 	float4x4 scale = { { 10.0, 0, 0, 0 }, { 0, 10.0, 0, 0 }, { 0, 0, 10.0, 0 }, { 0, 0, 0, 1 } };
 
-
+	
 	output.position = mul(output.position, scale);
 	output.position = mul(output.position, gmtxWorld);
 	output.position = mul( output.position , gmtxView );
 	output.position = mul( output.position, gmtxProjection);
 	
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
 	//output.color = input.color;
 	
 	//output.color = input.Weights2;
@@ -119,7 +123,11 @@ VS_OUTPUT VS(VS_INPUT input)
 
 float4 PS( VS_OUTPUT input ) : SV_Target
 {
+	input.normalW = normalize(input.normalW);
 	float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord);
-      //return input.color;
-	  return cColor;
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
+
+
+
+	return cColor * cIllumination;
 }

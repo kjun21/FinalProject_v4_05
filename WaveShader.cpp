@@ -609,6 +609,13 @@ void CRealityShader ::CreateShader(ID3D11Device *pd3dDevice)
 void  CRealityShader ::BuildObjects(ID3D11Device *pd3dDevice)
 {
 
+	m_pMaterial = new CMaterial();
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
+
+
 	ID3D11SamplerState *pd3dSamplerState = NULL;
 	D3D11_SAMPLER_DESC d3dSamplerDesc;
 	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
@@ -926,6 +933,12 @@ CReflectionShader ::~CReflectionShader()
 
 void CReflectionShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
+	m_pMaterial = new CMaterial();
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
+
 	ID3D11SamplerState *pd3dSamplerState = NULL;
 	D3D11_SAMPLER_DESC d3dSamplerDesc;
 	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));

@@ -74,117 +74,29 @@ void   CMonsterShader ::BuildObjects(ID3D11Device *pd3dDevice)
 
 	//텍스쳐 리소스를 생성한다.
 	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
-	m_pTexture = new CTexture(4, 1, 0, 0);
+	m_pTexture = new CTexture(1, 1, 0, 0);
 
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/MovingObject/ForestGolem-Green.dds"), NULL, NULL, &pd3dsrvTexture, NULL);
 	m_pTexture->SetTexture(0, pd3dsrvTexture);
 	pd3dsrvTexture->Release();
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/LeavesDiffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pTexture->SetTexture(1, pd3dsrvTexture);
-	pd3dsrvTexture->Release();
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/Rock-Multiple-01.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pTexture->SetTexture(2, pd3dsrvTexture);
-	pd3dsrvTexture->Release();
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/FixObject/Cliff-Diffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	m_pTexture->SetTexture(3, pd3dsrvTexture);
-	pd3dsrvTexture->Release();
-
-
 
 	m_pTexture->SetSampler(0, pd3dSamplerState);
 	pd3dSamplerState->Release();
 
 
-	//m_pLeavesTexture = new CTexture(1, 1, 0, 0);
-	//D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/LeavesDiffuse.png"), NULL, NULL, &pd3dsrvTexture, NULL);
-	//m_pLeavesTexture->SetTexture(0, pd3dsrvTexture);
-	//m_pLeavesTexture->SetSampler(0, pd3dSamplerState);
-	//pd3dsrvTexture->Release();
-
-	//pd3dsrvTexture->Release();
-
-
-
-
 	string strFileName1 = "Data/Golem_Vertex.txt";
-	string strFileName2 = "Data/Slime.txt";
-	// Stone mesh
-	string strFileName3 = "Data/NewRockFlat01_Vertex.txt";
-	string strFileName4 = "Data/NewFlatRock02_Vertex.txt";
-	string strFileName5 = "Data/NewRockFlat03_Vertex.txt";
-	string strFileName6 = "Data/NewRockTall01_Vertex.txt";
-
-	string strFileName7 = "Data/NewRockTall02_Vertex.txt";
-	// 최소 x : -53.8551 z: -51.4314
-	// 최대 x : 53.8551   z:  -51.4314
-	//CCharacterMesh* pGolemMesh = new CCharacterMesh(pd3dDevice, strFileName1);
-
-	//CFixedMesh* pLeavesMesh = new CFixedMesh(pd3dDevice, strFileName2);
-	//CFixedMesh * pFlatRockMesh01 = new CFixedMesh(pd3dDevice, strFileName3);
-	//CFixedMesh * pFlatRockMesh02 = new CFixedMesh(pd3dDevice, strFileName4);
-	//CFixedMesh * pFlatRockMesh03 = new CFixedMesh(pd3dDevice, strFileName5);
-	//CFixedMesh * pTallRockMesh01 = new CFixedMesh(pd3dDevice, strFileName6);
-	//CFixedMesh * pCliff01Mesh = new CFixedMesh(pd3dDevice, strFileName7);
-
-
-
 	
-	//m_nObjects = 200;
+
 	m_nObjects = GOLEM_NUM;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-
 	//  Golem
 	CCharacterMesh* pGolemMesh = new CCharacterMesh(pd3dDevice, strFileName1);
-	CCharacterMesh* pSlimeMesh = new CCharacterMesh(pd3dDevice, strFileName2);
-
-	/*CGolemObject *pMonsterObject1 = new CGolemObject(pd3dDevice, strFileName1);
-	CGolemObject *pMonsterObject2 = new CGolemObject(pd3dDevice, strFileName1);
-	CGolemObject *pMonsterObject3 = new CGolemObject(pd3dDevice, strFileName1);
-	CGolemObject *pMonsterObject4 = new CGolemObject(pd3dDevice, strFileName1);
-	CGolemObject *pMonsterObject5 = new CGolemObject(pd3dDevice, strFileName1);
-	CGolemObject *pMonsterObject6 = new CGolemObject(pd3dDevice, strFileName1);
-	pMonsterObject1->SetMesh(pGolemMesh);
-	pMonsterObject2->SetMesh(pGolemMesh);
-	pMonsterObject3->SetMesh(pGolemMesh);
-	pMonsterObject4->SetMesh(pGolemMesh);
-	pMonsterObject5->SetMesh(pGolemMesh);
-	pMonsterObject6->SetMesh(pGolemMesh);
-	m_ppObjects[0] = pMonsterObject1;
-	m_ppObjects[1] = pMonsterObject2;
-	m_ppObjects[2] = pMonsterObject3;
-	m_ppObjects[3] = pMonsterObject4;
-	m_ppObjects[4] = pMonsterObject5;
-	m_ppObjects[5] = pMonsterObject6;*/
-
-	//CSlimeObject *pSlimeObject1 = new CSlimeObject(pd3dDevice, strFileName2);
-	//pSlimeObject1->SetMesh(pSlimeMesh);
-	//m_ppObjects[5] = pSlimeObject1;
-
 
 
 	CGameManager* pGameManager = CGameManager::GetCGameManager();
-
 	CGolemObject* pGolemObject = NULL;
-	//int x = 8;
-	//int z = 5;
-	//int k = 0;
-	//for (int i = 0; i < x; i++)
-	//{
-	//	for (int j = 0; j < z; j++)
-	//	{
-	//		pGolemObject = new CGolemObject(pd3dDevice, strFileName1);
-	//		pGolemObject->SetMesh(pGolemMesh);
 
-	//		pGolemObject->SetPosition(800 * (j + 1), 266.0f, 800 * (i + 1));
-	//		//m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
-	//		pGolemObject->Scale(D3DXVECTOR3(0.6, 0.6, 0.6));
-	//		m_ppObjects[k] = pGolemObject;
-	//		pGameManager->m_ppMonster[k] = m_ppObjects[k];
-	//		k++;
-	//	}
-
-	//}
 
 	FILE* fp;
 	fopen_s(&fp, "Data/ObjectPosition/GolemData.txt", "rt");
@@ -277,46 +189,137 @@ CFakeMonsterShader  ::~CFakeMonsterShader()
 
 void CFakeMonsterShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	m_nObjects = 4;
-	m_ppObjects = new CGameObject*[m_nObjects];
 
+	m_pMaterial = new CMaterial();
+	m_pMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); //0.2f, 0.1f, 1.0f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
+	m_pMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 128.0f);
+	m_pMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
+
+
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = 0;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	//텍스쳐 리소스를 생성한다.
+	ID3D11ShaderResourceView *pd3dsrvTexture = NULL; //Stone Brick
+	m_pTexture = new CTexture(4, 1, 0, 0);
+
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/MovingObject/Goblin.jpg"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pTexture->SetTexture(0, pd3dsrvTexture);
+	pd3dsrvTexture->Release();
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/MovingObject/GreenMan.jpg"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pTexture->SetTexture(1, pd3dsrvTexture);
+	pd3dsrvTexture->Release();
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/MovingObject/Slime.jpg"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pTexture->SetTexture(2, pd3dsrvTexture);
+	pd3dsrvTexture->Release();
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Image/MovingObject/Fairy.jpg"), NULL, NULL, &pd3dsrvTexture, NULL);
+	m_pTexture->SetTexture(3, pd3dsrvTexture);
+	pd3dsrvTexture->Release();
+
+
+	m_pTexture->SetSampler(0, pd3dSamplerState);
+	pd3dSamplerState->Release();
+
+
+	m_nObjects = 8;
+	m_ppObjects = new CGameObject*[m_nObjects];
 
 	string strFileName1 = "Data/Gob_Vertex.txt";
 	string strFileName2 = "Data/Greenman_Vertex.txt";
-	string strFileName3 = "Data/Greenman_Vertex.txt";
+	string strFileName3 = "Data/Slime.txt";
+	string strFileName4 = "Data/F_Vertex.txt";
+	
 
-	//  Golem
+
 	CCharacterMesh* pGoblinMesh = new CCharacterMesh(pd3dDevice, strFileName1);
 	CCharacterMesh* pGreenmanMesh = new CCharacterMesh(pd3dDevice, strFileName2);
+	CCharacterMesh* pSlimeMesh = new CCharacterMesh(pd3dDevice, strFileName3);
+	CCharacterMesh* pFairyMesh = new CCharacterMesh(pd3dDevice, strFileName4);
 
 
 	CGoblinObject* pGoblinObject1 = new CGoblinObject(pd3dDevice, strFileName1);
 	CGoblinObject* pGoblinObject2 = new CGoblinObject(pd3dDevice, strFileName1);
+
 	CGreenManObject* pGreenManObject1 = new CGreenManObject(pd3dDevice, strFileName2);
 	CGreenManObject* pGreenManObject2 = new CGreenManObject(pd3dDevice, strFileName2);
+
+	CSlimeObject* pSlimeObject1 = new CSlimeObject(pd3dDevice, strFileName3);
+	CSlimeObject* pSlimeObject2 = new CSlimeObject(pd3dDevice, strFileName3);
+
+	CFairyObject* pFairyObject1 = new 	CFairyObject(pd3dDevice, strFileName4);
+	CFairyObject* pFairyObject2 = new 	CFairyObject(pd3dDevice, strFileName4);
+
+
 	pGoblinObject1->SetMesh(pGoblinMesh);
-	pGoblinObject1->SetAnimationState(ANIMATAION_CLIP_MONSTER_IDLE);
 	pGoblinObject2->SetMesh(pGoblinMesh);
+	pGoblinObject1->SetAnimationState(ANIMATAION_CLIP_MONSTER_IDLE);
 	pGoblinObject2->SetAnimationState(ANIMATAION_CLIP_MONSTER_ATTACK);
+
 	pGreenManObject1->SetMesh(pGreenmanMesh);
-	pGreenManObject1->SetAnimationState(ANIMATAION_CLIP_MONSTER_RUN);
 	pGreenManObject2->SetMesh(pGreenmanMesh);
+	pGreenManObject1->SetAnimationState(ANIMATAION_CLIP_MONSTER_RUN);
 	pGreenManObject2->SetAnimationState(ANIMATAION_CLIP_MONSTER_ATTACK);
+
+	pSlimeObject1->SetMesh(pSlimeMesh);
+	pSlimeObject2->SetMesh(pSlimeMesh);
+	pSlimeObject1->SetAnimationState(ANIMATAION_CLIP_MONSTER_RUN);
+	pSlimeObject2->SetAnimationState(ANIMATAION_CLIP_MONSTER_ATTACK);
+
+	pFairyObject1->SetMesh(pFairyMesh);
+	pFairyObject2->SetMesh(pFairyMesh);
+	pFairyObject1->SetAnimationState(ANIMATAION_CLIP_MONSTER_RUN);
+	pFairyObject2->SetAnimationState(ANIMATAION_CLIP_MONSTER_ATTACK);
+
 
 	m_ppObjects[0] = pGoblinObject1;
 	m_ppObjects[1] = pGoblinObject2;
 	m_ppObjects[2] = pGreenManObject1;
 	m_ppObjects[3] = pGreenManObject2;
+	m_ppObjects[4] = pSlimeObject1;
+	m_ppObjects[5] = pSlimeObject2;
+	m_ppObjects[6] = pFairyObject1;
+	m_ppObjects[7] = pFairyObject2;
 
-	m_ppObjects[0]->SetPosition(100.0f, 266.0f, 300.0f);
-	m_ppObjects[1]->SetPosition(100.0f, 266.0f, 300.0f);
 
-	m_ppObjects[2]->SetPosition(200.0f, 266.0f, 300.0f);
-	m_ppObjects[3]->SetPosition(200.0f, 266.0f, 500.0f);
 
 	for (int i = 0; i < m_nObjects; i++)
 		m_ppObjects[i]->Scale(D3DXVECTOR3(3.0f, 3.0f, 3.0f));
 
+
+
+
+
+	m_ppObjects[0]->SetPosition(100.0f, 266.0f, 900.0f);
+	m_ppObjects[1]->SetPosition(300.0f, 266.0f, 900.0f);
+	m_ppObjects[2]->SetPosition(100.0f, 266.0f, 700.0f);
+	m_ppObjects[3]->SetPosition(300.0f, 266.0f, 700.0f);
+	m_ppObjects[4]->SetPosition(300.0f, 266.0f, 500.0f);
+	m_ppObjects[5]->SetPosition(400.0f, 266.0f, 500.0f);
+	m_ppObjects[6]->SetPosition(300.0f, 266.0f, 1200.0f);
+	m_ppObjects[7]->SetPosition(400.0f, 266.0f, 1200.0f);
+
+
+
+
+	m_ppObjects[0]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[2]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[3]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[4]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[5]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[6]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[7]->Rotate(0.0f, 180.0f, 0.0f);
+	
 }
 
 void  CFakeMonsterShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
@@ -327,15 +330,21 @@ void  CFakeMonsterShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect
 
 	// golem Texture
 	if (m_pTexture)
-	{
 		m_pTexture->UpdateSamplerShaderVariable(pd3dDeviceContext, 0, 0);
-		m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
-	}
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
 		{
+			if (m_pTexture && 0<=j && j<=1)
+				m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 0, 0);
+			else if (m_pTexture && 2 <= j && j <= 3)
+				m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 1, 0);		
+			else if (m_pTexture && 4 <= j && j <= 5)
+				m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 2, 0);
+			else if (m_pTexture && 6 <= j && j <= 7)
+				m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext, 3, 0);
+
 			if (m_ppObjects[j]->IsVisible(pCamera))
 			{
 				m_ppObjects[j]->Render(pd3dDeviceContext, pCamera);

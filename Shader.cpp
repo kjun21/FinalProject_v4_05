@@ -393,8 +393,8 @@ void CPlayerShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarr
 
 	//m_ppObjects[0]->Scale(D3DXVECTOR3(0.3f, 0.3f, 0.3f));
 	CMaterial *pPlayerMaterial = new CMaterial();
-	pPlayerMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.6f, 0.2f, 0.2f, 1.0f);
-	pPlayerMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
+	pPlayerMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.9f, 0.9f, 0.9f, 1.0f);
+	pPlayerMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
 	pPlayerMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 5.0f);
 	pPlayerMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.2f, 1.0f);
 
@@ -1760,7 +1760,11 @@ void  COtherPlayerShader::CreateShader(ID3D11Device *pd3dDevice)
 void   COtherPlayerShader::BuildObjects(ID3D11Device *pd3dDevice, CCharacterMesh *pWarriorMesh)
 {
 	string strFileName = "Data/warrior_Vertex.txt";
-	string strFileName2 = "Data/Golem_Vertex.txt";
+	CMaterial *pPlayerMaterial = new CMaterial();
+	pPlayerMaterial->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.9f, 0.9f, 0.9f, 1.0f);
+	pPlayerMaterial->m_Material.m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f);
+	pPlayerMaterial->m_Material.m_d3dxcSpecular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 5.0f);
+	pPlayerMaterial->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.2f, 1.0f);
 
 	m_fTimePos = 0.0;
 	m_nObjects = 3;
@@ -1881,6 +1885,8 @@ COtherPlayerShader::~COtherPlayerShader()
 void COtherPlayerShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CDirect3DBase* m_pDirect3D, CCamera *pCamera)
 {
 	OnPrepareRender(pd3dDeviceContext);
+	if (m_pMaterial)
+		CIlluminatedShader::UpdateShaderVariable(pd3dDeviceContext, &m_pMaterial->m_Material);
 	//if (m_pTexture)
 	//	m_pTexture->UpdateTextureShaderVariable(pd3dDeviceContext);
 

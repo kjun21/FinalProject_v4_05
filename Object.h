@@ -555,8 +555,17 @@ public:
 	CSlimeObject(ID3D11Device *pd3dDevice, string strFileName);
 	virtual ~CSlimeObject();
 	virtual void CreateAnimation();
-	virtual void SetAnimationState(monsterState myPlayerState) { m_nAnimationState = myPlayerState; }
+	//virtual void SetAnimationState(monsterState myPlayerState) { m_nAnimationState = myPlayerState; }
 };
+class CFairyObject : public CMonsterObject
+{
+public:
+	CFairyObject(ID3D11Device *pd3dDevice, string strFileName);
+	virtual ~CFairyObject();
+	virtual void CreateAnimation();
+	//virtual void SetAnimationState(monsterState myPlayerState) { m_nAnimationState = myPlayerState; }
+};
+
 
 
 class CWoodObject : public CGameObject

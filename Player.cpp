@@ -32,6 +32,9 @@ CPlayer::CPlayer(int nMeshes) : CGameObject(nMeshes)
 	m_uiLife = 5;
 	m_bDamageCheck = false;
 	m_nObjectType = TYPE_PLAYER;
+
+
+
 }
 
 

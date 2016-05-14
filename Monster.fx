@@ -1,5 +1,6 @@
 
 #define MAX_MATRIX 200
+#include "Light.fx"
 cbuffer cbViewProjectionMatrix : register(b0)
 {
 	matrix gmtxView : packoffset(c0);
@@ -44,6 +45,8 @@ struct VS_OUTPUT
 { 
 	float4 position : SV_POSITION ;
 	float2 texCoord : TEXCOORD;
+	float3 normalW : NORMAL;
+	float3 positionW : POSITION;
 };
 
 
@@ -51,7 +54,8 @@ VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 	
-	float4 Pos = float4(input.position,1);
+	float4 Pos = float4(input.position, 1);
+	input.normal= normalize(input.normal);
 
     uint iBone0 = input.Bones1.r;
     uint iBone1 = input.Bones1.g;
@@ -113,13 +117,19 @@ VS_OUTPUT VS(VS_INPUT input)
 	//output.position = mul(output.position, scale);
 
 	output.position = mul(output.position, gmtxWorld);
+
+	//output.positionW = output.position.xyz;
 	output.position = mul( output.position , gmtxView );
 	output.position = mul( output.position, gmtxProjection);
 	
 	//output.color = input.color;
 	
 	//output.color = input.Weights2;
+
+	
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
 	output.texCoord = input.texCoord;
+	output.positionW = mul(input.position, (float3x3) gmtxWorld);
 	//output.normal = input.Weights1.xxxw;
 
     return output;
@@ -128,8 +138,11 @@ VS_OUTPUT VS(VS_INPUT input)
 
 float4 PS( VS_OUTPUT input ) : SV_Target
 {
-	float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord);
+	input.normalW = normalize(input.normalW);
+	//float4 cColor = gtxtTexture.Sample(gSamplerState, input.texCoord);
+	float4 cColor = float4(0.3f, 0.3f, 0.3f, 1.0f);
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
 	//float4 cColor = float4(0.3f, 0.3f,1.0f, 1.0f);
-      //return input.color;
-	  return cColor;
+	//return input.color;
+	return cColor * cIllumination;
 }
